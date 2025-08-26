@@ -1,13 +1,13 @@
 // src/journal/generator.js
 
 import { MODULE_ID, SETTINGS } from "../constants.js";
-import { STEP_DEFS }   from "../steps/index.js";
+import { STEP_DEFS }           from "../steps/index.js";
 
 /**
  * Ensure a JournalEntry folder exists (create if missing).
  */
 async function getOrCreateFolder(name) {
-  let folder = Folder.collection.getName(name);
+  let folder = game.folders.find(f => f.name === name && f.type === "JournalEntry");
   if (!folder) {
     folder = await Folder.create({
       name,
@@ -34,7 +34,6 @@ function getNextSessionNumber(folder, prefix) {
 
 /**
  * Generate the HTML for the actor rows on the first page.
- * Includes portrait, clickable name, two date fields and Today buttons.
  */
 function getActorRowsHTML() {
   const actors = game.actors.contents.filter(a => a.isOwner);
@@ -82,16 +81,16 @@ function getActorRowsHTML() {
  * Create a new prep journal with one page per step (or a combined page).
  */
 export async function createPrepJournal() {
-  const separatePages  = game.settings.get(MODULE_ID, SETTINGS.separatePages);
-  const folderName     = game.settings.get(MODULE_ID, SETTINGS.folderName);
-  const journalPrefix  = game.settings.get(MODULE_ID, SETTINGS.journalPrefix);
+  const separatePages = game.settings.get(MODULE_ID, SETTINGS.separatePages);
+  const folderName    = game.settings.get(MODULE_ID, SETTINGS.folderName);
+  const journalPrefix = game.settings.get(MODULE_ID, SETTINGS.journalPrefix);
 
   const folder        = await getOrCreateFolder(folderName);
   const sessionNumber = getNextSessionNumber(folder, journalPrefix);
   const dateStamp     = foundry.utils.formatDateISO(new Date());
   const journalName   = `${journalPrefix} ${sessionNumber} - ${dateStamp}`;
 
-  // Build pages array
+  // Build pages
   const pages = separatePages
     ? STEP_DEFS.map((step, idx) => {
         let content = `<p>${step.description}</p>`;
@@ -100,10 +99,7 @@ export async function createPrepJournal() {
           name: step.numbered ? `${idx + 1}. ${step.title}` : step.title,
           type: "text",
           sort: idx * 100,
-          text: {
-            format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML,
-            content
-          }
+          text: { format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML, content }
         };
       })
     : [{
@@ -112,21 +108,24 @@ export async function createPrepJournal() {
         text: {
           format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML,
           content: STEP_DEFS.map((step, idx) => {
-            let seg = `<p><strong>${step.numbered ? `${idx + 1}. ` : ""}${step.title}</strong></p>`;
-            seg += `<p>${step.description}</p>`;
-            if (idx === 0) seg += `<div class="lazy-gm-actors">${getActorRowsHTML()}</div>`;
-            return seg;
+            const header = `<p><strong>${
+              step.numbered ? `${idx + 1}. ` : ""
+            }${step.title}</strong></p>`;
+            let body = `<p>${step.description}</p>`;
+            if (idx === 0) body += `<div class="lazy-gm-actors">${getActorRowsHTML()}</div>`;
+            return header + body;
           }).join("<hr>")
         }
       }];
 
-  // Create and notify
+  // Create journal
   const journal = await JournalEntry.create({
     name: journalName,
     folder: folder.id,
     flags: { [MODULE_ID]: { sessionNumber } },
     pages
   });
-  ui.journal.render();
+
+  ui.journal.render(true);
   ui.notifications.info(`Created: ${journal.name}`);
 }
