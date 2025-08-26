@@ -1,0 +1,18 @@
+{
+  "id": "lazy-gm-prep",
+  "title": "Lazy GM Prep",
+  "description": "FoundryVTT v13 module to generate session prep journals based on Return of the Lazy Dungeon Master.",
+  "version": "1.0.0",
+  "compatibility": { "minimum": "13", "verified": "13" },
+  "authors": [{ "name": "Eric" }],
+  "esmodules": ["src/main.js"],
+  "styles": ["styles/lazy-gm-prep.css"],
+  "languages": [
+    { "lang": "en", "name": "English", "path": "lang/en.json" }
+  ],
+  "packs": [],
+  "socket": false,
+  "manifest": "",
+  "download": "",
+  "license": "LICENSE"
+}
