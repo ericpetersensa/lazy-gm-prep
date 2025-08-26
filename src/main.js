@@ -1,5 +1,5 @@
 // src/main.js
-import { registerSettings } from "./settings.js"; // still useful if you have other settings
+import { registerSettings } from "./settings.js";
 const MODULE_ID = "lazy-gm-prep";
 
 /* ---------------------------------
@@ -10,16 +10,10 @@ Hooks.once("init", () => {
   registerSettings?.();
 
   game.settings.register(MODULE_ID, "lastSeenDate", {
-    scope: "world",
-    config: false,
-    type: String,
-    default: ""
+    scope: "world", config: false, type: String, default: ""
   });
   game.settings.register(MODULE_ID, "lastSpotlightDate", {
-    scope: "world",
-    config: false,
-    type: String,
-    default: ""
+    scope: "world", config: false, type: String, default: ""
   });
 });
 
@@ -28,12 +22,11 @@ Hooks.once("ready", () => {
 });
 
 /* ---------------------------------
-   Utility: Actor list HTML
+   Utilities
 ----------------------------------- */
 function getActorListHTML() {
   const actors = game.actors?.contents.filter(a => a.isOwner) ?? [];
   if (!actors.length) return `<p><em>No actors available</em></p>`;
-
   return actors.map(actor => `
     <div class="lazy-gm-actor" style="display:flex;align-items:center;gap:0.5em;margin:0.25em 0;">
       <img src="${actor.img}" title="${actor.name}" width="36" height="36" style="border:1px solid var(--color-border-light-primary);border-radius:4px;">
@@ -42,9 +35,6 @@ function getActorListHTML() {
   `).join("");
 }
 
-/* ---------------------------------
-   Utility: Date field HTML
------------------------------------ */
 function getDateFieldHTML(fieldId, label, value) {
   return `
     <div class="form-group" style="align-items:center;margin:0.25em 0;">
@@ -55,15 +45,35 @@ function getDateFieldHTML(fieldId, label, value) {
   `;
 }
 
+async function getOrCreateFolder(name) {
+  let folder = game.folders.getName(name);
+  if (!folder) {
+    folder = await Folder.create({ name, type: "JournalEntry", color: "#7f5af0" });
+  }
+  return folder;
+}
+
+function getNextSessionNumber(folder) {
+  const entries = game.journal?.contents.filter(j => j.folder?.id === folder.id);
+  const numbers = entries.map(e => {
+    const match = e.name.match(/Session\s+(\d+)/i);
+    return match ? parseInt(match[1]) : 0;
+  });
+  return (Math.max(0, ...numbers) || 0) + 1;
+}
+
 /* ---------------------------------
-   Create the prep journal
+   Create the prep journal (v13+)
 ----------------------------------- */
 export async function createPrepJournal() {
   const lastSeen = game.settings.get(MODULE_ID, "lastSeenDate");
   const lastSpot = game.settings.get(MODULE_ID, "lastSpotlightDate");
 
-  const content = `
-    <h2>Session Prep</h2>
+  const folder = await getOrCreateFolder("Lazy GM Prep");
+  const sessionNumber = getNextSessionNumber(folder);
+
+  const pageHTML = `
+    <h2>Session ${sessionNumber} Prep</h2>
     <section>
       <h3>Party</h3>
       ${getActorListHTML()}
@@ -80,9 +90,13 @@ export async function createPrepJournal() {
   `;
 
   const journal = await JournalEntry.create({
-    name: `Prep - ${new Date().toLocaleDateString()}`,
-    content,
-    folder: null
+    name: `Session ${sessionNumber} - ${new Date().toLocaleDateString()}`,
+    folder: folder.id,
+    pages: [{
+      name: "Session Prep",
+      type: "text",
+      text: { content: pageHTML, format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML }
+    }]
   });
 
   journal.sheet.render(true);
@@ -103,23 +117,19 @@ Hooks.on("renderJournalDirectory", (app, element) => {
   `);
   button.on("click", () => createPrepJournal());
 
-  const header = html.find(".directory-header .action-buttons");
-  if (header.length) header.append(button);
+  html.find(".directory-header .action-buttons").append(button);
 });
 
 /* ---------------------------------
-   Click + date handling inside journals
+   Journal sheet handlers
 ----------------------------------- */
 Hooks.on("renderJournalSheet", (app, html) => {
-  // Actor sheet opens
   html.find(".lazy-gm-open-sheet").on("click", ev => {
     ev.preventDefault();
     const actorId = ev.currentTarget.dataset.actorId;
-    const actor = game.actors.get(actorId);
-    if (actor) actor.sheet.render(true);
+    game.actors.get(actorId)?.sheet.render(true);
   });
 
-  // "Today" buttons
   html.find(".lazy-gm-today").on("click", ev => {
     const targetId = ev.currentTarget.dataset.target;
     const input = html.find(`#${targetId}`);
@@ -129,7 +139,6 @@ Hooks.on("renderJournalSheet", (app, html) => {
     }
   });
 
-  // Persist dates on change
   html.find("#lazy-date-lastseen").on("change", ev => {
     game.settings.set(MODULE_ID, "lastSeenDate", ev.target.value);
   });
@@ -139,7 +148,7 @@ Hooks.on("renderJournalSheet", (app, html) => {
 });
 
 /* ---------------------------------
-   Chat command: /prep
+   Chat command
 ----------------------------------- */
 Hooks.on("chatMessage", (chatLog, messageText) => {
   if (!game.user.isGM) return;
