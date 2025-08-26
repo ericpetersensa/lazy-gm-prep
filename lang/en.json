@@ -1,0 +1,4 @@
+{
+  "lazy-gm-prep.settings.separatePages.name": "Separate Pages for Each Step",
+  "lazy-gm-prep.settings.separatePages.hint": "If enabled, create one page per prep step; otherwise combine all steps into one page."
+}
