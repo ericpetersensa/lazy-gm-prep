@@ -1,10 +1,35 @@
+// src/settings.js
+
+import { MODULE_ID, SETTINGS, DEFAULTS } from "./constants.js";
+
 export function registerSettings() {
-  game.settings.register("lazy-gm-prep", "separatePages", {
-    name: "Separate Pages for Each Step",
-    hint: "If enabled, create one page per prep step; otherwise combine all steps into one page.",
+  // Split into multiple pages?
+  game.settings.register(MODULE_ID, SETTINGS.separatePages, {
+    name: game.i18n.localize("lazy-gm-prep.settings.separatePages.name"),
+    hint: game.i18n.localize("lazy-gm-prep.settings.separatePages.hint"),
     scope: "world",
     config: true,
-    default: true,
+    default: DEFAULTS.separatePages,
     type: Boolean
+  });
+
+  // Folder name for generated journals
+  game.settings.register(MODULE_ID, SETTINGS.folderName, {
+    name: game.i18n.localize("lazy-gm-prep.settings.folderName.name"),
+    hint: game.i18n.localize("lazy-gm-prep.settings.folderName.hint"),
+    scope: "world",
+    config: true,
+    default: DEFAULTS.folderName,
+    type: String
+  });
+
+  // Prefix for journal names (e.g. "Session")
+  game.settings.register(MODULE_ID, SETTINGS.journalPrefix, {
+    name: game.i18n.localize("lazy-gm-prep.settings.journalPrefix.name"),
+    hint: game.i18n.localize("lazy-gm-prep.settings.journalPrefix.hint"),
+    scope: "world",
+    config: true,
+    default: DEFAULTS.journalPrefix,
+    type: String
   });
 }
