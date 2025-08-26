@@ -27,7 +27,7 @@ Hooks.on("getJournalDirectoryHeaderButtons", (app, buttons) => {
   if (buttons.some(b => b?.class === "lazy-gm-prep-btn")) return;
 
   buttons.unshift({
-    label: "New Session Prep",
+    label: "New Prep",
     class: "lazy-gm-prep-btn",
     icon: "fas fa-clipboard-list",
     onclick: () => createPrepJournal()
