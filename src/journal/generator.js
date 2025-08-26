@@ -33,7 +33,7 @@ function getNextSessionNumber(folder, prefix) {
 }
 
 /**
- * Generate the HTML for the actor rows on the first page.
+ * Build the actor‐rows HTML for the “Review the Characters” step.
  */
 function getActorRowsHTML() {
   const actors = game.actors.contents.filter(a => a.isOwner);
@@ -78,7 +78,7 @@ function getActorRowsHTML() {
 }
 
 /**
- * Create a new prep journal with one page per step (or a combined page).
+ * Create a new prep journal with the configured pages.
  */
 export async function createPrepJournal() {
   const separatePages = game.settings.get(MODULE_ID, SETTINGS.separatePages);
@@ -90,7 +90,6 @@ export async function createPrepJournal() {
   const dateStamp     = foundry.utils.formatDateISO(new Date());
   const journalName   = `${journalPrefix} ${sessionNumber} - ${dateStamp}`;
 
-  // Build pages
   const pages = separatePages
     ? STEP_DEFS.map((step, idx) => {
         let content = `<p>${step.description}</p>`;
@@ -108,21 +107,18 @@ export async function createPrepJournal() {
         text: {
           format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML,
           content: STEP_DEFS.map((step, idx) => {
-            const header = `<p><strong>${
-              step.numbered ? `${idx + 1}. ` : ""
-            }${step.title}</strong></p>`;
-            let body = `<p>${step.description}</p>`;
+            const header = `<p><strong>${step.numbered ? `${idx + 1}. ` : ""}${step.title}</strong></p>`;
+            let body    = `<p>${step.description}</p>`;
             if (idx === 0) body += `<div class="lazy-gm-actors">${getActorRowsHTML()}</div>`;
             return header + body;
           }).join("<hr>")
         }
       }];
 
-  // Create journal
   const journal = await JournalEntry.create({
-    name: journalName,
+    name:   journalName,
     folder: folder.id,
-    flags: { [MODULE_ID]: { sessionNumber } },
+    flags:  { [MODULE_ID]: { sessionNumber } },
     pages
   });
 
