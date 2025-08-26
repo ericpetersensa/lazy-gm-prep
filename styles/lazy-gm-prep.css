@@ -1,0 +1,6 @@
+.lazygm-placeholder {
+  border: 1px dashed rgba(255,255,255,0.2);
+  padding: 0.25rem;
+  margin-top: 0.25rem;
+  opacity: 0.6;
+}
