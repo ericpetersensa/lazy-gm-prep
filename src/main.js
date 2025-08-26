@@ -4,9 +4,6 @@ import { createPrepJournal } from "./journal/generator.js";
 
 const MODULE_ID = "lazy-gm-prep";
 
-/* ---------------------------------
-   Boot
------------------------------------ */
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} | init`);
   registerSettings();
@@ -17,33 +14,14 @@ Hooks.once("ready", () => {
 });
 
 /* ---------------------------------
-   Journal Directory button (API hook)
-   - Preferred, clean integration
------------------------------------ */
-Hooks.on("getJournalDirectoryHeaderButtons", (app, buttons) => {
-  if (!game.user.isGM) return;
-
-  // Prevent duplicate injection if some theme re-renders or other hooks run
-  if (buttons.some(b => b?.class === "lazy-gm-prep-btn")) return;
-
-  buttons.unshift({
-    label: "New Prep",
-    class: "lazy-gm-prep-btn",
-    icon: "fas fa-clipboard-list",
-    onclick: () => createPrepJournal()
-  });
-});
-
-/* ---------------------------------
-   Journal Directory button (DOM fallback)
-   - Rock-solid if the API hook is skipped by a theme or timing
+   Journal Directory button — v13+ stable
 ----------------------------------- */
 Hooks.on("renderJournalDirectory", (app, element) => {
   if (!game.user.isGM) return;
 
   const html = element instanceof jQuery ? element : $(element);
 
-  // If a button with our class already exists (from either hook), bail
+  // Prevent duplicate injection
   if (html.find(".lazy-gm-prep-btn").length) return;
 
   const button = $(`
@@ -69,6 +47,6 @@ Hooks.on("chatMessage", (chatLog, messageText) => {
   if (!game.user.isGM) return;
   if (messageText.trim().toLowerCase() === "/prep") {
     createPrepJournal();
-    return false; // prevent echoing the command to chat
+    return false; // block chat echo
   }
 });
