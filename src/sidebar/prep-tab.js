@@ -1,6 +1,6 @@
 import { MODULE_ID } from "../constants.js";
 
-// v13 exports SidebarTab from foundry.applications.api
+// Pull SidebarTab from the v13 API namespace
 const { SidebarTab } = foundry.applications.api;
 
 export class PrepSidebarTab extends SidebarTab {
