@@ -1,6 +1,5 @@
 // src/main.js
-// Enable the PoC sidebar tab (non-destructive)
-import "./sidebar/register-prep-tab.js";
+
 import { registerSettings }   from "./settings.js";
 import { MODULE_ID }          from "./constants.js";
 import { createPrepJournal, getActorRowsHTML } from "./journal/generator.js";
@@ -12,6 +11,13 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   console.log(`${MODULE_ID} | ready`);
+
+  // Late-load the PoC tab after base module is up
+  if (game.user.isGM) {
+    import("./sidebar/register-prep-tab.js")
+      .then(() => console.log(`${MODULE_ID} | PoC sidebar tab loaded`))
+      .catch(err => console.error(`${MODULE_ID} | Failed to load PoC:`, err));
+  }
 });
 
 /* ---------------------------------
