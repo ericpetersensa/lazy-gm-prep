@@ -1,7 +1,7 @@
 // src/main.js
 
-import { registerSettings }   from "./settings.js";
-import { MODULE_ID }          from "./constants.js";
+import { registerSettings } from "./settings.js";
+import { MODULE_ID } from "./constants.js";
 import { createPrepJournal, getActorRowsHTML } from "./journal/generator.js";
 
 Hooks.once("init", () => {
@@ -12,11 +12,11 @@ Hooks.once("init", () => {
 Hooks.once("ready", () => {
   console.log(`${MODULE_ID} | ready`);
 
-  // Late-load the PoC tab after base module is up
+  // GM-only load of v13-native Prep tab PoC
   if (game.user.isGM) {
     import("./sidebar/register-prep-tab.js")
-      .then(() => console.log(`${MODULE_ID} | PoC sidebar tab loaded`))
-      .catch(err => console.error(`${MODULE_ID} | Failed to load PoC:`, err));
+      .then(() => console.log(`${MODULE_ID} | v13-native Prep tab loaded`))
+      .catch(err => console.error(`${MODULE_ID} | Failed to load Prep tab:`, err));
   }
 });
 
