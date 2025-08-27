@@ -1,12 +1,16 @@
 <section class="prep-sidebar flexcol">
-  {{#each actors}}
-    <div class="lgp-actor flexrow" data-actor-id="{{id}}">
-      <img src="{{img}}" title="{{name}}" width="36" height="36"/>
-      <div class="details">
-        <strong>{{name}}</strong><br>
-        Spotlight: {{spotlight}}<br>
-        Seen: {{seen}}
+  {{#if actors.length}}
+    {{#each actors}}
+      <div class="lgp-actor flexrow" data-actor-id="{{id}}">
+        <img src="{{img}}" title="{{name}}" width="36" height="36"/>
+        <div class="details">
+          <strong>{{name}}</strong><br>
+          Spotlight: {{spotlight}}<br>
+          Seen: {{seen}}
+        </div>
       </div>
-    </div>
-  {{/each}}
+    {{/each}}
+  {{else}}
+    <p><em>No player characters found.</em></p>
+  {{/if}}
 </section>
