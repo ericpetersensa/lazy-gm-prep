@@ -1,0 +1,12 @@
+<section class="prep-sidebar flexcol">
+  {{#each actors}}
+    <div class="lgp-actor flexrow" data-actor-id="{{id}}">
+      <img src="{{img}}" title="{{name}}" width="36" height="36"/>
+      <div class="details">
+        <strong>{{name}}</strong><br>
+        Spotlight: {{spotlight}}<br>
+        Seen: {{seen}}
+      </div>
+    </div>
+  {{/each}}
+</section>
