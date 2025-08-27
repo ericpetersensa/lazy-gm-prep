@@ -3,9 +3,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { STEP_DEFS } from "../steps/index.js";
 
-/**
- * Ensure a JournalEntry folder exists (create if missing).
- */
 async function getOrCreateFolder(name) {
   let folder = game.folders.find(f => f.name === name && f.type === "JournalEntry");
   if (!folder) {
@@ -18,9 +15,6 @@ async function getOrCreateFolder(name) {
   return folder;
 }
 
-/**
- * Calculate the next session number by parsing existing journals.
- */
 function getNextSessionNumber(folder, prefix) {
   const entries = game.journal.contents.filter(
     j => j.folder?.id === folder.id && j.name.startsWith(prefix)
@@ -32,12 +26,11 @@ function getNextSessionNumber(folder, prefix) {
   return Math.max(0, ...numbers) + 1;
 }
 
-/**
- * Build the actor‐rows HTML for the “Review the Characters” step.
- */
 function getActorRowsHTML() {
-  const actors = game.actors.contents.filter(a => a.isOwner);
-  if (!actors.length) return `<p><em>No actors available</em></p>`;
+  const actors = game.actors.contents.filter(a =>
+    a.isOwner && a.type === "character"
+  );
+  if (!actors.length) return `<p><em>No player characters available</em></p>`;
 
   return actors.map(actor => {
     const seen = actor.getFlag(MODULE_ID, "lastSeen") || "";
@@ -77,9 +70,6 @@ function getActorRowsHTML() {
   }).join("");
 }
 
-/**
- * Create a new prep journal with the configured pages.
- */
 export async function createPrepJournal() {
   const separatePages = game.settings.get(MODULE_ID, SETTINGS.separatePages);
   const folderName    = game.settings.get(MODULE_ID, SETTINGS.folderName);
