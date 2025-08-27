@@ -1,16 +1,20 @@
 import { MODULE_ID } from "../constants.js";
 
+// v13 exports SidebarTab from foundry.applications.api
+const { SidebarTab } = foundry.applications.api;
+
 export class PrepSidebarTab extends SidebarTab {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "prep",
       template: `modules/${MODULE_ID}/src/sidebar/templates/prep-sidebar.html`,
-      title: "Session Prep"
+      title: "Session Prep",
+      icon: "fas fa-clipboard-list"
     });
   }
 
-  getData() {
-    const actors = game.actors.filter(a => a?.isOwner && a.type === "character");
+  getData(options) {
+    const actors = game.actors.filter(a => a.isOwner && a.type === "character");
     return {
       actors: actors.map(a => ({
         id: a.id,
