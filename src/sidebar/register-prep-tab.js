@@ -1,23 +1,47 @@
-import { PrepSidebarTab } from "./prep-tab.js";
+import { MODULE_ID } from "../constants.js";
 
 const TAB_ID    = "prep";
 const TAB_ICON  = "fas fa-clipboard-list";
 const TAB_LABEL = "Prep";
+const TEMPLATE  = `modules/${MODULE_ID}/src/sidebar/templates/prep-sidebar.html`;
 
-Hooks.once("init", () => {
-  CONFIG.ui[TAB_ID] = PrepSidebarTab;
-});
+/**
+ * Render the prep panel content and wire listeners.
+ */
+async function renderPrepPanel(panel) {
+  const actors = game.actors?.filter(a => a?.isOwner && a.type === "character") ?? [];
+  const data = {
+    actors: actors.map(a => ({
+      id: a.id,
+      name: a.name,
+      img: a.img,
+      spotlight: a.getFlag(MODULE_ID, "lastSpotlight") ?? "—",
+      seen: a.getFlag(MODULE_ID, "lastSeen") ?? "—"
+    }))
+  };
 
-Hooks.on("renderSidebar", () => {
+  const html = await renderTemplate(TEMPLATE, data);
+  panel.html(html);
+
+  // Open sheet on click
+  panel.find(".lgp-actor").on("click", ev => {
+    const actorId = ev.currentTarget.dataset.actorId;
+    game.actors.get(actorId)?.sheet?.render(true);
+  });
+}
+
+/**
+ * Ensure the nav button and panel exist, then render content.
+ */
+async function ensurePrepMounted() {
   if (!game.user.isGM) return;
+  const sidebar = ui.sidebar?.element;
+  if (!sidebar?.length) return;
 
-  const tabs = ui.sidebar.element.find(".tabs[data-group='sidebar']");
-  if (!tabs.length) {
-    console.warn(`lazy-gm-prep | Could not find sidebar tabs container.`);
-    return;
-  }
+  // 1) Ensure the nav button exists
+  const tabs = sidebar.find(".tabs[data-group='sidebar']");
+  if (!tabs.length) return;
 
-  // Add button if missing
   if (!tabs.find(`[data-tab='${TAB_ID}']`).length) {
     const button = $(
       `<a class="item" data-tab="${TAB_ID}" title="${TAB_LABEL}">
@@ -25,14 +49,32 @@ Hooks.on("renderSidebar", () => {
        </a>`
     );
     tabs.append(button);
-    console.log(`lazy-gm-prep | ${TAB_LABEL} tab button added to sidebar.`);
+
+    // Fallback activation handler
+    tabs.on("click", `a.item[data-tab='${TAB_ID}']`, ev => {
+      ev.preventDefault();
+      // Set active state on nav
+      tabs.find("a.item").removeClass("active");
+      $(ev.currentTarget).addClass("active");
+      // Toggle panels
+      sidebar.find(".tab").removeClass("active");
+      sidebar.find(`.tab[data-tab='${TAB_ID}']`).addClass("active");
+    });
   }
 
-  // Add content pane if missing
-  if (!ui.sidebar.tabs[TAB_ID]) {
-    const tab = new PrepSidebarTab();
-    ui.sidebar.tabs[TAB_ID] = tab;
-    ui.sidebar.element.append(tab.render(true));
-    console.log(`lazy-gm-prep | ${TAB_LABEL} tab content attached.`);
+  // 2) Ensure the panel exists
+  let panel = sidebar.find(`.tab[data-tab='${TAB_ID}']`);
+  if (!panel.length) {
+    panel = $(`<div class="tab" data-tab="${TAB_ID}"></div>`);
+    sidebar.append(panel);
   }
-});
+
+  // 3) Render content
+  await renderPrepPanel(panel);
+
+  console.log(`${MODULE_ID} | Prep tab mounted`);
+}
+
+// Mount once on ready (in case sidebar already rendered), and on every sidebar render.
+Hooks.once("ready", ensurePrepMounted);
+Hooks.on("renderSidebar", ensurePrepMounted);
