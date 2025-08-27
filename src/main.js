@@ -1,5 +1,6 @@
 // src/main.js
-
+// Enable the PoC sidebar tab (non-destructive)
+import "./sidebar/register-prep-tab.js";
 import { registerSettings }   from "./settings.js";
 import { MODULE_ID }          from "./constants.js";
 import { createPrepJournal, getActorRowsHTML } from "./journal/generator.js";
