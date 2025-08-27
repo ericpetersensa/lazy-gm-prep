@@ -1,32 +1,12 @@
 // src/journal/generator.js
 
 import { MODULE_ID, SETTINGS } from "../constants.js";
-import { STEP_DEFS } from "../steps/index.js";
+import { STEP_DEFS }           from "../steps/index.js";
 
-async function getOrCreateFolder(name) {
-  let folder = game.folders.find(f => f.name === name && f.type === "JournalEntry");
-  if (!folder) {
-    folder = await Folder.create({
-      name,
-      type: "JournalEntry",
-      color: "#d9a066"
-    });
-  }
-  return folder;
-}
-
-function getNextSessionNumber(folder, prefix) {
-  const entries = game.journal.contents.filter(
-    j => j.folder?.id === folder.id && j.name.startsWith(prefix)
-  );
-  const numbers = entries.map(e => {
-    const m = e.name.match(new RegExp(`^${prefix}\\s+(\\d+)`, "i"));
-    return m ? parseInt(m[1]) : 0;
-  });
-  return Math.max(0, ...numbers) + 1;
-}
-
-function getActorRowsHTML() {
+/**
+ * Build the actor‐rows HTML for the “Review the Characters” step.
+ */
+export function getActorRowsHTML() {
   const actors = game.actors.contents.filter(a =>
     a.isOwner && a.type === "character"
   );
@@ -70,6 +50,38 @@ function getActorRowsHTML() {
   }).join("");
 }
 
+/**
+ * Ensure a JournalEntry folder exists (create if missing).
+ */
+async function getOrCreateFolder(name) {
+  let folder = game.folders.find(f => f.name === name && f.type === "JournalEntry");
+  if (!folder) {
+    folder = await Folder.create({
+      name,
+      type: "JournalEntry",
+      color: "#d9a066"
+    });
+  }
+  return folder;
+}
+
+/**
+ * Calculate the next session number by parsing existing journals.
+ */
+function getNextSessionNumber(folder, prefix) {
+  const entries = game.journal.contents.filter(
+    j => j.folder?.id === folder.id && j.name.startsWith(prefix)
+  );
+  const numbers = entries.map(e => {
+    const m = e.name.match(new RegExp(`^${prefix}\\s+(\\d+)`, "i"));
+    return m ? parseInt(m[1]) : 0;
+  });
+  return Math.max(0, ...numbers) + 1;
+}
+
+/**
+ * Create a new prep journal with the configured pages.
+ */
 export async function createPrepJournal() {
   const separatePages = game.settings.get(MODULE_ID, SETTINGS.separatePages);
   const folderName    = game.settings.get(MODULE_ID, SETTINGS.folderName);
@@ -80,10 +92,11 @@ export async function createPrepJournal() {
   const dateStamp     = new Date().toISOString().split("T")[0];
   const journalName   = `${journalPrefix} ${sessionNumber} - ${dateStamp}`;
 
+  // Build pages with a placeholder for actors on step 0
   const pages = separatePages
     ? STEP_DEFS.map((step, idx) => {
-        let content = `<p>${step.description}</p>`;
-        if (idx === 0) content += `<div class="lazy-gm-actors">${getActorRowsHTML()}</div>`;
+        const content = `<p>${step.description}</p>` +
+          (idx === 0 ? `<div class="lazy-gm-actors"></div>` : "");
         return {
           name: step.numbered ? `${idx + 1}. ${step.title}` : step.title,
           type: "text",
@@ -97,18 +110,20 @@ export async function createPrepJournal() {
         text: {
           format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML,
           content: STEP_DEFS.map((step, idx) => {
-            const header = `<p><strong>${step.numbered ? `${idx + 1}. ` : ""}${step.title}</strong></p>`;
-            let body = `<p>${step.description}</p>`;
-            if (idx === 0) body += `<div class="lazy-gm-actors">${getActorRowsHTML()}</div>`;
+            const header = `<p><strong>${
+              step.numbered ? `${idx + 1}. ` : ""
+            }${step.title}</strong></p>`;
+            const body   = `<p>${step.description}</p>` +
+              (idx === 0 ? `<div class="lazy-gm-actors"></div>` : "");
             return header + body + "<hr>";
           }).join("")
         }
       }];
 
   const journal = await JournalEntry.create({
-    name: journalName,
+    name:  journalName,
     folder: folder.id,
-    flags: { [MODULE_ID]: { sessionNumber } },
+    flags:  { [MODULE_ID]: { sessionNumber } },
     pages
   });
 
