@@ -10,7 +10,7 @@
   "lazy-gm-prep.settings.journalPrefix.name": "Journal Name Prefix",
   "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g. \"Session\").",
 
-  "lazy-gm-prep.header.button": "New Prep",
+  "lazy-gm-prep.header.button": "Create Lazy GM Prep",
 
   "lazy-gm-prep.ui.noCharacters": "No player characters available",
   "lazy-gm-prep.ui.lastSeen": "Last Seen",
