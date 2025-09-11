@@ -5,51 +5,92 @@ import { createPrepJournal, getActorRowsHTML } from "../journal/generator.js";
 
 const ACTION_ID = "lazy-gm-prep__new-prep";
 
-/** Add our header control, guarding against duplicates and non-GMs. */
-function addNewPrepControl(controls) {
+/* ---------------------------------
+ * 1) Header-menu control (AppV2)
+ *    Keep the kebab-menu entry for consistency with v13 controls.
+ *    Ref: getHeaderControls{ClassName} and generic getHeaderControlsApplicationV2
+ * --------------------------------- */
+function addNewPrepMenuControl(controls) {
   if (!game.user.isGM) return;
   if (Array.isArray(controls) && controls.some(c => c?.action === ACTION_ID)) return;
 
   controls.unshift({
-    action: ACTION_ID,                                   // v13 requires a string id
+    action: ACTION_ID,                                   // v13 requires a string identifier
     icon: "fa-solid fa-clipboard-list",
     label: game.i18n.localize("lazy-gm-prep.header.button"),
-    onClick: () => createPrepJournal()                   // click handler
+    onClick: () => createPrepJournal()
   });
-
-  // Optional debug
-  console.debug?.(`${MODULE_ID} | Added header control: ${ACTION_ID}`);
 }
 
-/**
- * Some v13 builds fire class-specific header-control hooks for the sidebar directory.
- * Register across the likely chain + the generic fallback.
- * Docs: getHeaderControlsApplicationV2 (class-specific substitution). 
- */
 [
-  "getHeaderControlsJournalDirectory",       // most specific for the Journal sidebar tab
-  "getHeaderControlsDocumentDirectory",      // parent class in the chain
-  "getHeaderControlsAbstractSidebarTab",     // higher in the chain
+  "getHeaderControlsJournalDirectory",       // class-specific
+  "getHeaderControlsDocumentDirectory",      // parent in chain
+  "getHeaderControlsAbstractSidebarTab",     // higher in chain
   "getHeaderControlsApplicationV2"           // generic fallback
 ].forEach(hookName => {
   Hooks.on(hookName, (app, controls) => {
     try {
-      // If we hit the generic hook, gate it to relevant classes
+      // If we hit the generic hook, gate by class
       if (hookName === "getHeaderControlsApplicationV2") {
         const name = app?.constructor?.name;
         if (!["JournalDirectory", "DocumentDirectory", "AbstractSidebarTab"].includes(name)) return;
       }
-      addNewPrepControl(controls);
+      addNewPrepMenuControl(controls);
     } catch (err) {
       console.error(`${MODULE_ID} | Failed to add header control via ${hookName}:`, err);
     }
   });
 });
 
-/**
- * Journal/Page injection & handlers via the generic AppV2 render hook.
- * Covers JournalSheetV2 and page-level sheets (e.g., JournalTextPageSheetV2).
- */
+/* ---------------------------------
+ * 2) Visible inline button in the Journal Directory header
+ *    We add a real <button> next to the directory’s built-in header buttons.
+ *    Uses native DOM; runs on every render to survive re-renders.
+ * --------------------------------- */
+function ensureInlineHeaderButton(dirEl) {
+  if (!game.user.isGM) return;
+
+  // Directory header element (v13 JournalDirectory)
+  // Your console log shows the app container as: section#journal.tab.sidebar-tab.directory...
+  // The header is a child element.
+  const header = dirEl.querySelector(".directory-header");
+  if (!header) return;
+
+  // Common containers across versions/themes
+  const container =
+    header.querySelector(".action-buttons") ||
+    header.querySelector(".header-actions") ||
+    header.querySelector(".header-controls") ||
+    header;
+
+  // Deduplicate
+  if (container.querySelector('[data-action="lazy-gm-prep-inline"]')) return;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.dataset.action = "lazy-gm-prep-inline";
+  btn.classList.add("lazy-gm-prep-btn");        // styled in your CSS
+  // Add a Foundry header-control class if present, to match spacing (optional)
+  btn.classList.add("header-control");
+
+  // FA6 icon + localized label
+  btn.innerHTML = `<i class="fa-solid fa-clipboard-list"></i> ${game.i18n.localize("lazy-gm-prep.header.button")}`;
+
+  btn.addEventListener("click", () => createPrepJournal());
+
+  container.appendChild(btn);
+}
+
+// We know from your logs that renderJournalDirectory fires. Use it.
+Hooks.on("renderJournalDirectory", (app, element /*, data, options */) => {
+  // element is the native DOM root for the app; inject in-place
+  ensureInlineHeaderButton(element);
+});
+
+/* ---------------------------------
+ * 3) Journal/Page wiring (unchanged): inject actor rows and handlers
+ *    Use the generic AppV2 render hook so it covers JournalSheetV2 and page sheets.
+ * --------------------------------- */
 Hooks.on("renderApplicationV2", (app, element) => {
   const cls = app?.constructor?.name;
   const isJournal = cls === "JournalSheetV2" || cls === "JournalPageSheetV2" || cls === "JournalTextPageSheetV2";
@@ -73,10 +114,12 @@ Hooks.on("renderApplicationV2", (app, element) => {
   element.addEventListener("click", (ev) => {
     const btn = ev.target?.closest?.(".lazy-gm-today");
     if (!btn) return;
+
     const { field, actorId } = btn.dataset;
     const today = new Date().toISOString().split("T")[0];
     const row = btn.closest(".lazy-gm-actor-row");
     const input = row?.querySelector(`.lazy-gm-date[data-field="${field}"]`);
+
     if (input) {
       input.value = today;
       input.dispatchEvent(new Event("change", { bubbles: true }));
@@ -89,6 +132,7 @@ Hooks.on("renderApplicationV2", (app, element) => {
   element.addEventListener("change", async (ev) => {
     const input = ev.target?.closest?.(".lazy-gm-date");
     if (!input) return;
+
     const { actorId, field } = input.dataset;
     const validFields = ["lastSeen", "lastSpotlight"];
     const actor = game.actors.get(actorId);
