@@ -25,7 +25,7 @@ export const STEP_DEFS = [
   },
   {
     key: "secrets-clues",
-    title: "Define Secrets & Clues",
+    title: "Define Secrets & Clues", // ← use literal ampersand
     numbered: true,
     description: "Prep hidden information for the players to discover."
   },
