@@ -11,10 +11,13 @@ Hooks.once("init", () => {
 Hooks.once("ready", () => {
   console.log(`${MODULE_ID} | ready`);
 
-  // GM-only load of v13-native integration (header controls + journal page wiring)
   if (game.user.isGM) {
     import("./sidebar/register-prep-tab.js")
-      .then(() => console.log(`${MODULE_ID} | v13-native integration loaded`))
+      .then(() => {
+        console.log(`${MODULE_ID} | v13-native integration loaded`);
+        // Force a re-render so header controls rebuild and your button appears
+        ui.journal?.render(true);
+      })
       .catch(err => console.error(`${MODULE_ID} | Failed to load v13 integration:`, err));
   }
 });
