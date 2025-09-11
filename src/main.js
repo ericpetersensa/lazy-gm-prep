@@ -15,7 +15,9 @@ Hooks.once("ready", () => {
     import("./sidebar/register-prep-tab.js")
       .then(() => {
         console.log(`${MODULE_ID} | v13-native integration loaded`);
+
         // Force a re-render so header controls rebuild and your button appears
+        // (Directory may have rendered before our hooks were registered.)
         ui.journal?.render(true);
       })
       .catch(err => console.error(`${MODULE_ID} | Failed to load v13 integration:`, err));
