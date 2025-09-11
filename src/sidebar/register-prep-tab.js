@@ -3,34 +3,59 @@
 import { MODULE_ID } from "../constants.js";
 import { createPrepJournal, getActorRowsHTML } from "../journal/generator.js";
 
-/**
- * Add a "New Prep" header control to the Journal Directory (GM only) the AppV2 way.
- * v13 hook: getHeaderControlsApplicationV2
- */
-Hooks.on("getHeaderControlsApplicationV2", (app, controls) => {
-  if (!game.user.isGM) return;
+const ACTION_ID = "lazy-gm-prep__new-prep";
 
-  // Journal Directory class name in v13 is "JournalDirectory"
-  if (app?.constructor?.name !== "JournalDirectory") return; // ✔ confirmed class name [3](https://foundryvtt.com/api/v13/classes/foundry.applications.sidebar.tabs.JournalDirectory.html)
+/** Add our header control, guarding against duplicates and non-GMs. */
+function addNewPrepControl(controls) {
+  if (!game.user.isGM) return;
+  if (Array.isArray(controls) && controls.some(c => c?.action === ACTION_ID)) return;
 
   controls.unshift({
-    action: "lazy-gm-prep__new-prep", // MUST be a string id, not a function
+    action: ACTION_ID,                                   // v13 requires a string id
     icon: "fa-solid fa-clipboard-list",
     label: game.i18n.localize("lazy-gm-prep.header.button"),
-    onClick: () => createPrepJournal() // click handler
+    onClick: () => createPrepJournal()                   // click handler
+  });
+
+  // Optional debug
+  console.debug?.(`${MODULE_ID} | Added header control: ${ACTION_ID}`);
+}
+
+/**
+ * Some v13 builds fire class-specific header-control hooks for the sidebar directory.
+ * Register across the likely chain + the generic fallback.
+ * Docs: getHeaderControlsApplicationV2 (class-specific substitution). 
+ */
+[
+  "getHeaderControlsJournalDirectory",       // most specific for the Journal sidebar tab
+  "getHeaderControlsDocumentDirectory",      // parent class in the chain
+  "getHeaderControlsAbstractSidebarTab",     // higher in the chain
+  "getHeaderControlsApplicationV2"           // generic fallback
+].forEach(hookName => {
+  Hooks.on(hookName, (app, controls) => {
+    try {
+      // If we hit the generic hook, gate it to relevant classes
+      if (hookName === "getHeaderControlsApplicationV2") {
+        const name = app?.constructor?.name;
+        if (!["JournalDirectory", "DocumentDirectory", "AbstractSidebarTab"].includes(name)) return;
+      }
+      addNewPrepControl(controls);
+    } catch (err) {
+      console.error(`${MODULE_ID} | Failed to add header control via ${hookName}:`, err);
+    }
   });
 });
 
 /**
- * Wire up journal/page sheets via the generic renderApplicationV2 hook.
- * Covers JournalSheetV2 and page-level sheets like JournalTextPageSheetV2.
+ * Journal/Page injection & handlers via the generic AppV2 render hook.
+ * Covers JournalSheetV2 and page-level sheets (e.g., JournalTextPageSheetV2).
  */
 Hooks.on("renderApplicationV2", (app, element) => {
   const cls = app?.constructor?.name;
   const isJournal = cls === "JournalSheetV2" || cls === "JournalPageSheetV2" || cls === "JournalTextPageSheetV2";
   if (!isJournal) return;
 
-  // 1) Inject actor rows
+  // 1) Inject actor rows into placeholders
   for (const el of element.querySelectorAll(".lazy-gm-actors")) {
     el.innerHTML = getActorRowsHTML();
   }
@@ -48,12 +73,10 @@ Hooks.on("renderApplicationV2", (app, element) => {
   element.addEventListener("click", (ev) => {
     const btn = ev.target?.closest?.(".lazy-gm-today");
     if (!btn) return;
-
     const { field, actorId } = btn.dataset;
     const today = new Date().toISOString().split("T")[0];
     const row = btn.closest(".lazy-gm-actor-row");
     const input = row?.querySelector(`.lazy-gm-date[data-field="${field}"]`);
-
     if (input) {
       input.value = today;
       input.dispatchEvent(new Event("change", { bubbles: true }));
@@ -66,7 +89,6 @@ Hooks.on("renderApplicationV2", (app, element) => {
   element.addEventListener("change", async (ev) => {
     const input = ev.target?.closest?.(".lazy-gm-date");
     if (!input) return;
-
     const { actorId, field } = input.dataset;
     const validFields = ["lastSeen", "lastSpotlight"];
     const actor = game.actors.get(actorId);
