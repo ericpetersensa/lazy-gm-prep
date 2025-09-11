@@ -22,8 +22,8 @@ export function getActorRowsHTML() {
     return `<p><em>${game.i18n.localize("lazy-gm-prep.ui.noCharacters")}</em></p>`;
   }
 
-  const labelSeen = game.i18n.localize("lazy-gm-prep.ui.lastSeen");
-  const labelSpot = game.i18n.localize("lazy-gm-prep.ui.lastSpotlight");
+  const labelSeen  = game.i18n.localize("lazy-gm-prep.ui.lastSeen");
+  const labelSpot  = game.i18n.localize("lazy-gm-prep.ui.lastSpotlight");
   const labelToday = game.i18n.localize("lazy-gm-prep.ui.today");
 
   return actors.map(actor => {
@@ -35,9 +35,8 @@ export function getActorRowsHTML() {
           <img src="${esc(actor.img)}" title="${esc(actor.name)}"
                width="36" height="36"
                style="border:1px solid var(--color-border-light-primary);border-radius:4px;">
-          <a href="#" class="lazy-gm-open-sheet" data-actor-id="${actor.id}">
-            ${esc(actor.name)}
-date"
+          <a href="#" class="lazy-gm-open-sheet" data-actorabel>
+          <input type="date" class="lazy-gm-date"
                  data-actor-id="${actor.id}" data-field="lastSeen"
                  value="${esc(seen)}">
           <button type="button" class="lazy-gm-today"
