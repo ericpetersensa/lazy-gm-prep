@@ -5,33 +5,32 @@ import { createPrepJournal, getActorRowsHTML } from "../journal/generator.js";
 
 /**
  * Add a "New Prep" header control to the Journal Directory (GM only) the AppV2 way.
- * v13+ provides a generic header-control hook for all ApplicationV2 subclasses.
- * See: hookEvents -> getHeaderControlsApplicationV2
+ * v13 hook: getHeaderControlsApplicationV2
  */
 Hooks.on("getHeaderControlsApplicationV2", (app, controls) => {
   if (!game.user.isGM) return;
-  // Only for Journal Directory windows
-  if (app?.constructor?.name !== "JournalDirectory") return;
+
+  // Journal Directory class name in v13 is "JournalDirectory"
+  if (app?.constructor?.name !== "JournalDirectory") return; // ✔ confirmed class name [3](https://foundryvtt.com/api/v13/classes/foundry.applications.sidebar.tabs.JournalDirectory.html)
 
   controls.unshift({
+    action: "lazy-gm-prep__new-prep", // MUST be a string id, not a function
     icon: "fa-solid fa-clipboard-list",
     label: game.i18n.localize("lazy-gm-prep.header.button"),
-    tooltip: game.i18n.localize("lazy-gm-prep.header.button"),
-    class: "lazy-gm-prep-btn",
-    action: () => createPrepJournal()
+    onClick: () => createPrepJournal() // click handler
   });
 });
 
 /**
  * Wire up journal/page sheets via the generic renderApplicationV2 hook.
- * This covers JournalSheetV2 and page-level sheets like JournalTextPageSheetV2.
+ * Covers JournalSheetV2 and page-level sheets like JournalTextPageSheetV2.
  */
 Hooks.on("renderApplicationV2", (app, element) => {
   const cls = app?.constructor?.name;
   const isJournal = cls === "JournalSheetV2" || cls === "JournalPageSheetV2" || cls === "JournalTextPageSheetV2";
   if (!isJournal) return;
 
-  // 1) Inject actor rows into any placeholder element(s).
+  // 1) Inject actor rows
   for (const el of element.querySelectorAll(".lazy-gm-actors")) {
     el.innerHTML = getActorRowsHTML();
   }
