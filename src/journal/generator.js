@@ -13,6 +13,13 @@ function esc(str) {
     .replaceAll("'", "&#39;");
 }
 
+/** Returns local date as YYYY-MM-DD (e.g., 2025-09-11 in PST/PDT). */
+function localISODate(d = new Date()) {
+  const tz = d.getTimezoneOffset();                // minutes difference from UTC
+  const local = new Date(d.getTime() - tz * 60000);
+  return local.toISOString().split("T")[0];
+}
+
 /**
  * Ensure a JournalEntry folder exists (create if missing).
  */
@@ -53,8 +60,8 @@ export async function createPrepJournal() {
 
   const folder        = await getOrCreateFolder(folderName);
   const sessionNumber = getNextSessionNumber(folder, journalPrefix);
-  const dateStamp     = new Date().toISOString().split("T")[0];
-  const journalName   = `${journalPrefix} ${sessionNumber}  (${dateStamp})`;
+  const dateStamp     = localISODate();                            // Local (not UTC)
+  const journalName   = `${journalPrefix} ${sessionNumber}: ${dateStamp}`;
 
   const pages = separatePages
     ? STEP_DEFS.map((step, idx) => {
