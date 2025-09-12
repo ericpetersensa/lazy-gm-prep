@@ -8,8 +8,8 @@ function getActorTypes() {
 }
 
 /**
- * Use v13's DocumentSheetConfig to marshal available sheet classes
- * for a given Actor type (subtype).
+ * Use v13's DocumentSheetConfig to gather available sheet classes
+ * for a given Actor subtype (e.g., "character", "npc", etc.).
  */
 function getSheetInfoForType(actorType) {
   const { DocumentSheetConfig } = foundry.applications.apps;
@@ -38,15 +38,51 @@ function resolveCategoryToActorType(category, actorTypes) {
   }
 }
 
-/** Local keys for the new dropdown settings (avoid dependency on constants.js changes). */
+/** Local keys for the new dropdown settings (avoid touching constants.js). */
 const SHEET_KEYS = {
   actor: "defaultSheet.actor",
   npc: "defaultSheet.npc",
   monster: "defaultSheet.monster"
 };
 
+/** Register (or repair) one dropdown setting for the given category. */
+async function registerOrRefreshSheetDropdown(category, labelKey, actorTypes) {
+  const actorType = resolveCategoryToActorType(category, actorTypes);
+  const { sheetClasses, defaultClass } = getSheetInfoForType(actorType);
+
+  const key = SHEET_KEYS[category];
+  const fullKey = `${MODULE_ID}.${key}`;
+  const already = game.settings.settings.has(fullKey);
+
+  if (!already) {
+    // Fresh registration with proper choices (setup time).
+    game.settings.register(MODULE_ID, key, {
+      name: game.i18n.localize(labelKey),
+      hint: game.i18n.localize("lazy-gm-prep.settings.sheet.hint"),
+      scope: "world",
+      config: true,
+      type: String,
+      choices: sheetClasses,  // { sheetId: "Label", ... }
+      default: defaultClass,  // System default sheet for that actor type
+      onChange: () => ui.notifications?.info(game.i18n.localize("lazy-gm-prep.settings.sheet.changed"))
+    });
+  } else {
+    // Repair: the setting exists (likely created at init with empty choices). Update choices/default in-place.
+    const registry = game.settings.settings.get(fullKey);
+    if (registry) {
+      registry.choices = sheetClasses || {};
+      if (defaultClass) registry.default = defaultClass;
+    }
+    // Optional migration: if value is blank or not one of the available choices, set to defaultClass.
+    const current = game.settings.get(MODULE_ID, key);
+    if ((!current || !sheetClasses[current]) && defaultClass) {
+      await game.settings.set(MODULE_ID, key, defaultClass);
+    }
+  }
+}
+
 export function registerSettings() {
-  // ——— Existing settings you already use ———
+  // ---------------- Existing settings you already use (register at init) ----------------
   game.settings.register(MODULE_ID, SETTINGS.separatePages, {
     name: game.i18n.localize("lazy-gm-prep.settings.separatePages.name"),
     hint: game.i18n.localize("lazy-gm-prep.settings.separatePages.hint"),
@@ -83,29 +119,11 @@ export function registerSettings() {
     type: String
   });
 
-  // ——— New: dynamic sheet selection dropdowns ———
-  const types = getActorTypes(); // system-agnostic (e.g., ["character","npc",...])
-
-  /**
-   * Helper to register one dropdown for a category (actor|npc|monster)
-   * using the discovered sheet classes for its resolved actor type.
-   */
-  const registerSheetDropdown = (category, labelKey) => {
-    const actorType = resolveCategoryToActorType(category, types);
-    const { sheetClasses, defaultClass } = getSheetInfoForType(actorType);
-    game.settings.register(MODULE_ID, SHEET_KEYS[category], {
-      name: game.i18n.localize(labelKey),
-      hint: game.i18n.localize("lazy-gm-prep.settings.sheet.hint"),
-      scope: "world",
-      config: true,
-      type: String,
-      choices: sheetClasses,   // { sheetId: "Label", ... }
-      default: defaultClass,   // system default for that type
-      onChange: () => ui.notifications?.info(game.i18n.localize("lazy-gm-prep.settings.sheet.changed"))
-    });
-  };
-
-  registerSheetDropdown("actor",   "lazy-gm-prep.settings.actor.label");
-  registerSheetDropdown("npc",     "lazy-gm-prep.settings.npc.label");
-  registerSheetDropdown("monster", "lazy-gm-prep.settings.monster.label");
+  // ---------------- NEW: Register/repair the three sheet dropdowns at SETUP ----------------
+  Hooks.once("setup", async () => {
+    const types = getActorTypes(); // e.g., ["character","npc",...]  (system-dependent)
+    await registerOrRefreshSheetDropdown("actor",   "lazy-gm-prep.settings.actor.label",   types);
+    await registerOrRefreshSheetDropdown("npc",     "lazy-gm-prep.settings.npc.label",     types);
+    await registerOrRefreshSheetDropdown("monster", "lazy-gm-prep.settings.monster.label", types);
+  });
 }
