@@ -10,6 +10,9 @@
   "lazy-gm-prep.settings.journalPrefix.name": "Journal Name Prefix",
   "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g. \"Session\").",
 
+  "lazy-gm-prep.settings.pcActorTypes.name": "Actor Types for PCs",
+  "lazy-gm-prep.settings.pcActorTypes.hint": "Comma-separated list of actor types to treat as player characters (PCs). Example: \"character\" (5e), \"pc\" (PF2e), or \"character, pc\" for cross-system worlds.",
+
   "lazy-gm-prep.header.button": "Create GM Prep",
   "lazy-gm-prep.header.buttonTooltip": "Create a new GM prep journal for your next session",
 
@@ -29,6 +32,7 @@
 
   "lazy-gm-prep.steps.secrets-clues.title": "Define Secrets & Clues",
   "lazy-gm-prep.steps.secrets-clues.description": "Prep hidden information for the players to discover.",
+
   "lazy-gm-prep.steps.fantastic-locations.title": "Develop Fantastic Locations",
   "lazy-gm-prep.steps.fantastic-locations.description": "Design memorable locations for the session.",
 
