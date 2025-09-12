@@ -62,7 +62,7 @@ function ensureInlineHeaderButton(dirEl) {
   btn.dataset.action = "lazy-gm-prep-inline";
   // Reuse core button look for perfect theme parity
   btn.classList.add("lazy-gm-prep-btn", "header-control", "create-entry");
-  btn.title = game.i18n.localize("lazy-gm-prep.header.button");
+  btn.title = game.i18n.localize("lazy-gm-prep.header.button"); // <-- tooltip
   btn.innerHTML = `<i class="fa-solid fa-clipboard-list"></i> ${game.i18n.localize("lazy-gm-prep.header.button")}`;
 
   btn.addEventListener("click", () => createPrepJournal());
