@@ -51,7 +51,7 @@ function getNextSessionNumber(folder, prefix) {
 
 /**
  * Create a new prep journal with the configured pages.
- * (No actor placeholders; just the step headers + descriptions)
+ * (No actor placeholders; just i18n-based step headers + descriptions)
  */
 export async function createPrepJournal() {
   const separatePages = game.settings.get(MODULE_ID, SETTINGS.separatePages);
@@ -60,14 +60,16 @@ export async function createPrepJournal() {
 
   const folder        = await getOrCreateFolder(folderName);
   const sessionNumber = getNextSessionNumber(folder, journalPrefix);
-  const dateStamp     = localISODate();                            // Local (not UTC)
-  const journalName   = `${journalPrefix} ${sessionNumber}  (${dateStamp})`;
+  const dateStamp     = localISODate();
+  const journalName   = `${journalPrefix} ${sessionNumber}: ${dateStamp}`;
 
   const pages = separatePages
     ? STEP_DEFS.map((step, idx) => {
-        const content = `<p>${esc(step.description)}</p>`;
+        const title = game.i18n.localize(step.titleKey);
+        const desc  = game.i18n.localize(step.descriptionKey);
+        const content = `<p>${esc(desc)}</p>`;
         return {
-          name: step.numbered ? `${idx + 1}. ${esc(step.title)}` : esc(step.title),
+          name: step.numbered ? `${idx + 1}. ${esc(title)}` : esc(title),
           type: "text",
           sort: idx * 100,
           text: { format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML, content }
@@ -79,10 +81,12 @@ export async function createPrepJournal() {
         text: {
           format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML,
           content: STEP_DEFS.map((step, idx) => {
+            const title = game.i18n.localize(step.titleKey);
+            const desc  = game.i18n.localize(step.descriptionKey);
             const header = `<p><strong>${
               step.numbered ? `${idx + 1}. ` : ""
-            }${esc(step.title)}</strong></p>`;
-            const body   = `<p>${esc(step.description)}</p>`;
+            }${esc(title)}</strong></p>`;
+            const body   = `<p>${esc(desc)}</p>`;
             return header + body + "<hr>";
           }).join("")
         }
