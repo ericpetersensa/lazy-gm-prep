@@ -1,26 +1,6 @@
-/* src/styles/lazy-gm-prep.css */
-
+/* lazy-gm-prep/styles/lazy-gm-prep.css */
 @layer modules {
-  /* Placeholder containers for later injection */
-  .lazygm-placeholder {
-    border: 1px dashed rgba(255,255,255,0.2);
-    padding: 0.5rem;
-    margin-top: 0.5rem;
-  }
-
-  /* Actor rows styling */
-  .lazy-gm-actor-row {
-    background: var(--color-background-secondary);
-    border-radius: 4px;
-    padding: 0.5rem;
-    margin: 0.5rem 0;
-  }
-
-  .lazy-gm-actor-row .form-group label {
-    font-weight: 500;
-  }
-
-  /* Minimal tweaks for our inline button */
+  /* Inline header button tweaks (inherits core theme look via 'header-control create-entry') */
   .directory .directory-header .lazy-gm-prep-btn {
     display: inline-flex;
     align-items: center;
