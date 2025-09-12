@@ -11,12 +11,12 @@
   "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g. \"Session\").",
 
   "lazy-gm-prep.header.button": "Create GM Prep",
+  "lazy-gm-prep.header.buttonTooltip": "Create a new GM prep journal for your next session",
 
   "lazy-gm-prep.notifications.created": "Created: {name}",
 
   "lazy-gm-prep.keybindings.createPrep.name": "Create GM Prep",
   "lazy-gm-prep.keybindings.createPrep.hint": "Create a new prep journal (GM only). Default: Alt+P",
-  "lazy-gm-prep.header.buttonTooltip": "Create a new Lazy GM prep journal for your next session"
 
   "lazy-gm-prep.steps.review-characters.title": "Review the Characters",
   "lazy-gm-prep.steps.review-characters.description": "Look over PCs, notes, and recent changes.",
@@ -29,7 +29,6 @@
 
   "lazy-gm-prep.steps.secrets-clues.title": "Define Secrets & Clues",
   "lazy-gm-prep.steps.secrets-clues.description": "Prep hidden information for the players to discover.",
-
   "lazy-gm-prep.steps.fantastic-locations.title": "Develop Fantastic Locations",
   "lazy-gm-prep.steps.fantastic-locations.description": "Design memorable locations for the session.",
 
