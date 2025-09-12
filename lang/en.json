@@ -8,10 +8,16 @@
   "lazy-gm-prep.settings.folderName.hint": "The folder in which to store generated prep journals.",
 
   "lazy-gm-prep.settings.journalPrefix.name": "Journal Name Prefix",
-  "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g. \"Session\").",
+  "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g., \"Session\").",
 
   "lazy-gm-prep.settings.pcActorTypes.name": "Actor Types for PCs",
-  "lazy-gm-prep.settings.pcActorTypes.hint": "Comma-separated list of actor types to treat as player characters (PCs). Example: \"character\" (5e), \"pc\" (PF2e), or \"character, pc\" for cross-system worlds.",
+  "lazy-gm-prep.settings.pcActorTypes.hint": "Comma-separated list of actor types to treat as player characters (PCs). Example: \"character\" (DnD5e), \"pc\" (PF2e), or \"character, pc\" for cross-system worlds.",
+
+  "lazy-gm-prep.settings.actor.label": "Preferred Sheet: Actor (PC-like)",
+  "lazy-gm-prep.settings.npc.label": "Preferred Sheet: NPC",
+  "lazy-gm-prep.settings.monster.label": "Preferred Sheet: Monster",
+  "lazy-gm-prep.settings.sheet.hint": "Choose which sheet to use when the module opens entries in this category.",
+  "lazy-gm-prep.settings.sheet.changed": "Lazy GM Prep sheet preference updated.",
 
   "lazy-gm-prep.header.button": "Create GM Prep",
   "lazy-gm-prep.header.buttonTooltip": "Create a new GM prep journal for your next session",
