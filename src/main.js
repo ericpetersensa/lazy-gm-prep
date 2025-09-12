@@ -2,10 +2,25 @@
 
 import { registerSettings } from "./settings.js";
 import { MODULE_ID } from "./constants.js";
+import { createPrepJournal } from "./journal/generator.js";
 
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} | init`);
   registerSettings();
+
+  // Register keybinding: Alt+P (GM only) to create a prep journal
+  game.keybindings.register(MODULE_ID, "create-prep", {
+    name: "lazy-gm-prep.keybindings.createPrep.name",
+    hint: "lazy-gm-prep.keybindings.createPrep.hint",
+    editable: [{ key: "KeyP", modifiers: ["Alt"] }],
+    onDown: () => {
+      if (!game.user.isGM) return false;
+      createPrepJournal();
+      return true;
+    },
+    restricted: true // GM-only
+    // precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL  // (optional)
+  });
 });
 
 Hooks.once("ready", () => {
@@ -15,9 +30,7 @@ Hooks.once("ready", () => {
     import("./sidebar/register-prep-tab.js")
       .then(() => {
         console.log(`${MODULE_ID} | v13-native integration loaded`);
-
-        // Force a re-render so header controls rebuild and your button appears
-        // (Directory may have rendered before our hooks were registered.)
+        // In case the directory rendered before our hooks registered
         ui.journal?.render(true);
       })
       .catch(err => console.error(`${MODULE_ID} | Failed to load v13 integration:`, err));
@@ -27,8 +40,6 @@ Hooks.once("ready", () => {
 /* ---------------------------------
    Chat command: /prep
 ----------------------------------- */
-import { createPrepJournal } from "./journal/generator.js";
-
 Hooks.on("chatMessage", (chatLog, messageText) => {
   if (!game.user.isGM) return;
   if (messageText.trim().toLowerCase() === "/prep") {
