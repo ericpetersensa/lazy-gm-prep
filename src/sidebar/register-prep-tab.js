@@ -70,9 +70,7 @@ function ensureInlineHeaderButton(dirEl) {
   btn.type = "button";
   btn.dataset.action = "lazy-gm-prep-inline";
   btn.classList.add("lazy-gm-prep-btn");        // styled in your CSS
-  // Add a Foundry header-control class if present, to match spacing (optional)
-  btn.classList.add("header-control");
-
+  
   // FA6 icon + localized label
   btn.innerHTML = `<i class="fa-solid fa-clipboard-list"></i> ${game.i18n.localize("lazy-gm-prep.header.button")}`;
 
