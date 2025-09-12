@@ -3,19 +3,13 @@
 
   "lazy-gm-prep.settings.separatePages.name": "Separate Pages for Each Step",
   "lazy-gm-prep.settings.separatePages.hint": "If enabled, create one page per prep step; otherwise combine all steps into one page.",
-
   "lazy-gm-prep.settings.folderName.name": "Folder Name for Prep Journals",
   "lazy-gm-prep.settings.folderName.hint": "The folder in which to store generated prep journals.",
 
   "lazy-gm-prep.settings.journalPrefix.name": "Journal Name Prefix",
   "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g. \"Session\").",
 
-  "lazy-gm-prep.header.button": "Create Lazy GM Prep",
-
-  "lazy-gm-prep.ui.noCharacters": "No player characters available",
-  "lazy-gm-prep.ui.lastSeen": "Last Seen",
-  "lazy-gm-prep.ui.lastSpotlight": "Last Spotlight",
-  "lazy-gm-prep.ui.today": "Today",
+  "lazy-gm-prep.header.button": "Create GM Prep",
 
   "lazy-gm-prep.notifications.created": "Created: {name}"
 }
