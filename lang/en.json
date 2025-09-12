@@ -14,6 +14,9 @@
 
   "lazy-gm-prep.notifications.created": "Created: {name}",
 
+  "lazy-gm-prep.keybindings.createPrep.name": "Create GM Prep",
+  "lazy-gm-prep.keybindings.createPrep.hint": "Create a new prep journal (GM only). Default: Alt+P",
+
   "lazy-gm-prep.steps.review-characters.title": "Review the Characters",
   "lazy-gm-prep.steps.review-characters.description": "Look over PCs, notes, and recent changes.",
 
