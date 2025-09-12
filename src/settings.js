@@ -32,4 +32,14 @@ export function registerSettings() {
     default: DEFAULTS.journalPrefix,
     type: String
   });
+
+  // NEW: Actor types to treat as PCs
+  game.settings.register(MODULE_ID, SETTINGS.pcActorTypes, {
+    name: game.i18n.localize("lazy-gm-prep.settings.pcActorTypes.name"),
+    hint: game.i18n.localize("lazy-gm-prep.settings.pcActorTypes.hint"),
+    scope: "world",
+    config: true,
+    default: DEFAULTS.pcActorTypes,
+    type: String
+  });
 }
