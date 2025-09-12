@@ -15,7 +15,7 @@ function addNewPrepMenuControl(controls) {
   controls.unshift({
     action: ACTION_ID,
     icon: "fa-solid fa-clipboard-list",
-    label: game.i18n.localize("lazy-gm-prep.header.button"),
+    label: game.i18n.localize("lazy-gm-prep.header.button"),           // label text
     onClick: () => createPrepJournal()
   });
 }
@@ -62,7 +62,9 @@ function ensureInlineHeaderButton(dirEl) {
   btn.dataset.action = "lazy-gm-prep-inline";
   // Reuse core button look for perfect theme parity
   btn.classList.add("lazy-gm-prep-btn", "header-control", "create-entry");
-  btn.title = game.i18n.localize("lazy-gm-prep.header.buttonTooltip"); // <-- tooltip
+  // Tooltip uses a different i18n key for better a11y context
+  btn.title = game.i18n.localize("lazy-gm-prep.header.buttonTooltip");
+  // Visible label uses the original header.button key
   btn.innerHTML = `<i class="fa-solid fa-clipboard-list"></i> ${game.i18n.localize("lazy-gm-prep.header.button")}`;
 
   btn.addEventListener("click", () => createPrepJournal());
