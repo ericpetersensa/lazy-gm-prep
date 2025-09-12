@@ -14,52 +14,6 @@ function esc(str) {
 }
 
 /**
- * Build the actor-rows HTML for the “Review the Characters” step.
- */
-export function getActorRowsHTML() {
-  const actors = game.actors.contents.filter(a => a.isOwner && a.type === "character");
-  if (!actors.length) {
-    return `<p><em>${game.i18n.localize("lazy-gm-prep.ui.noCharacters")}</em></p>`;
-  }
-
-  const labelSeen  = game.i18n.localize("lazy-gm-prep.ui.lastSeen");
-  const labelSpot  = game.i18n.localize("lazy-gm-prep.ui.lastSpotlight");
-  const labelToday = game.i18n.localize("lazy-gm-prep.ui.today");
-
-  return actors.map(actor => {
-    const seen = actor.getFlag(MODULE_ID, "lastSeen") || "";
-    const spot = actor.getFlag(MODULE_ID, "lastSpotlight") || "";
-    return `
-      <div class="lazy-gm-actor-row" data-actor-id="${actor.id}">
-        <div style="display:flex;align-items:center;gap:0.5em;">
-          <img src="${esc(actor.img)}" title="${esc(actor.name)}"
-               width="36" height="36"
-               style="border:1px solid var(--color-border-light-primary);border-radius:4px;">
-          <a href="#" class="lazy-gm-open-sheet" data-actorabel>
-          <input type="date" class="lazy-gm-date"
-                 data-actor-id="${actor.id}" data-field="lastSeen"
-                 value="${esc(seen)}">
-          <button type="button" class="lazy-gm-today"
-                  data-actor-id="${actor.id}" data-field="lastSeen">
-            ${labelToday}
-          </button>
-        </div>
-        <div class="form-group" style="display:flex;align-items:center;gap:0.5em;margin-top:0.25em;">
-          <label style="min-width:8ch;">${labelSpot}</label>
-          <input type="date" class="lazy-gm-date"
-                 data-actor-id="${actor.id}" data-field="lastSpotlight"
-                 value="${esc(spot)}">
-          <button type="button" class="lazy-gm-today"
-                  data-actor-id="${actor.id}" data-field="lastSpotlight">
-            ${labelToday}
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-/**
  * Ensure a JournalEntry folder exists (create if missing).
  */
 async function getOrCreateFolder(name) {
@@ -90,6 +44,7 @@ function getNextSessionNumber(folder, prefix) {
 
 /**
  * Create a new prep journal with the configured pages.
+ * (No actor placeholders; just the step headers + descriptions)
  */
 export async function createPrepJournal() {
   const separatePages = game.settings.get(MODULE_ID, SETTINGS.separatePages);
@@ -99,13 +54,11 @@ export async function createPrepJournal() {
   const folder        = await getOrCreateFolder(folderName);
   const sessionNumber = getNextSessionNumber(folder, journalPrefix);
   const dateStamp     = new Date().toISOString().split("T")[0];
-  const journalName   = `${journalPrefix} ${sessionNumber} (${dateStamp})`;
+  const journalName   = `${journalPrefix} ${sessionNumber}: ${dateStamp}`;
 
-  // Build pages with a placeholder for actors on step 0
   const pages = separatePages
     ? STEP_DEFS.map((step, idx) => {
-        const content = `<p>${esc(step.description)}</p>` +
-          (idx === 0 ? `<div class="lazy-gm-actors"></div>` : "");
+        const content = `<p>${esc(step.description)}</p>`;
         return {
           name: step.numbered ? `${idx + 1}. ${esc(step.title)}` : esc(step.title),
           type: "text",
@@ -122,8 +75,7 @@ export async function createPrepJournal() {
             const header = `<p><strong>${
               step.numbered ? `${idx + 1}. ` : ""
             }${esc(step.title)}</strong></p>`;
-            const body   = `<p>${esc(step.description)}</p>` +
-              (idx === 0 ? `<div class="lazy-gm-actors"></div>` : "");
+            const body   = `<p>${esc(step.description)}</p>`;
             return header + body + "<hr>";
           }).join("")
         }
