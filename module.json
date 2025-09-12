@@ -15,7 +15,7 @@
   "packs": [],
   "socket": false,
   "manifest": "https://raw.githubusercontent.com/ericpetersensa/lazy-gm-prep/main/module.json",
-  "download": "https://github.com/ericpetersensa/lazy-gm-prep/releases/latest/download/module.json",
+  "download": "https://github.com/ericpetersensa/lazy-gm-prep/archive/refs/heads/main.zip",
   "bugs": { "url": "https://github.com/ericpetersensa/lazy-gm-prep/issues" },
   "license": "MIT"
 }
