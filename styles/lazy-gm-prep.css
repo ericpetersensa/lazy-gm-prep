@@ -20,33 +20,14 @@
     font-weight: 500;
   }
 
-  /* Inline header button for Journal Directory */
+  /* Minimal tweaks for our inline button */
   .directory .directory-header .lazy-gm-prep-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    height: var(--header-control-size, 28px); /* matches v13 header controls */
-    padding: 0 8px;
-    white-space: nowrap;       /* keep text on one line */
-    flex: 0 0 auto;            /* prevent stretching */
-    line-height: 1;
-    border: 1px solid var(--color-border-light-primary);
-    border-radius: 4px;
-    background-color: var(--color-button-secondary);
-    color: var(--color-text-primary);
-    font-size: var(--font-size-14);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+    white-space: nowrap;
   }
 
-  /* Hover/focus states for better UX */
-  .directory .directory-header .lazy-gm-prep-btn:hover,
-  .directory .directory-header .lazy-gm-prep-btn:focus {
-    background-color: var(--color-button-hover);
-    outline: none;
-  }
-
-  /* Icon inside the button */
   .directory .directory-header .lazy-gm-prep-btn i {
     font-size: 0.9em;
   }
