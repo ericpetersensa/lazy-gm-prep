@@ -19,6 +19,12 @@
   "lazy-gm-prep.settings.sheet.hint": "Choose which sheet to use when the module opens entries in this category.",
   "lazy-gm-prep.settings.sheet.changed": "Lazy GM Prep sheet preference updated.",
 
+  "lazy-gm-prep.settings.actorType.actor.label": "Actor Type for Actor (PC-like)",
+  "lazy-gm-prep.settings.actorType.npc.label": "Actor Type for NPC",
+  "lazy-gm-prep.settings.actorType.monster.label": "Actor Type for Monster",
+  "lazy-gm-prep.settings.actorType.hint": "Select the actor type this category should use. Choose Auto to let the module pick a sensible default per system.",
+  "lazy-gm-prep.settings.auto": "Auto (Recommended)",
+
   "lazy-gm-prep.header.button": "Create GM Prep",
   "lazy-gm-prep.header.buttonTooltip": "Create a new GM prep journal for your next session",
 
