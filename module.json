@@ -2,8 +2,8 @@
   "id": "lazy-gm-prep",
   "title": "Lazy GM Prep",
   "description": "Generate session prep journals based on Return of the Lazy Dungeon Master.",
-  "version": "0.0.30",
-  "compatibility": { "minimum": "13.0.0", "verified": "13.348" },
+  "version": "0.0.31",
+  "compatibility": { "minimum": "13.0.0", "verified": "13.347" },
   "authors": [
     { "name": "Eric Petersen", "email": "ericpetersensa@gmail.com" }
   ],
@@ -15,11 +15,7 @@
   "packs": [],
   "socket": false,
   "manifest": "https://raw.githubusercontent.com/ericpetersensa/lazy-gm-prep/main/module.json",
-  "download": "https://github.com/ericpetersensa/lazy-gm-prep/archive/refs/heads/main.zip",
+  "download": "https://github.com/ericpetersensa/lazy-gm-prep/releases/latest/download/module.json",
   "bugs": { "url": "https://github.com/ericpetersensa/lazy-gm-prep/issues" },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ericpetersensa/lazy-gm-prep.git"
-  },
   "license": "MIT"
 }
