@@ -61,7 +61,7 @@ export async function createPrepJournal() {
   const folder        = await getOrCreateFolder(folderName);
   const sessionNumber = getNextSessionNumber(folder, journalPrefix);
   const dateStamp     = localISODate();
-  const journalName   = `${journalPrefix} ${sessionNumber}: ${dateStamp}`;
+  const journalName   = `${journalPrefix} ${sessionNumber}   (${dateStamp})`;
 
   const pages = separatePages
     ? STEP_DEFS.map((step, idx) => {
