@@ -69,7 +69,7 @@ function ensureInlineHeaderButton(dirEl) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.dataset.action = "lazy-gm-prep-inline";
-  btn.classList.add("lazy-gm-prep-btn");        // styled in your CSS
+  btn.classList.add("lazy-gm-prep-btn", "header-control", "create-entry");
   
   // FA6 icon + localized label
   btn.innerHTML = `<i class="fa-solid fa-clipboard-list"></i> ${game.i18n.localize("lazy-gm-prep.header.button")}`;
