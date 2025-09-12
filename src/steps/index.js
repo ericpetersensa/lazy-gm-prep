@@ -2,61 +2,61 @@
 
 /**
  * Registry of the Lazy DM prep steps.
- * Each step has a unique key for future targeting.
+ * Each step references i18n keys for title and description.
  */
 export const STEP_DEFS = [
   {
     key: "review-characters",
-    title: "Review the Characters",
-    numbered: true,
-    description: "Look over PCs, notes, and recent changes."
+    titleKey: "lazy-gm-prep.steps.review-characters.title",
+    descriptionKey: "lazy-gm-prep.steps.review-characters.description",
+    numbered: true
   },
   {
     key: "strong-start",
-    title: "Create a Strong Start",
-    numbered: true,
-    description: "Plan an exciting opening scene."
+    titleKey: "lazy-gm-prep.steps.strong-start.title",
+    descriptionKey: "lazy-gm-prep.steps.strong-start.description",
+    numbered: true
   },
   {
     key: "outline-scenes",
-    title: "Outline Potential Scenes",
-    numbered: true,
-    description: "List possible scenes that could occur."
+    titleKey: "lazy-gm-prep.steps.outline-scenes.title",
+    descriptionKey: "lazy-gm-prep.steps.outline-scenes.description",
+    numbered: true
   },
   {
     key: "secrets-clues",
-    title: "Define Secrets & Clues", // ← use literal ampersand
-    numbered: true,
-    description: "Prep hidden information for the players to discover."
+    titleKey: "lazy-gm-prep.steps.secrets-clues.title",
+    descriptionKey: "lazy-gm-prep.steps.secrets-clues.description",
+    numbered: true
   },
   {
     key: "fantastic-locations",
-    title: "Develop Fantastic Locations",
-    numbered: true,
-    description: "Design memorable locations for the session."
+    titleKey: "lazy-gm-prep.steps.fantastic-locations.title",
+    descriptionKey: "lazy-gm-prep.steps.fantastic-locations.description",
+    numbered: true
   },
   {
     key: "important-npcs",
-    title: "Outline Important NPCs",
-    numbered: true,
-    description: "List key NPCs with goals and motivations."
+    titleKey: "lazy-gm-prep.steps.important-npcs.title",
+    descriptionKey: "lazy-gm-prep.steps.important-npcs.description",
+    numbered: true
   },
   {
     key: "choose-monsters",
-    title: "Choose Relevant Monsters",
-    numbered: true,
-    description: "Pick monsters that fit the session’s themes."
+    titleKey: "lazy-gm-prep.steps.choose-monsters.title",
+    descriptionKey: "lazy-gm-prep.steps.choose-monsters.description",
+    numbered: true
   },
   {
     key: "magic-item-rewards",
-    title: "Select Magic Item Rewards",
-    numbered: true,
-    description: "Add magic items or loot to be found."
+    titleKey: "lazy-gm-prep.steps.magic-item-rewards.title",
+    descriptionKey: "lazy-gm-prep.steps.magic-item-rewards.description",
+    numbered: true
   },
   {
     key: "other-notes",
-    title: "Other Notes",
-    numbered: false,
-    description: "Miscellaneous notes, reminders, or ideas."
+    titleKey: "lazy-gm-prep.steps.other-notes.title",
+    descriptionKey: "lazy-gm-prep.steps.other-notes.description",
+    numbered: false
   }
 ];
