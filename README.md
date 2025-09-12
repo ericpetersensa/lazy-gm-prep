@@ -16,7 +16,7 @@
 ## Installation
 
 1. **Download:**  
-   [Latest Release ZIP](https://github.com/ericpetersensa/lazy-gm-pre0.0.29.zip
+   [Latest Release ZIP](https://github.com/ericpetersensa/lazy-gm-prep/archive/refs/heads/main.zip
 
 2. **Install in Foundry VTT:**  
    - Go to **Add-on Modules** > **Install Module**.
