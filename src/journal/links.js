@@ -11,9 +11,11 @@ Hooks.on("renderJournalPageSheet", (app, html) => {
     const api = game.modules.get("lazy-gm-prep")?.api;
     if (!api) return actor.sheet?.render(true);
 
-    if (category === "actor")   return api.openActor(actor);
-    if (category === "npc")     return api.openNPC(actor);
-    if (category === "monster") return api.openMonster(actor);
-    return actor.sheet?.render(true);
+    switch (category) {
+      case "actor":   return api.openActor(actor);
+      case "npc":     return api.openNPC(actor);
+      case "monster": return api.openMonster(actor);
+      default:        return actor.sheet?.render(true);
+    }
   });
 });
