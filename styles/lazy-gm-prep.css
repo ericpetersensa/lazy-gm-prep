@@ -7,15 +7,42 @@
     gap: 0.35rem;
     white-space: nowrap;
   }
-
   .directory .directory-header .lazy-gm-prep-btn i {
     font-size: 0.9em;
   }
-}
-/* ---- Lazy GM Prep: Journal List Styling (append to your existing file) ---- */
-@layer modules {
+
+  /* ---- Lazy GM Prep: Journal List & Header Styling ---- */
+  .lgmp-header {
+    margin: 0.25rem 0 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: space-between;
+  }
+
+  .lgmp-refresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.25));
+    background: var(--color-bg-subtle, rgba(0,0,0,0.06));
+    color: var(--color-text);
+    cursor: pointer;
+    font: inherit;
+  }
+  .lgmp-refresh:hover {
+    background: var(--color-bg, rgba(0,0,0,0.12));
+  }
+
   .lgmp-section {
     margin-block: 0.75rem 1rem;
+  }
+
+  .lgmp-step-desc {
+    margin: 0.25rem 0 0.5rem;
+    opacity: 0.95;
   }
 
   .lgmp-actor-list {
@@ -28,7 +55,7 @@
 
   .lgmp-actor-item {
     display: grid;
-    grid-template-columns: 28px 1fr auto;
+    grid-template-columns: 28px 1fr;
     align-items: center;
     gap: 0.5rem;
     padding: 0.35rem 0.45rem;
@@ -43,11 +70,11 @@
     object-fit: cover;
   }
 
-  .lgmp-actor-item .lgmp-name {
+  .lgmp-name {
     font-weight: 600;
   }
 
-  .lgmp-actor-item .lgmp-type {
+  .lgmp-type {
     opacity: 0.7;
     margin-left: 0.4rem;
   }
@@ -58,12 +85,17 @@
     margin-left: 0.5rem;
   }
 
-  /* Optional hover affordance for the preferred-sheet link */
   .lgmp-actor-item a[data-lazy-open] {
     text-decoration: none;
     border-bottom: 1px dashed transparent;
   }
   .lgmp-actor-item a[data-lazy-open]:hover {
     border-bottom-color: currentColor;
+  }
+
+  .lgmp-empty {
+    opacity: 0.7;
+    font-style: italic;
+    padding-left: 2.5rem;
   }
 }
