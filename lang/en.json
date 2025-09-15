@@ -11,19 +11,20 @@
   "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g., \"Session\").",
 
   "lazy-gm-prep.settings.pcActorTypes.name": "Actor Types for PCs",
-  "lazy-gm-prep.settings.pcActorTypes.hint": "Comma-separated list of actor types to treat as player characters (PCs). Example: \"character\" (DnD5e), \"pc\" (PF2e), or \"character, pc\" for cross-system worlds.",
+  "lazy-gm-prep.settings.pcActorTypes.hint": "Comma-separated list of actor types to treat as player characters (PCs). Example: \"character\" (DnD5e), \"player\" (Shadowdark), or \"character, player\" for cross-system worlds.",
+
+  "lazy-gm-prep.settings.import.actor.label": "Include PCs on \"Review the Characters\" page",
+  "lazy-gm-prep.settings.import.actor.hint": "When enabled, pull actors of the selected PC-like type into the 'Review the Characters' journal page.",
+  "lazy-gm-prep.settings.import.npc.label": "Include NPCs on \"Outline Important NPCs\" page",
+  "lazy-gm-prep.settings.import.npc.hint": "When enabled, pull actors of the NPC type into the 'Outline Important NPCs' journal page.",
+  "lazy-gm-prep.settings.import.monster.label": "Include Monsters on \"Choose Relevant Monsters\" page",
+  "lazy-gm-prep.settings.import.monster.hint": "When enabled, pull actors of the Monster type into the 'Choose Relevant Monsters' journal page.",
 
   "lazy-gm-prep.settings.actor.label": "Preferred Sheet: Actor (PC-like)",
   "lazy-gm-prep.settings.npc.label": "Preferred Sheet: NPC",
   "lazy-gm-prep.settings.monster.label": "Preferred Sheet: Monster",
   "lazy-gm-prep.settings.sheet.hint": "Choose which sheet to use when the module opens entries in this category.",
   "lazy-gm-prep.settings.sheet.changed": "Lazy GM Prep sheet preference updated.",
-
-  "lazy-gm-prep.settings.actorType.actor.label": "Actor Type for Actor (PC-like)",
-  "lazy-gm-prep.settings.actorType.npc.label": "Actor Type for NPC",
-  "lazy-gm-prep.settings.actorType.monster.label": "Actor Type for Monster",
-  "lazy-gm-prep.settings.actorType.hint": "Select the actor type this category should use. Choose Auto to let the module pick a sensible default per system.",
-  "lazy-gm-prep.settings.auto": "Auto (Recommended)",
 
   "lazy-gm-prep.header.button": "Create GM Prep",
   "lazy-gm-prep.header.buttonTooltip": "Create a new GM prep journal for your next session",
@@ -35,28 +36,20 @@
 
   "lazy-gm-prep.steps.review-characters.title": "Review the Characters",
   "lazy-gm-prep.steps.review-characters.description": "Look over PCs, notes, and recent changes.",
-
   "lazy-gm-prep.steps.strong-start.title": "Create a Strong Start",
   "lazy-gm-prep.steps.strong-start.description": "Plan an exciting opening scene.",
-
   "lazy-gm-prep.steps.outline-scenes.title": "Outline Potential Scenes",
   "lazy-gm-prep.steps.outline-scenes.description": "List possible scenes that could occur.",
-
   "lazy-gm-prep.steps.secrets-clues.title": "Define Secrets & Clues",
   "lazy-gm-prep.steps.secrets-clues.description": "Prep hidden information for the players to discover.",
-
   "lazy-gm-prep.steps.fantastic-locations.title": "Develop Fantastic Locations",
   "lazy-gm-prep.steps.fantastic-locations.description": "Design memorable locations for the session.",
-
   "lazy-gm-prep.steps.important-npcs.title": "Outline Important NPCs",
   "lazy-gm-prep.steps.important-npcs.description": "List key NPCs with goals and motivations.",
-
   "lazy-gm-prep.steps.choose-monsters.title": "Choose Relevant Monsters",
   "lazy-gm-prep.steps.choose-monsters.description": "Pick monsters that fit the session’s themes.",
-
   "lazy-gm-prep.steps.magic-item-rewards.title": "Select Magic Item Rewards",
   "lazy-gm-prep.steps.magic-item-rewards.description": "Add magic items or loot to be found.",
-
   "lazy-gm-prep.steps.other-notes.title": "Other Notes",
   "lazy-gm-prep.steps.other-notes.description": "Miscellaneous notes, reminders, or ideas."
 }
