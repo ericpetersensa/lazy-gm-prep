@@ -63,7 +63,7 @@ export async function createPrepJournal() {
   const folderName   = getSetting("folderName", "GM Prep");
   const separate     = !!getSetting("separatePages", true);
   const namePrefix   = getSetting("journalPrefix", "Session");
-  const seq = nextSequenceNumber(); // naive example; replace if you have your own
+  const seq = nextSequenceNumber(); // simple incrementer
   const entryName = `${namePrefix} ${seq}: ${new Date().toLocaleDateString()}`;
 
   const folderId = await ensureFolder(folderName);
@@ -111,7 +111,6 @@ export async function createPrepJournal() {
 }
 
 function nextSequenceNumber() {
-  // Very simple increment: looks at existing journals with the prefix and returns N+1
   const prefix = getSetting("journalPrefix", "Session");
   const existing = game.journal?.filter(j => j.name?.startsWith(prefix)) ?? [];
   const nums = existing
