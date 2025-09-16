@@ -4,18 +4,18 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
 
 /**
  * Create a new GM Prep journal for the next session.
- * - If a page's "Copy previous" toggle is enabled and a matching page exists in the previous session,
- *   copy that page's HTML; otherwise create a blank scaffold with numbered header + short description.
- * - Works best when the previous session used separate pages (no fragile HTML parsing).
+ * - Separate pages: disables "Display Page Title" so only the page header shows the title.
+ * - Combined page: keeps H2 headers for each section.
+ * - Scrubs legacy headers/descriptions from copied content.
  */
 export async function createPrepJournal() {
-  const separate = !!getSetting(SETTINGS.separatePages, true);
+  const separate   = !!getSetting(SETTINGS.separatePages, true);
   const folderName = getSetting(SETTINGS.folderName, "GM Prep");
-  const prefix = getSetting(SETTINGS.journalPrefix, "Session");
+  const prefix     = getSetting(SETTINGS.journalPrefix, "Session");
   const includeDate = !!getSetting("includeDateInName", true);
 
   const folder = await ensureFolder(folderName);
-  const seq = nextSequenceNumber(prefix);
+  const seq    = nextSequenceNumber(prefix);
   const entryName = includeDate
     ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
     : `${prefix} ${seq}`;
@@ -24,30 +24,53 @@ export async function createPrepJournal() {
   const prev = findPreviousSession(prefix);
 
   if (separate) {
+    // --- Separate pages: no in-body H2; description + notes if new; scrub copied content.
     const pages = [];
     for (const def of PAGE_ORDER) {
-      const copyOn = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
+      const copyOn      = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
       const prevContent = copyOn ? getPreviousPageContent(prev, def) : null;
-      const content = prevContent ?? composeSection(def);
+
+      let content;
+      if (prevContent) {
+        // Remove legacy headers so we don't show a duplicate "1. Review the Characters" inside the page body.
+        content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
+        if (!content.trim()) content = sectionDescription(def) + notesPlaceholder();
+      } else {
+        content = sectionDescription(def) + notesPlaceholder();
+      }
+
       pages.push({
         name: game.i18n.localize(def.titleKey),
         type: "text",
+        displayTitle: false, // <--- disables the in-body title!
         text: { format: 1, content }
       });
     }
+
     const entry = await JournalEntry.create({ name: entryName, folder, pages });
     ui.notifications?.info(game.i18n.format("lazy-gm-prep.notifications.created", { name: entry.name }));
     return entry;
   }
 
-  // Combined single-page mode: stitch all sections; copy where a prior separate page exists.
-  const combined = PAGE_ORDER
-    .map(def => {
-      const copyOn = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
-      const prevContent = copyOn ? getPreviousPageContent(prev, def) : null;
-      return prevContent ?? composeSection(def);
-    })
-    .join("\n<hr/>\n");
+  // --- Combined single-page mode: keep H2 headers for each section.
+  const chunks = [];
+  for (const def of PAGE_ORDER) {
+    const copyOn      = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
+    const prevContent = copyOn ? getPreviousPageContent(prev, def) : null;
+
+    // Always render a clean header + description for combined mode.
+    const headerHtml = sectionHeader(def) + sectionDescription(def);
+
+    let bodyHtml;
+    if (prevContent) {
+      bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
+      if (!bodyHtml.trim()) bodyHtml = notesPlaceholder();
+    } else {
+      bodyHtml = notesPlaceholder();
+    }
+
+    chunks.push(`${headerHtml}${bodyHtml}`);
+  }
 
   const entry = await JournalEntry.create({
     name: entryName,
@@ -55,7 +78,7 @@ export async function createPrepJournal() {
     pages: [{
       name: game.i18n.localize("lazy-gm-prep.module.name"),
       type: "text",
-      text: { format: 1, content: combined }
+      text: { format: 1, content: chunks.join("\n<hr/>\n") }
     }]
   });
 
@@ -63,27 +86,30 @@ export async function createPrepJournal() {
   return entry;
 }
 
-/* ------------------------------ helpers ------------------------------ */
+/* ------------------------------ section builders ------------------------------ */
 
-function composeSection(def) {
+function sectionHeader(def) {
   const title = game.i18n.localize(def.titleKey);
-  const desc  = game.i18n.localize(def.descKey);
-  const hint  = game.i18n.localize("lazy-gm-prep.ui.add-notes-here");
-
-  return `
-  <section class="lgmp-section lgmp-${def.key}">
-    <h2 style="margin:0">${escapeHtml(title)}</h2>
-    <p class="lgmp-step-desc">${escapeHtml(desc)}</p>
-    <p><em>${escapeHtml(hint)}</em></p>
-  </section>
-  `;
+  return `<h2 style="margin:0">${escapeHtml(title)}</h2>\n`;
 }
+
+function sectionDescription(def) {
+  const desc  = game.i18n.localize(def.descKey);
+  return `<p class="lgmp-step-desc">${escapeHtml(desc)}</p>\n`;
+}
+
+function notesPlaceholder() {
+  const hint  = game.i18n.localize("lazy-gm-prep.ui.add-notes-here") || "Add your notes here.";
+  return `<p><em>${escapeHtml(hint)}</em></p>\n`;
+}
+
+/* ------------------------------ helpers ------------------------------ */
 
 async function ensureFolder(name) {
   if (!name) return null;
   const existing = game.folders?.find(f => f.type === "JournalEntry" && f.name === name);
   if (existing) return existing.id;
-  // Set color to #6d712d when creating the folder
+  // Ensure the folder is created with the requested color
   const f = await Folder.create({ name, type: "JournalEntry", color: "#6d712d" });
   return f?.id ?? null;
 }
@@ -111,8 +137,7 @@ function findPreviousSession(prefix) {
 }
 
 /**
- * Try to fetch the previous session's page content for the same numbered step.
- * We match by page name equal to the localized title (e.g., "1. Review the Characters").
+ * Fetch previous session's page by localized title.
  */
 function getPreviousPageContent(prevJournal, def) {
   if (!prevJournal) return null;
@@ -126,8 +151,45 @@ function getPreviousPageContent(prevJournal, def) {
   return null;
 }
 
+/**
+ * Remove legacy in-body headers so we don't duplicate the page name, and (optionally) the
+ * old auto-inserted description. Also drops the old .lgmp-header wrapper when found.
+ */
+function scrubContent(rawHtml, def, { stripTitle = true, stripLegacyHeader = true, stripDesc = false } = {}) {
+  let html = String(rawHtml ?? "");
+
+  // Remove legacy wrapper like: <div class="lgmp-header"> ... </div>
+  if (stripLegacyHeader) {
+    html = html.replace(/<div\s+class=["']lgmp-header["'][\s\S]*?<\/div>/i, "");
+  }
+
+  // Remove the first H1/H2 matching the section title (with optional leading "1. " etc.)
+  if (stripTitle) {
+    const titleText = game.i18n.localize(def.titleKey);
+    const titlePattern = escapeRegExp(titleText);
+    const re = new RegExp(`<h[12][^>]*>\\s*(?:\\d+\\.\\s*)?${titlePattern}\\s*<\\/h[12]>`, "i");
+    html = html.replace(re, "");
+  }
+
+  // Optionally remove the auto description paragraph (either by class or exact text match).
+  if (stripDesc) {
+    const descText = game.i18n.localize(def.descKey);
+    // By class (our recent markup)
+    html = html.replace(/<p[^>]*class=["']lgmp-step-desc["'][^>]*>[\s\S]*?<\/p>/i, "");
+    // As plain paragraph (older markup)
+    const reDesc = new RegExp(`<p[^>]*>\\s*${escapeRegExp(descText)}\\s*<\\/p>`, "i");
+    html = html.replace(reDesc, "");
+  }
+
+  return html.trim();
+}
+
 function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, m => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[m]));
+}
+
+function escapeRegExp(s) {
+  return String(s ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
