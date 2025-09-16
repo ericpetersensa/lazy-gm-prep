@@ -6,7 +6,7 @@ import { createPrepJournal } from "./journal/generator.js";
 /* =========================================
    Toggle debug tracing here if needed
 ========================================= */
-const DEBUG = false;
+const DEBUG = true;
 const log = (...a) => DEBUG && console.debug(`${MODULE_ID} |`, ...a);
 
 /* ========================================================================== */
