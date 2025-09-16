@@ -18,6 +18,9 @@
   "lazy-gm-prep.settings.journalPrefix.name": "Journal Name Prefix",
   "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g., \"Session\").",
 
+  "lazy-gm-prep.settings.includeDateInName.name": "Include today’s date on the Journal name",
+  "lazy-gm-prep.settings.includeDateInName.hint": "If enabled, the current date will be appended to the journal name (e.g., 'Session 3: 9/16/2025'). If disabled, only the prefix and number are used.",
+
   "lazy-gm-prep.settings.copy.review-characters.name": "Copy previous: 1. Review the Characters",
   "lazy-gm-prep.settings.copy.review-characters.hint": "If enabled, copy this page’s content from the previous session (when available).",
   "lazy-gm-prep.settings.copy.strong-start.name": "Copy previous: 2. Create a Strong Start",
@@ -39,7 +42,6 @@
 
   "lazy-gm-prep.steps.review-characters.title": "1. Review the Characters",
   "lazy-gm-prep.steps.review-characters.description": "Refresh names, backgrounds, motivations, and player interests so the rest of your prep wraps around the PCs. Keep it short—this primes your brain for everything else.",
-
   "lazy-gm-prep.steps.strong-start.title": "2. Create a Strong Start",
   "lazy-gm-prep.steps.strong-start.description": "Define a vivid opening that drops the party near the action—an event, hook, or immediate scene that propels the session forward. When in doubt, start with conflict.",
 
