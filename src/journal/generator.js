@@ -4,10 +4,12 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
 
 /**
  * Create a new GM Prep journal for the next session.
- * - Separate pages: do NOT print an in-page H2 title (avoid duplicate with page name).
- *   Fresh pages get description + notes + a 10-line checklist. Copied pages are scrubbed for legacy headers.
- * - Combined page: include an H2 per section. Fresh sections also include a 10-line checklist.
- * - When copying from a previous session, scrub legacy headers/descriptions to prevent duplicates.
+ * - Separate pages: no in-body H2 (avoid duplicate with page name).
+ *   Fresh "secrets-clues" => description + notes + a 10-line Unicode checklist; others => description + notes only.
+ *   Copy "secrets-clues" => keep your other text, replace old checklist with a new one formed from unchecked items (topped up to 10).
+ *   Copy non-secrets => scrub legacy headers/desc; keep content.
+ * - Combined page: include H2 per section. Same secrets logic as above for checklist handling.
+ * - When copying, convert any legacy <input type="checkbox"> or [ ] / [x] into Unicode ☐ / ☑, then process.
  */
 export async function createPrepJournal() {
   const separate     = !!getSetting(SETTINGS.separatePages, true);
@@ -20,25 +22,71 @@ export async function createPrepJournal() {
   const entryName    = includeDate ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
                                    : `${prefix} ${seq}`;
 
-  // Find previous session by the highest numeric suffix after the prefix
-  const prev = findPreviousSession(prefix);
+  const prev = findPreviousSession(prefix); // previous session by highest sequence number
 
   if (separate) {
-    // --- Separate pages: no in-body H2; description + notes + checklist if new; scrub copied content.
     const pages = [];
     for (const def of PAGE_ORDER) {
       const copyOn      = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
       const prevContent = copyOn ? getPreviousPageContent(prev, def) : null;
 
+      // --- For Secrets & Clues, we handle checklist replacement.
+      if (def.key === "secrets-clues") {
+        let content;
+
+        if (prevContent) {
+          // Scrub legacy headers/desc; normalize to Unicode boxes; then extract & rebuild checklist.
+          const normalized = normalizeMarkers(
+            scrubContent(prevContent, def, {
+              stripTitle: true,
+              stripLegacyHeader: true,
+              stripDesc: false
+            })
+          );
+
+          const { bodyWithoutChecklist, items } = extractModuleChecklist(normalized);
+
+          // Keep only UNCHECKED items and top up to 10 with blanks
+          const uncheckedTexts = items.filter(i => !i.checked).map(i => i.text.trim());
+          const toRender = topUpToTen(uncheckedTexts, /*label*/ "Clue");
+
+          // Separate pages: no H2; include description only on fresh content; on copy keep body + new UL
+          const bodyCore = bodyWithoutChecklist?.trim()
+            ? `${bodyWithoutChecklist.trim()}\n`
+            : "";
+          content = `${bodyCore}${renderChecklist(toRender)}`;
+
+          // If body had nothing (e.g., purely a checklist last time), ensure a description + notes for usability.
+          if (!bodyCore) {
+            content = sectionDescription(def) + notesPlaceholder() + content;
+          }
+        } else {
+          // Fresh page: description + notes + 10 blank ☐ Clue lines
+          content = sectionDescription(def) + notesPlaceholder() + renderChecklist(topUpToTen([], "Clue"));
+        }
+
+        pages.push({
+          name: game.i18n.localize(def.titleKey),
+          type: "text",
+          text: { format: 1, content }
+        });
+        continue;
+      }
+
+      // --- Non Secrets pages
       let content;
       if (prevContent) {
-        // Remove legacy headers so we don't show a duplicate title inside the page body.
-        content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
-        // If scrubbing empties the page, fall back to a fresh scaffold (desc + notes + checklist).
-        if (!content.trim()) content = sectionDescription(def) + notesPlaceholder() + checklistHtml(10);
+        // Scrub duplicate headers; keep the rest intact
+        content = scrubContent(prevContent, def, {
+          stripTitle: true,
+          stripLegacyHeader: true,
+          stripDesc: false
+        });
+        if (!content.trim()) {
+          content = sectionDescription(def) + notesPlaceholder();
+        }
       } else {
-        // Fresh page: description + notes + 10-line checklist (no H2).
-        content = sectionDescription(def) + notesPlaceholder() + checklistHtml(10);
+        content = sectionDescription(def) + notesPlaceholder();
       }
 
       pages.push({
@@ -53,25 +101,47 @@ export async function createPrepJournal() {
     return entry;
   }
 
-  // --- Combined single-page mode: keep H2 headers for each section.
+  // --- Combined single page mode: keep H2 headers per section
   const chunks = [];
   for (const def of PAGE_ORDER) {
     const copyOn      = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
     const prevContent = copyOn ? getPreviousPageContent(prev, def) : null;
 
-    // Always render a clean header + description for combined mode.
     const headerHtml = sectionHeader(def) + sectionDescription(def);
 
-    let bodyHtml;
-    if (prevContent) {
-      // Strip any legacy header and old auto-inserted description; we are adding our own above.
-      bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
-      if (!bodyHtml.trim()) bodyHtml = notesPlaceholder(); // no checklist on copy to avoid duplication
+    if (def.key === "secrets-clues") {
+      let bodyHtml;
+      if (prevContent) {
+        const normalized = normalizeMarkers(
+          scrubContent(prevContent, def, {
+            stripTitle: true,
+            stripLegacyHeader: true,
+            stripDesc: true
+          })
+        );
+        const { bodyWithoutChecklist, items } = extractModuleChecklist(normalized);
+        const uncheckedTexts = items.filter(i => !i.checked).map(i => i.text.trim());
+        const toRender = topUpToTen(uncheckedTexts, "Clue");
+        bodyHtml = `${(bodyWithoutChecklist?.trim() ?? "")}${renderChecklist(toRender)}`;
+        if (!bodyWithoutChecklist?.trim()) bodyHtml = notesPlaceholder() + bodyHtml;
+      } else {
+        bodyHtml = notesPlaceholder() + renderChecklist(topUpToTen([], "Clue"));
+      }
+      chunks.push(`${headerHtml}${bodyHtml}`);
     } else {
-      bodyHtml = notesPlaceholder() + checklistHtml(10);
+      let bodyHtml;
+      if (prevContent) {
+        bodyHtml = scrubContent(prevContent, def, {
+          stripTitle: true,
+          stripLegacyHeader: true,
+          stripDesc: true
+        });
+        if (!bodyHtml.trim()) bodyHtml = notesPlaceholder();
+      } else {
+        bodyHtml = notesPlaceholder();
+      }
+      chunks.push(`${headerHtml}${bodyHtml}`);
     }
-
-    chunks.push(`${headerHtml}${bodyHtml}`);
   }
 
   const entry = await JournalEntry.create({
@@ -105,32 +175,110 @@ function notesPlaceholder() {
   return `<p><em>${escapeHtml(hint)}</em></p>\n`;
 }
 
-/**
- * 10-line checklist (default). Each item has a checkbox and editable label text.
- * You can change the count or placeholder labels as you like.
- */
-function checklistHtml(count = 10) {
-  let items = "";
-  for (let i = 1; i <= count; i++) {
-    items += `<li><label><input type="checkbox"> <span>Item ${i}</span></label></li>\n`;
-  }
+/* ------------------------------ checklist utilities ------------------------------ */
+
+/** Render a checklist UL with ☐ for each text line. */
+function renderChecklist(texts) {
+  const items = texts.map(t => `<li>☐ ${escapeHtml(t)}</li>`).join("\n");
   return `
 <section class="lgmp-section lgmp-checklist">
   <ul class="lgmp-checklist">
-    ${items.trim()}
+${items}
   </ul>
 </section>
 `;
 }
 
-/* ------------------------------ helpers ------------------------------ */
+/** Pad list of texts to exactly 10 by adding "Label N" entries. */
+function topUpToTen(texts, label = "Item") {
+  const out = [...texts];
+  for (let i = out.length + 1; i <= 10; i++) out.push(`${label} ${i}`);
+  return out.slice(0, 10);
+}
+
+/**
+ * Extract our module checklist (<ul class="lgmp-checklist">) and return:
+ * { bodyWithoutChecklist, items: [{text, checked}] }
+ * - Supports markers ☐ / ☑ and legacy [ ] / [x].
+ */
+function extractModuleChecklist(html) {
+  const UL_RE = /<ul\s+class=["']lgmp-checklist["'][\s\S]*?<\/ul>/i;
+  const match = html.match(UL_RE);
+  if (!match) return { bodyWithoutChecklist: html, items: [] };
+
+  const ulHtml = match[0];
+  const bodyWithoutChecklist = html.replace(UL_RE, "");
+
+  // Extract <li> text
+  const LI_RE = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+  const items = [];
+  let m;
+  while ((m = LI_RE.exec(ulHtml))) {
+    const raw = stripTags(m[1]).trim();
+    const { marker, text } = splitMarker(raw);
+    if (!text) continue;
+    const checked = marker === "☑";
+    items.push({ text, checked });
+  }
+  return { bodyWithoutChecklist, items };
+}
+
+/**
+ * Convert legacy markers or inputs to Unicode ☐ / ☑.
+ * - <input type="checkbox" checked> -> ☑
+ * - <input type="checkbox"> -> ☐
+ * - [x]/[X] -> ☑ ; [ ] -> ☐
+ */
+function normalizeMarkers(html) {
+  let s = String(html ?? "");
+  // inputs -> markers
+  s = s.replace(/<input[^>]*type=["']checkbox["'][^>]*checked[^>]*>/gi, "☑");
+  s = s.replace(/<input[^>]*type=["']checkbox["'][^>]*>/gi, "☐");
+  // bracket -> markers
+  s = s.replace(/\[\s*\]/g, "☐");
+  s = s.replace(/\[\s*[xX]\s*\]/g, "☑");
+  // unwrap labels
+  s = s.replace(/<label[^>]*>/gi, "").replace(/<\/label>/gi, "");
+  return s;
+}
+
+/**
+ * Remove legacy in-body headers and (optionally) the prior auto description.
+ */
+function scrubContent(rawHtml, def, {
+  stripTitle = true,
+  stripLegacyHeader = true,
+  stripDesc = false
+} = {}) {
+  let html = String(rawHtml ?? "");
+
+  // Remove <div class="lgmp-header">…</div>
+  if (stripLegacyHeader) {
+    html = html.replace(/<div\s+class=["']lgmp-header["'][\s\S]*?<\/div>/i, "");
+  }
+  // Remove H1/H2 matching the section title (with optional "1. " prefix)
+  if (stripTitle) {
+    const titleText = game.i18n.localize(def.titleKey);
+    const reTitle = new RegExp(`<h[12][^>]*>\\s*(?:\\d+\\.\\s*)?${escapeRegExp(titleText)}\\s*<\\/h[12]>`, "i");
+    html = html.replace(reTitle, "");
+  }
+  // Optionally remove our auto description paragraph
+  if (stripDesc) {
+    html = html.replace(/<p[^>]*class=["']lgmp-step-desc["'][^>]*>[\s\S]*?<\/p>/i, "");
+    const descText = game.i18n.localize(def.descKey);
+    const reDesc = new RegExp(`<p[^>]*>\\s*${escapeRegExp(descText)}\\s*<\\/p>`, "i");
+    html = html.replace(reDesc, "");
+  }
+  return html;
+}
+
+/* ------------------------------ core helpers ------------------------------ */
 
 async function ensureFolder(name) {
   if (!name) return null;
   const existing = game.folders?.find(f => f.type === "JournalEntry" && f.name === name);
   if (existing) return existing.id;
-  // Ensure the folder is created with the requested color
-  const f = await Folder.create({ name, type: "JournalEntry", color: "#6d712d" });
+  const f = await Folder.create({ name, type: "JournalEntry", color: "#6d712d" }); // set folder color
   return f?.id ?? null;
 }
 
@@ -156,9 +304,6 @@ function findPreviousSession(prefix) {
   return list.length ? list[0].journal : null;
 }
 
-/**
- * Fetch previous session's page by localized title.
- */
 function getPreviousPageContent(prevJournal, def) {
   if (!prevJournal) return null;
   try {
@@ -171,45 +316,26 @@ function getPreviousPageContent(prevJournal, def) {
   return null;
 }
 
-/**
- * Remove legacy in-body headers so we don't duplicate the page name, and (optionally) the
- * old auto-inserted description. Also drops the old .lgmp-header wrapper when found.
- */
-function scrubContent(rawHtml, def, { stripTitle = true, stripLegacyHeader = true, stripDesc = false } = {}) {
-  let html = String(rawHtml ?? "");
-
-  // Remove legacy wrapper like: <div class="lgmp-header"> ... </div>
-  if (stripLegacyHeader) {
-    html = html.replace(/<div\s+class=["']lgmp-header["'][\s\S]*?<\/div>/i, "");
-  }
-
-  // Remove the first H1/H2 matching the section title (with optional leading "1. " etc.)
-  if (stripTitle) {
-    const titleText = game.i18n.localize(def.titleKey);
-    const titlePattern = escapeRegExp(titleText);
-    const re = new RegExp(`<h[12][^>]*>\\s*(?:\\d+\\.\\s*)?${titlePattern}\\s*<\\/h[12]>`, "i");
-    html = html.replace(re, "");
-  }
-
-  // Optionally remove the auto description paragraph (either by class or exact text match).
-  if (stripDesc) {
-    const descText = game.i18n.localize(def.descKey);
-    // By class (our recent markup)
-    html = html.replace(/<p[^>]*class=["']lgmp-step-desc["'][^>]*>[\s\S]*?<\/p>/i, "");
-    // As plain paragraph (older markup)
-    const reDesc = new RegExp(`<p[^>]*>\\s*${escapeRegExp(descText)}\\s*<\\/p>`, "i");
-    html = html.replace(reDesc, "");
-  }
-
-  return html.trim();
-}
+/* ------------------------------ string utils ------------------------------ */
 
 function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, m => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[m]));
 }
-
 function escapeRegExp(s) {
   return String(s ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+function stripTags(s) {
+  return String(s ?? "").replace(/<\/?[^>]+>/g, "");
+}
+function splitMarker(line) {
+  const trimmed = String(line ?? "").trim();
+  // Unicode boxes
+  if (/^☑\s*/.test(trimmed)) return { marker: "☑", text: trimmed.replace(/^☑\s*/, "") };
+  if (/^☐\s*/.test(trimmed)) return { marker: "☐", text: trimmed.replace(/^☐\s*/, "") };
+  // Legacy bracket markers (should have been normalized already, but be safe)
+  if (/^\[\s*[xX]\s*\]\s*/.test(trimmed)) return { marker: "☑", text: trimmed.replace(/^\[\s*[xX]\s*\]\s*/, "") };
+  if (/^\[\s*\]\s*/.test(trimmed))       return { marker: "☐", text: trimmed.replace(/^\[\s*\]\s*/, "") };
+  return { marker: "", text: trimmed };
 }
