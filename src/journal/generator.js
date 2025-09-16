@@ -12,10 +12,13 @@ export async function createPrepJournal() {
   const separate = !!getSetting(SETTINGS.separatePages, true);
   const folderName = getSetting(SETTINGS.folderName, "GM Prep");
   const prefix = getSetting(SETTINGS.journalPrefix, "Session");
+  const includeDate = !!getSetting("includeDateInName", true);
 
   const folder = await ensureFolder(folderName);
   const seq = nextSequenceNumber(prefix);
-  const entryName = `${prefix} ${seq}: ${new Date().toLocaleDateString()}`;
+  const entryName = includeDate
+    ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
+    : `${prefix} ${seq}`;
 
   // Find previous session by the highest numeric suffix after the prefix (e.g., "Session 3: ...")
   const prev = findPreviousSession(prefix);
