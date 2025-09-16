@@ -3,9 +3,9 @@ import { registerSettings } from "./settings.js";
 import { MODULE_ID } from "./constants.js";
 import { createPrepJournal } from "./journal/generator.js";
 
-/* ------------------------------------------------------------------ */
-/* Create GM Prep: Header button (AppV2 & v13+)                       */
-/* ------------------------------------------------------------------ */
+/* ========================================================================== */
+/* Create GM Prep: Header button (AppV2 & v13+)                                */
+/* ========================================================================== */
 function ensureInlineHeaderButton(rootEl) {
   if (!game.user.isGM) return;
   const header = rootEl.querySelector(".directory-header");
@@ -34,84 +34,49 @@ Hooks.on("renderJournalDirectory", (_app, html) => {
   if (root) ensureInlineHeaderButton(root);
 });
 
-/* ------------------------------------------------------------------ */
-/* Checklist: View-mode toggle (☐ ⇄ ☑) with immediate persistence     */
-/* ------------------------------------------------------------------ */
+/* ========================================================================== */
+/* Checklist: View-mode toggle (☐ ⇄ ☑) with immediate persistence             */
+/* ========================================================================== */
 /**
- * AppV2 uses Shadow DOM inside page components. We can't rely on querying a
- * specific host (e.g., <journal-page-text>). Instead:
- *  - Attach a CAPTURING click listener to the page sheet container AND to document.
- *  - On click, use event.composedPath() to locate the <li> that belongs to a
- *    <ul class="lgmp-checklist">, regardless of shadow boundaries.
- *  - Toggle the marker and persist by replacing the checklist UL in saved HTML.
+ * AppV2 uses Shadow DOM inside page components. To guarantee clicks are seen,
+ * we bind directly to each <li> inside any <ul.lgmp-checklist>, including those
+ * inside nested shadowRoots, and we also observe the sheet for dynamic changes.
  */
-Hooks.on("renderJournalPageSheet", (app, html) => {
-  const container = html?.[0] ?? html;
-  if (!container) return;
 
-  // Only toggle in view mode: if an editor is present, skip binding here.
+Hooks.on("renderJournalPageSheet", (app, html) => {
+  const sheetRoot = html?.[0] ?? html;
+  if (!sheetRoot) return;
+
+  // Only operate in VIEW mode; skip if an editor is present.
   const isEditMode =
-    container.querySelector(".editor") ||
-    container.querySelector(".tox-tinymce") ||
-    container.querySelector('[contenteditable="true"]');
+    sheetRoot.querySelector(".editor") ||
+    sheetRoot.querySelector(".tox-tinymce") ||
+    sheetRoot.querySelector('[contenteditable="true"]');
   if (isEditMode) return;
 
-  // --- Helper: find the clicked <li> from a composed click event
-  function findChecklistLI(ev) {
-    const path = typeof ev.composedPath === "function" ? ev.composedPath() : [];
-    // Prefer composed path (crosses shadow). Fallback to target.closest.
-    if (path.length) {
-      for (const n of path) {
-        if (n && n.nodeType === 1 && n.matches && n.matches("li")) {
-          // Ensure its ancestor in the composed path is a UL.lgmp-checklist
-          // Look forward in the path to find the UL that contains this LI
-          const idx = path.indexOf(n);
-          for (let i = idx; i < path.length; i++) {
-            const p = path[i];
-            if (p && p.nodeType === 1 && p.matches && p.matches("ul.lgmp-checklist")) {
-              return n;
-            }
-          }
-        }
-      }
-    }
-    // Fallback for non-composed environments
-    return ev.target?.closest?.(".lgmp-checklist li") ?? null;
+  // --- Bind logic -----------------------------------------------------------
+  const boundSymbol = Symbol.for(`${MODULE_ID}:boundClick`);
+  const observers = [];
+
+  /** Toggle the leading checkbox marker (Unicode or legacy brackets). */
+  function toggleMarker(text) {
+    if (/^\s*☐/.test(text)) return text.replace(/^\s*☐/, "☑");
+    if (/^\s*☑/.test(text)) return text.replace(/^\s*☑/, "☐");
+    if (/^\s*\[\s*\]/.test(text)) return text.replace(/^\s*\[\s*\]/, "☑");   // [ ] -> ☑
+    if (/^\s*\[\s*[xX]\s*\]/.test(text)) return text.replace(/^\s*\[\s*[xX]\s*\]/, "☐"); // [x] -> ☐
+    return `☐ ${text}`;
   }
 
-  async function handleClick(ev) {
-    const li = findChecklistLI(ev);
-    if (!li) return;
-
-    // Toggle the leading box in *text content*
-    const current = li.textContent ?? "";
-    let next = current;
-    if (/^\s*☐/.test(current)) next = current.replace(/^\s*☐/, "☑");
-    else if (/^\s*☑/.test(current)) next = current.replace(/^\s*☑/, "☐");
-    else if (/^\s*\[\s*\]/.test(current)) next = current.replace(/^\s*\[\s*\]/, "☑");
-    else if (/^\s*\[\s*[xX]\s*\]/.test(current)) next = current.replace(/^\s*\[\s*[xX]\s*\]/, "☐");
-    else next = `☐ ${current}`;
-
-    // Update the live view immediately
-    li.textContent = next;
-
-    // Persist: replace the first <ul.lgmp-checklist> in the saved content
+  /** Persist the currently rendered checklist UL back into the page document. */
+  async function persistChecklistFromRenderedUL(ulEl) {
     try {
-      const page = app?.page; // JournalEntryPage
+      const page = app?.page; // JournalEntryPage document
       if (!page) return;
-
-      // Find the UL element for outerHTML capture. Try composedPath again to get the real DOM node.
-      let ulEl = null;
-      if (typeof ev.composedPath === "function") {
-        const path = ev.composedPath();
-        ulEl = path.find((n) => n?.nodeType === 1 && n.matches?.("ul.lgmp-checklist")) ?? null;
-      }
-      if (!ulEl) ulEl = li.closest("ul.lgmp-checklist");
-      if (!ulEl) return;
 
       const newUL = ulEl.outerHTML;
       const oldContent = page.text?.content ?? "";
 
+      // Parse saved HTML; replace the first lgmp-checklist UL found.
       const parser = new DOMParser();
       const doc = parser.parseFromString(oldContent, "text/html");
       const savedUL = doc.querySelector("ul.lgmp-checklist");
@@ -121,30 +86,108 @@ Hooks.on("renderJournalPageSheet", (app, html) => {
         savedUL.outerHTML = newUL;
         newContent = doc.body.innerHTML;
       } else {
-        // If not found (unexpected), append for safety
+        // Safety: append if somehow missing in saved content
         newContent = `${oldContent}\n${newUL}`;
       }
 
       await page.update({ "text.content": newContent });
-      // Force a re-render so hover/tap stays consistent
       app.render(true);
     } catch (err) {
       console.error(`${MODULE_ID} | Checklist toggle persist failed:`, err);
     }
   }
 
-  // Bind on the sheet container (capture) so we get composed events
-  container.removeEventListener("click", handleClick, true);
-  container.addEventListener("click", handleClick, true);
+  /** Click handler bound directly on each <li>. */
+  function onChecklistClick(ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
 
-  // Also bind on document (capture) as a safety net for deeply nested shadow roots
-  document.removeEventListener("click", handleClick, true);
-  document.addEventListener("click", handleClick, true);
+    const li = ev.currentTarget;
+    if (!li) return;
+
+    // Flip the marker in the live DOM immediately
+    const next = toggleMarker(li.textContent ?? "");
+    li.textContent = next;
+
+    // Persist: find the enclosing UL and save it back into the page HTML.
+    const ul = li.closest("ul.lgmp-checklist");
+    if (ul) persistChecklistFromRenderedUL(ul);
+  }
+
+  /** Recursively collect all nodes (including shadowRoots) under a root. */
+  function* traverseDeep(rootNode) {
+    const stack = [rootNode];
+    while (stack.length) {
+      const n = stack.pop();
+      yield n;
+      // Shadow root
+      if (n && n.shadowRoot) stack.push(n.shadowRoot);
+      // Regular children
+      if (n && n.children) {
+        for (let i = n.children.length - 1; i >= 0; i--) stack.push(n.children[i]);
+      }
+    }
+  }
+
+  /** Bind click handlers to all current checklist LIs under a given root (deep). */
+  function bindAllChecklistLis(rootNode) {
+    for (const n of traverseDeep(rootNode)) {
+      if (n?.querySelectorAll) {
+        const lis = n.querySelectorAll("ul.lgmp-checklist li");
+        lis.forEach((li) => {
+          // Avoid double-binding
+          if (li[boundSymbol]) return;
+          li.addEventListener("click", onChecklistClick, { capture: true });
+          li[boundSymbol] = true;
+        });
+      }
+    }
+  }
+
+  /** Observe for new/changed content and (re)bind as needed. */
+  function observeMutations(rootNode) {
+    const mo = new MutationObserver((mutList) => {
+      for (const m of mutList) {
+        // If a checklist UL or LI is added/changed, (re)bind within that subtree
+        if (
+          (m.addedNodes && m.addedNodes.length) ||
+          m.type === "childList" ||
+          (m.target && (m.target.matches?.("ul.lgmp-checklist, ul.lgmp-checklist li") ||
+                        m.target.closest?.("ul.lgmp-checklist")))
+        ) {
+          bindAllChecklistLis(rootNode);
+        }
+      }
+    });
+    mo.observe(rootNode, { childList: true, subtree: true });
+    observers.push(mo);
+  }
+
+  // Initial bind across light DOM + any shadowRoots
+  bindAllChecklistLis(sheetRoot);
+
+  // Observe the sheet root itself
+  observeMutations(sheetRoot);
+
+  // Also observe any shadow host we can reach from the sheet root
+  for (const el of sheetRoot.querySelectorAll("*")) {
+    if (el.shadowRoot) {
+      bindAllChecklistLis(el.shadowRoot);
+      observeMutations(el.shadowRoot);
+    }
+  }
+
+  // When the sheet closes, disconnect observers (Foundry will destroy this DOM)
+  const appEl = sheetRoot.closest?.(".app");
+  if (appEl) {
+    const disconnect = () => observers.forEach((o) => o.disconnect());
+    appEl.addEventListener("closed", disconnect, { once: true });
+  }
 });
 
-/* ------------------------------------------------------------------ */
-/* Module init / ready / commands / keybindings                       */
-/* ------------------------------------------------------------------ */
+/* ========================================================================== */
+/* Module init / ready / commands / keybindings                               */
+/* ========================================================================== */
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} | init`);
   registerSettings();
