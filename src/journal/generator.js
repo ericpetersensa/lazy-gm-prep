@@ -80,7 +80,8 @@ async function ensureFolder(name) {
   if (!name) return null;
   const existing = game.folders?.find(f => f.type === "JournalEntry" && f.name === name);
   if (existing) return existing.id;
-  const f = await Folder.create({ name, type: "JournalEntry" });
+  // Set color to #6d712d when creating the folder
+  const f = await Folder.create({ name, type: "JournalEntry", color: "#6d712d" });
   return f?.id ?? null;
 }
 
