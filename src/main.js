@@ -26,9 +26,38 @@ function ensureInlineHeaderButton(dirEl) {
   container.appendChild(btn);
 }
 
-// Add the button every time the Journal Directory renders
 Hooks.on("renderJournalDirectory", (_app, html) => {
   ensureInlineHeaderButton(html[0] ?? html);
+});
+
+// --- Toggle ☐ / ☑ (and support legacy [ ] / [x]) on click within checklist --------
+// Works in view or edit mode; remember to Save the journal to persist.
+Hooks.on("renderJournalPageSheet", (_app, html) => {
+  html.on("click", ".lgmp-checklist li", (ev) => {
+    const li = ev.currentTarget;
+    const text = li.textContent || "";
+    let newText = text;
+
+    // Unicode boxes first
+    if (/^\s*☐/.test(text)) {
+      newText = text.replace(/^\s*☐/, "☑");
+    } else if (/^\s*☑/.test(text)) {
+      newText = text.replace(/^\s*☑/, "☐");
+    }
+    // Legacy bracket fallback (normalize to Unicode)
+    else if (/^\s*\[\s*\]/.test(text)) {
+      newText = text.replace(/^\s*\[\s*\]/, "☑");
+    } else if (/^\s*\[\s*[xX]\s*\]/.test(text)) {
+      newText = text.replace(/^\s*\[\s*[xX]\s*\]/, "☐");
+    } else {
+      // No marker at start: prepend an unchecked box
+      newText = `☐ ${text}`;
+    }
+
+    // Keep any inline HTML (e.g., italics in clue text) by only replacing the leading marker in innerHTML too
+    // Simple approach: set plainText back; if you want richer preservation, we can do a range replace.
+    li.innerText = newText;
+  });
 });
 
 // --- Standard module setup and triggers ---
@@ -53,7 +82,6 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   console.log(`${MODULE_ID} | ready`);
-  // Optional: refresh the Journal Directory to surface new items in some setups
   ui.journal?.render(true);
 });
 
