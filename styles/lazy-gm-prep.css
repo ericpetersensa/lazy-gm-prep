@@ -88,7 +88,7 @@
     padding-left: 2.5rem;
   }
 
-  /* --- New: checklist spacing --- */
+  /* --- Checklist block for Secrets & Clues --- */
   .lgmp-checklist {
     list-style: none;
     margin: 0.25rem 0 0;
@@ -96,9 +96,13 @@
     display: grid;
     gap: 0.35rem;
   }
-  .lgmp-checklist li label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+  .lgmp-checklist li {
+    cursor: pointer;
+    padding: 0.15em 0.25em;
+    transition: background 0.15s;
+    border-radius: 4px;
+  }
+  .lgmp-checklist li:hover {
+    background: var(--color-bg-subtle, #f6f6e6);
   }
 }
