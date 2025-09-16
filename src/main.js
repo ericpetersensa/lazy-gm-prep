@@ -6,9 +6,9 @@ import { createPrepJournal } from "./journal/generator.js";
 /* ------------------------------------------------------------------ */
 /* Create GM Prep: Header button (AppV2 & v13+)                       */
 /* ------------------------------------------------------------------ */
-function ensureInlineHeaderButton(dirEl) {
+function ensureInlineHeaderButton(rootEl) {
   if (!game.user.isGM) return;
-  const header = dirEl.querySelector(".directory-header");
+  const header = rootEl.querySelector(".directory-header");
   if (!header) return;
 
   const container =
@@ -30,89 +30,86 @@ function ensureInlineHeaderButton(dirEl) {
 }
 
 Hooks.on("renderJournalDirectory", (_app, html) => {
-  // html may be a jQuery-wrapped element in AppV2
   const root = html?.[0] ?? html;
   if (root) ensureInlineHeaderButton(root);
 });
 
 /* ------------------------------------------------------------------ */
-/* Checklist: View-mode toggle with immediate persistence              */
+/* Checklist: View-mode toggle (☐ ⇄ ☑) with immediate persistence     */
 /* ------------------------------------------------------------------ */
 /**
- * We attach in VIEW mode only (not edit mode), so a GM can click a Secrets & Clues
- * checklist line to toggle ☐/☑ while running the session.
- *
- * After toggling, we immediately update the page's HTML:
- * - Locate the <ul.lgmp-checklist> that contains the clicked <li>
- * - Replace that UL's outerHTML in the Document's saved content
- * - Call page.update({ "text.content": ... }) to persist
+ * Attaches at render time to the page’s container in *view* mode.
+ * We don’t trust app.options.editable; instead we inspect the DOM to detect editors.
+ * On click:
+ *   - Toggle the leading marker (☐/☑) on the clicked <li>
+ *   - Persist by replacing the <ul.lgmp-checklist> block inside the saved page HTML
+ *   - Re-render the page
  */
 Hooks.on("renderJournalPageSheet", (app, html) => {
-  // Only in view mode; in edit-mode TinyMCE consumes events and we don't want to mutate live editor DOM
-  if (app?.options?.editable) return;
+  const container = html?.[0] ?? html;
+  if (!container) return;
 
-  // Attach a delegated handler to the checklist items
-  html.find(".lgmp-checklist li").on("click", async function () {
-    const $li = $(this);
-    const current = $li.text() || "";
-    let next = current;
+  // If the page is in edit mode, TinyMCE/ProseMirror is present; skip binding in that case.
+  const isEditMode =
+    container.querySelector(".editor") ||
+    container.querySelector(".tox-tinymce") ||
+    container.querySelector('[contenteditable="true"]');
+  if (isEditMode) return;
 
-    // Toggle Unicode checkboxes at the *start* of the line
-    if (/^\s*☐/.test(current)) {
-      next = current.replace(/^\s*☐/, "☑");
-    } else if (/^\s*☑/.test(current)) {
-      next = current.replace(/^\s*☑/, "☐");
-    } else if (/^\s*\[\s*\]/.test(current)) {
-      // Legacy [ ] -> ☑
-      next = current.replace(/^\s*\[\s*\]/, "☑");
-    } else if (/^\s*\[\s*[xX]\s*\]/.test(current)) {
-      // Legacy [x] -> ☐
-      next = current.replace(/^\s*\[\s*[xX]\s*\]/, "☐");
-    } else {
-      // No marker; prepend an unchecked box
-      next = `☐ ${current}`;
-    }
+  // Delegate click handling to the page container (works for dynamic lists too)
+  const onClick = async (ev) => {
+    const li = ev.target?.closest(".lgmp-checklist li");
+    if (!li) return;
 
-    // Write the new text back
-    $li.text(next);
+    // Toggle the leading marker
+    const currentText = li.textContent ?? "";
+    let nextText = currentText;
+    if (/^\s*☐/.test(currentText))      nextText = currentText.replace(/^\s*☐/, "☑");
+    else if (/^\s*☑/.test(currentText)) nextText = currentText.replace(/^\s*☑/, "☐");
+    else if (/^\s*\[\s*\]/.test(currentText))       nextText = currentText.replace(/^\s*\[\s*\]/, "☑");
+    else if (/^\s*\[\s*[xX]\s*\]/.test(currentText)) nextText = currentText.replace(/^\s*\[\s*[xX]\s*\]/, "☐");
+    else nextText = `☐ ${currentText}`;
 
-    // Persist change by replacing the UL's HTML inside the page's saved content
+    // Update the display immediately
+    li.textContent = nextText;
+
+    // Persist: replace the matching <ul.lgmp-checklist> inside the saved Document
     try {
-      const page = app?.page; // JournalEntryPage document
+      const page = app?.page; // JournalEntryPage
       if (!page) return;
 
-      const ulEl = $li.closest("ul.lgmp-checklist")?.get(0);
+      const ulEl = li.closest("ul.lgmp-checklist");
       if (!ulEl) return;
 
-      // Use the *rendered* UL HTML as the new block to persist
-      const newUL = ulEl.outerHTML;
+      // Build new UL HTML from the live DOM
+      const newULHtml = ulEl.outerHTML;
 
-      // The original content as saved (string)
+      // Parse current saved content to robustly replace the checklist UL
       const oldContent = page.text?.content ?? "";
-
-      // We need to find the current UL block in oldContent; safest is to query the snapshot of the rendered HTML for that UL
-      // Use the first matching lgmp-checklist in the *saved* content; replace that one.
-      // (Secrets & Clues has a single checklist block by design.)
-      const UL_RE = /<ul\s+class=["']lgmp-checklist["'][\s\S]*?<\/ul>/i;
-      const hasChecklist = UL_RE.test(oldContent);
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(oldContent, "text/html");
+      const savedUL = doc.querySelector("ul.lgmp-checklist");
 
       let newContent;
-      if (hasChecklist) {
-        newContent = oldContent.replace(UL_RE, newUL);
+      if (savedUL) {
+        // Replace the saved UL with the live UL
+        savedUL.outerHTML = newULHtml;
+        newContent = doc.body.innerHTML;
       } else {
-        // If the saved content is missing the UL (unexpected), append it at the end to avoid data loss
-        newContent = `${oldContent}\n${newUL}`;
+        // Unexpected: no UL found in saved content; append it to the end to avoid data loss
+        newContent = `${oldContent}\n${newULHtml}`;
       }
 
-      // Persist
       await page.update({ "text.content": newContent });
-
-      // Optional: force re-render so hover/click targets remain consistent
       app.render(true);
     } catch (err) {
-      console.error(`${MODULE_ID} | Failed to persist checklist toggle:`, err);
+      console.error(`${MODULE_ID} | Checklist toggle persist failed:`, err);
     }
-  });
+  };
+
+  // Ensure we don’t double-bind if the sheet re-renders
+  container.removeEventListener("click", onClick, false);
+  container.addEventListener("click", onClick, false);
 });
 
 /* ------------------------------------------------------------------ */
@@ -122,7 +119,7 @@ Hooks.once("init", () => {
   console.log(`${MODULE_ID} | init`);
   registerSettings();
 
-  // Keybinding: Alt+P (GM) -> Create Prep
+  // Keybinding: Alt+P (GM) -> Create Prep journal
   game.keybindings.register(MODULE_ID, "create-prep", {
     name: "lazy-gm-prep.keybindings.createPrep.name",
     hint: "lazy-gm-prep.keybindings.createPrep.hint",
@@ -138,7 +135,6 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   console.log(`${MODULE_ID} | ready`);
-  // Ensure directory reflects newly injected header control
   ui.journal?.render(true);
 });
 
