@@ -43,6 +43,16 @@ export function registerSettings() {
     type: String
   });
 
+  // NEW: Include date in journal name
+  game.settings.register(MODULE_ID, "includeDateInName", {
+    name: game.i18n.localize("lazy-gm-prep.settings.includeDateInName.name"),
+    hint: game.i18n.localize("lazy-gm-prep.settings.includeDateInName.hint"),
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
   // Nine per-page “copy” toggles. Monsters default OFF.
   for (const s of PAGE_ORDER) {
     const key = `copy.${s.key}`;
