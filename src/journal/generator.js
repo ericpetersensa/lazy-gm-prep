@@ -4,27 +4,27 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
 
 /**
  * Create a new GM Prep journal for the next session.
- * - Separate pages: disables "Display Page Title" so only the page header shows the title.
- * - Combined page: keeps H2 headers for each section.
- * - Scrubs legacy headers/descriptions from copied content.
+ * - Separate pages: do NOT print an in-page H2 title (avoid duplicate with page name).
+ *   Fresh pages get description + notes + a 10-line checklist. Copied pages are scrubbed for legacy headers.
+ * - Combined page: include an H2 per section. Fresh sections also include a 10-line checklist.
+ * - When copying from a previous session, scrub legacy headers/descriptions to prevent duplicates.
  */
 export async function createPrepJournal() {
-  const separate   = !!getSetting(SETTINGS.separatePages, true);
-  const folderName = getSetting(SETTINGS.folderName, "GM Prep");
-  const prefix     = getSetting(SETTINGS.journalPrefix, "Session");
-  const includeDate = !!getSetting("includeDateInName", true);
+  const separate     = !!getSetting(SETTINGS.separatePages, true);
+  const folderName   = getSetting(SETTINGS.folderName, "GM Prep");
+  const prefix       = getSetting(SETTINGS.journalPrefix, "Session");
+  const includeDate  = !!getSetting("includeDateInName", true);
 
-  const folder = await ensureFolder(folderName);
-  const seq    = nextSequenceNumber(prefix);
-  const entryName = includeDate
-    ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
-    : `${prefix} ${seq}`;
+  const folderId     = await ensureFolder(folderName);
+  const seq          = nextSequenceNumber(prefix);
+  const entryName    = includeDate ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
+                                   : `${prefix} ${seq}`;
 
-  // Find previous session by the highest numeric suffix after the prefix (e.g., "Session 3: ...")
+  // Find previous session by the highest numeric suffix after the prefix
   const prev = findPreviousSession(prefix);
 
   if (separate) {
-    // --- Separate pages: no in-body H2; description + notes if new; scrub copied content.
+    // --- Separate pages: no in-body H2; description + notes + checklist if new; scrub copied content.
     const pages = [];
     for (const def of PAGE_ORDER) {
       const copyOn      = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
@@ -32,22 +32,23 @@ export async function createPrepJournal() {
 
       let content;
       if (prevContent) {
-        // Remove legacy headers so we don't show a duplicate "1. Review the Characters" inside the page body.
+        // Remove legacy headers so we don't show a duplicate title inside the page body.
         content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
-        if (!content.trim()) content = sectionDescription(def) + notesPlaceholder();
+        // If scrubbing empties the page, fall back to a fresh scaffold (desc + notes + checklist).
+        if (!content.trim()) content = sectionDescription(def) + notesPlaceholder() + checklistHtml(10);
       } else {
-        content = sectionDescription(def) + notesPlaceholder();
+        // Fresh page: description + notes + 10-line checklist (no H2).
+        content = sectionDescription(def) + notesPlaceholder() + checklistHtml(10);
       }
 
       pages.push({
         name: game.i18n.localize(def.titleKey),
         type: "text",
-        displayTitle: false, // <--- disables the in-body title!
         text: { format: 1, content }
       });
     }
 
-    const entry = await JournalEntry.create({ name: entryName, folder, pages });
+    const entry = await JournalEntry.create({ name: entryName, folder: folderId, pages });
     ui.notifications?.info(game.i18n.format("lazy-gm-prep.notifications.created", { name: entry.name }));
     return entry;
   }
@@ -63,10 +64,11 @@ export async function createPrepJournal() {
 
     let bodyHtml;
     if (prevContent) {
+      // Strip any legacy header and old auto-inserted description; we are adding our own above.
       bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
-      if (!bodyHtml.trim()) bodyHtml = notesPlaceholder();
+      if (!bodyHtml.trim()) bodyHtml = notesPlaceholder(); // no checklist on copy to avoid duplication
     } else {
-      bodyHtml = notesPlaceholder();
+      bodyHtml = notesPlaceholder() + checklistHtml(10);
     }
 
     chunks.push(`${headerHtml}${bodyHtml}`);
@@ -74,7 +76,7 @@ export async function createPrepJournal() {
 
   const entry = await JournalEntry.create({
     name: entryName,
-    folder,
+    folder: folderId,
     pages: [{
       name: game.i18n.localize("lazy-gm-prep.module.name"),
       type: "text",
@@ -101,6 +103,24 @@ function sectionDescription(def) {
 function notesPlaceholder() {
   const hint  = game.i18n.localize("lazy-gm-prep.ui.add-notes-here") || "Add your notes here.";
   return `<p><em>${escapeHtml(hint)}</em></p>\n`;
+}
+
+/**
+ * 10-line checklist (default). Each item has a checkbox and editable label text.
+ * You can change the count or placeholder labels as you like.
+ */
+function checklistHtml(count = 10) {
+  let items = "";
+  for (let i = 1; i <= count; i++) {
+    items += `<li><label><input type="checkbox"> <span>Item ${i}</span></label></li>\n`;
+  }
+  return `
+<section class="lgmp-section lgmp-checklist">
+  <ul class="lgmp-checklist">
+    ${items.trim()}
+  </ul>
+</section>
+`;
 }
 
 /* ------------------------------ helpers ------------------------------ */
