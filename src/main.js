@@ -38,66 +38,80 @@ Hooks.on("renderJournalDirectory", (_app, html) => {
 /* Checklist: View-mode toggle (☐ ⇄ ☑) with immediate persistence     */
 /* ------------------------------------------------------------------ */
 /**
- * AppV2 renders journal pages inside custom elements (e.g. <journal-page-text>)
- * which use a Shadow DOM. We must bind clicks in BOTH the light DOM and the
- * component's shadowRoot to see clicks on <ul.lgmp-checklist> items.
+ * AppV2 uses Shadow DOM inside page components. We can't rely on querying a
+ * specific host (e.g., <journal-page-text>). Instead:
+ *  - Attach a CAPTURING click listener to the page sheet container AND to document.
+ *  - On click, use event.composedPath() to locate the <li> that belongs to a
+ *    <ul class="lgmp-checklist">, regardless of shadow boundaries.
+ *  - Toggle the marker and persist by replacing the checklist UL in saved HTML.
  */
 Hooks.on("renderJournalPageSheet", (app, html) => {
   const container = html?.[0] ?? html;
   if (!container) return;
 
-  // Detect edit mode by presence of editors; only toggle in VIEW mode.
+  // Only toggle in view mode: if an editor is present, skip binding here.
   const isEditMode =
     container.querySelector(".editor") ||
     container.querySelector(".tox-tinymce") ||
     container.querySelector('[contenteditable="true"]');
   if (isEditMode) return;
 
-  // Collect roots to listen on: light DOM AND the shadowRoot of known page components.
-  const roots = new Set();
-  roots.add(container);
+  // --- Helper: find the clicked <li> from a composed click event
+  function findChecklistLI(ev) {
+    const path = typeof ev.composedPath === "function" ? ev.composedPath() : [];
+    // Prefer composed path (crosses shadow). Fallback to target.closest.
+    if (path.length) {
+      for (const n of path) {
+        if (n && n.nodeType === 1 && n.matches && n.matches("li")) {
+          // Ensure its ancestor in the composed path is a UL.lgmp-checklist
+          // Look forward in the path to find the UL that contains this LI
+          const idx = path.indexOf(n);
+          for (let i = idx; i < path.length; i++) {
+            const p = path[i];
+            if (p && p.nodeType === 1 && p.matches && p.matches("ul.lgmp-checklist")) {
+              return n;
+            }
+          }
+        }
+      }
+    }
+    // Fallback for non-composed environments
+    return ev.target?.closest?.(".lgmp-checklist li") ?? null;
+  }
 
-  // Text pages
-  const textHost = container.querySelector("journal-page-text");
-  if (textHost?.shadowRoot) roots.add(textHost.shadowRoot);
-
-  // (Optional) other page types that might host checklists in the future:
-  const htmlHost = container.querySelector("journal-page-html");
-  if (htmlHost?.shadowRoot) roots.add(htmlHost.shadowRoot);
-
-  // Robust delegated click handler
-  const handler = async (ev) => {
-    // Find clicked LI within a checklist
-    const li = ev.composedPath
-      ? ev.composedPath().find((n) => n?.nodeType === 1 && n.matches?.(".lgmp-checklist li"))
-      : ev.target?.closest?.(".lgmp-checklist li");
-
+  async function handleClick(ev) {
+    const li = findChecklistLI(ev);
     if (!li) return;
 
-    // Toggle the leading marker in the *text content* of the LI
+    // Toggle the leading box in *text content*
     const current = li.textContent ?? "";
     let next = current;
-    if (/^\s*☐/.test(current))      next = current.replace(/^\s*☐/, "☑");
+    if (/^\s*☐/.test(current)) next = current.replace(/^\s*☐/, "☑");
     else if (/^\s*☑/.test(current)) next = current.replace(/^\s*☑/, "☐");
-    else if (/^\s*\[\s*\]/.test(current))       next = current.replace(/^\s*\[\s*\]/, "☑");
+    else if (/^\s*\[\s*\]/.test(current)) next = current.replace(/^\s*\[\s*\]/, "☑");
     else if (/^\s*\[\s*[xX]\s*\]/.test(current)) next = current.replace(/^\s*\[\s*[xX]\s*\]/, "☐");
     else next = `☐ ${current}`;
 
-    // Update view immediately
+    // Update the live view immediately
     li.textContent = next;
 
-    // Persist: replace the current <ul.lgmp-checklist> in the saved page HTML.
+    // Persist: replace the first <ul.lgmp-checklist> in the saved content
     try {
-      const page = app?.page; // JournalEntryPage document
+      const page = app?.page; // JournalEntryPage
       if (!page) return;
 
-      const ulEl = li.closest?.("ul.lgmp-checklist");
+      // Find the UL element for outerHTML capture. Try composedPath again to get the real DOM node.
+      let ulEl = null;
+      if (typeof ev.composedPath === "function") {
+        const path = ev.composedPath();
+        ulEl = path.find((n) => n?.nodeType === 1 && n.matches?.("ul.lgmp-checklist")) ?? null;
+      }
+      if (!ulEl) ulEl = li.closest("ul.lgmp-checklist");
       if (!ulEl) return;
 
       const newUL = ulEl.outerHTML;
       const oldContent = page.text?.content ?? "";
 
-      // Parse saved HTML; replace the first lgmp-checklist UL found.
       const parser = new DOMParser();
       const doc = parser.parseFromString(oldContent, "text/html");
       const savedUL = doc.querySelector("ul.lgmp-checklist");
@@ -107,22 +121,25 @@ Hooks.on("renderJournalPageSheet", (app, html) => {
         savedUL.outerHTML = newUL;
         newContent = doc.body.innerHTML;
       } else {
-        // Safety: append if somehow missing in saved content
+        // If not found (unexpected), append for safety
         newContent = `${oldContent}\n${newUL}`;
       }
 
       await page.update({ "text.content": newContent });
+      // Force a re-render so hover/tap stays consistent
       app.render(true);
     } catch (err) {
       console.error(`${MODULE_ID} | Checklist toggle persist failed:`, err);
     }
-  };
-
-  // Bind once per root; guard against double-binding by removing then adding.
-  for (const root of roots) {
-    root.removeEventListener("click", handler, true);
-    root.addEventListener("click", handler, true);
   }
+
+  // Bind on the sheet container (capture) so we get composed events
+  container.removeEventListener("click", handleClick, true);
+  container.addEventListener("click", handleClick, true);
+
+  // Also bind on document (capture) as a safety net for deeply nested shadow roots
+  document.removeEventListener("click", handleClick, true);
+  document.addEventListener("click", handleClick, true);
 });
 
 /* ------------------------------------------------------------------ */
