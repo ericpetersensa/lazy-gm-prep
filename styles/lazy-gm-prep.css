@@ -105,8 +105,7 @@
     border-radius: 4px;
   }
   .lgmp-checklist li:hover {
-    /* Theme-aware hover that reads well in both light & dark modes */
+    /* Theme-aware hover (works in both light & dark); subtle fallback for older themes */
     background: var(--color-bg-subtle, rgba(255,255,255,0.08));
-    /* Keep text color inherited from theme for readability */
   }
 }
