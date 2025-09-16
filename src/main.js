@@ -38,66 +38,77 @@ Hooks.on("renderJournalDirectory", (_app, html) => {
 /* Checklist: View-mode toggle (☐ ⇄ ☑) with immediate persistence     */
 /* ------------------------------------------------------------------ */
 /**
- * Attaches at render time to the page’s container in *view* mode.
- * We don’t trust app.options.editable; instead we inspect the DOM to detect editors.
- * On click:
- *   - Toggle the leading marker (☐/☑) on the clicked <li>
- *   - Persist by replacing the <ul.lgmp-checklist> block inside the saved page HTML
- *   - Re-render the page
+ * AppV2 renders journal pages inside custom elements (e.g. <journal-page-text>)
+ * which use a Shadow DOM. We must bind clicks in BOTH the light DOM and the
+ * component's shadowRoot to see clicks on <ul.lgmp-checklist> items.
  */
 Hooks.on("renderJournalPageSheet", (app, html) => {
   const container = html?.[0] ?? html;
   if (!container) return;
 
-  // If the page is in edit mode, TinyMCE/ProseMirror is present; skip binding in that case.
+  // Detect edit mode by presence of editors; only toggle in VIEW mode.
   const isEditMode =
     container.querySelector(".editor") ||
     container.querySelector(".tox-tinymce") ||
     container.querySelector('[contenteditable="true"]');
   if (isEditMode) return;
 
-  // Delegate click handling to the page container (works for dynamic lists too)
-  const onClick = async (ev) => {
-    const li = ev.target?.closest(".lgmp-checklist li");
+  // Collect roots to listen on: light DOM AND the shadowRoot of known page components.
+  const roots = new Set();
+  roots.add(container);
+
+  // Text pages
+  const textHost = container.querySelector("journal-page-text");
+  if (textHost?.shadowRoot) roots.add(textHost.shadowRoot);
+
+  // (Optional) other page types that might host checklists in the future:
+  const htmlHost = container.querySelector("journal-page-html");
+  if (htmlHost?.shadowRoot) roots.add(htmlHost.shadowRoot);
+
+  // Robust delegated click handler
+  const handler = async (ev) => {
+    // Find clicked LI within a checklist
+    const li = ev.composedPath
+      ? ev.composedPath().find((n) => n?.nodeType === 1 && n.matches?.(".lgmp-checklist li"))
+      : ev.target?.closest?.(".lgmp-checklist li");
+
     if (!li) return;
 
-    // Toggle the leading marker
-    const currentText = li.textContent ?? "";
-    let nextText = currentText;
-    if (/^\s*☐/.test(currentText))      nextText = currentText.replace(/^\s*☐/, "☑");
-    else if (/^\s*☑/.test(currentText)) nextText = currentText.replace(/^\s*☑/, "☐");
-    else if (/^\s*\[\s*\]/.test(currentText))       nextText = currentText.replace(/^\s*\[\s*\]/, "☑");
-    else if (/^\s*\[\s*[xX]\s*\]/.test(currentText)) nextText = currentText.replace(/^\s*\[\s*[xX]\s*\]/, "☐");
-    else nextText = `☐ ${currentText}`;
+    // Toggle the leading marker in the *text content* of the LI
+    const current = li.textContent ?? "";
+    let next = current;
+    if (/^\s*☐/.test(current))      next = current.replace(/^\s*☐/, "☑");
+    else if (/^\s*☑/.test(current)) next = current.replace(/^\s*☑/, "☐");
+    else if (/^\s*\[\s*\]/.test(current))       next = current.replace(/^\s*\[\s*\]/, "☑");
+    else if (/^\s*\[\s*[xX]\s*\]/.test(current)) next = current.replace(/^\s*\[\s*[xX]\s*\]/, "☐");
+    else next = `☐ ${current}`;
 
-    // Update the display immediately
-    li.textContent = nextText;
+    // Update view immediately
+    li.textContent = next;
 
-    // Persist: replace the matching <ul.lgmp-checklist> inside the saved Document
+    // Persist: replace the current <ul.lgmp-checklist> in the saved page HTML.
     try {
-      const page = app?.page; // JournalEntryPage
+      const page = app?.page; // JournalEntryPage document
       if (!page) return;
 
-      const ulEl = li.closest("ul.lgmp-checklist");
+      const ulEl = li.closest?.("ul.lgmp-checklist");
       if (!ulEl) return;
 
-      // Build new UL HTML from the live DOM
-      const newULHtml = ulEl.outerHTML;
-
-      // Parse current saved content to robustly replace the checklist UL
+      const newUL = ulEl.outerHTML;
       const oldContent = page.text?.content ?? "";
+
+      // Parse saved HTML; replace the first lgmp-checklist UL found.
       const parser = new DOMParser();
       const doc = parser.parseFromString(oldContent, "text/html");
       const savedUL = doc.querySelector("ul.lgmp-checklist");
 
       let newContent;
       if (savedUL) {
-        // Replace the saved UL with the live UL
-        savedUL.outerHTML = newULHtml;
+        savedUL.outerHTML = newUL;
         newContent = doc.body.innerHTML;
       } else {
-        // Unexpected: no UL found in saved content; append it to the end to avoid data loss
-        newContent = `${oldContent}\n${newULHtml}`;
+        // Safety: append if somehow missing in saved content
+        newContent = `${oldContent}\n${newUL}`;
       }
 
       await page.update({ "text.content": newContent });
@@ -107,9 +118,11 @@ Hooks.on("renderJournalPageSheet", (app, html) => {
     }
   };
 
-  // Ensure we don’t double-bind if the sheet re-renders
-  container.removeEventListener("click", onClick, false);
-  container.addEventListener("click", onClick, false);
+  // Bind once per root; guard against double-binding by removing then adding.
+  for (const root of roots) {
+    root.removeEventListener("click", handler, true);
+    root.addEventListener("click", handler, true);
+  }
 });
 
 /* ------------------------------------------------------------------ */
