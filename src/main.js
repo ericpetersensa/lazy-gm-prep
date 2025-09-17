@@ -1,242 +1,292 @@
-// src/main.js
-import { registerSettings } from "./settings.js";
-import { MODULE_ID } from "./constants.js";
-import { createPrepJournal } from "./journal/generator.js";
+// lazy-gm-prep / main.js — v13/AppV2
+// - Click-to-toggle ☐/☑ in view mode for <ul class="lgmp-checklist">
+// - Remember last source journal/page
+// - /prep or Alt+P creates a new Journal with only unchecked clues
 
-/* =======================================================================================
-   Create GM Prep: Header button (AppV2 & v13+)
-======================================================================================= */
-function ensureInlineHeaderButton(rootEl) {
-  if (!game.user.isGM) return;
-  const header = rootEl.querySelector(".directory-header");
-  if (!header) return;
+const MOD = "lazy-gm-prep";
+const SECRETS_PAGE_NAME = "4. Define Secrets & Clues";
+const SECRETS_PAGE_UUID = ""; // Optional: e.g. "JournalEntry.vz...JournalEntryPage.C94..." to hard-wire
 
-  const container =
-    header.querySelector(".action-buttons") ||
-    header.querySelector(".header-actions") ||
-    header.querySelector(".header-controls") ||
-    header;
-
-  if (container.querySelector('[data-action="lazy-gm-prep-inline"]')) return;
-
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.dataset.action = "lazy-gm-prep-inline";
-  btn.classList.add("lazy-gm-prep-btn", "header-control", "create-entry");
-  btn.title = game.i18n.localize("lazy-gm-prep.header.buttonTooltip");
-  btn.innerHTML = `<i class="fa-solid fa-clipboard-list"></i> ${game.i18n.localize("lazy-gm-prep.header.button")}`;
-  btn.addEventListener("click", () => createPrepJournal());
-  container.appendChild(btn);
-}
-
-Hooks.on("renderJournalDirectory", (_app, html) => {
-  const root = html?.[0] ?? html;
-  if (root) ensureInlineHeaderButton(root);
-});
-
-/* =======================================================================================
-   VIEW-MODE SECRETS PANEL (works around closed Shadow DOM)
-   - Adds a small floating button on Journal Page Sheet (view mode only) when a checklist exists.
-   - Clicking it opens a panel that lists the current ☐/☑ items; clicking an item toggles & saves.
-======================================================================================= */
-
-/** Normalize old markers to Unicode ☐/☑ */
-function normalizeMarkers(html) {
-  let s = String(html ?? "");
-  // inputs -> markers
-  s = s.replace(/<input[^>]*type=["']checkbox["'][^>]*checked[^>]*>/gi, "☑");
-  s = s.replace(/<input[^>]*type=["']checkbox["'][^>]*>/gi, "☐");
-  // bracket -> markers
-  s = s.replace(/\[\s*\]/g, "☐");
-  s = s.replace(/\[\s*[xX]\s*\]/g, "☑");
-  // unwrap labels
-  s = s.replace(/<label[^>]*>/gi, "").replace(/<\/label>/gi, "");
-  return s;
-}
-
-/** Extract the module checklist: returns { bodyWithoutChecklist, ulHtml, items: [{text,checked}] } */
-function extractChecklist(html) {
-  const UL_RE = /<ul\s+class=["']lgmp-checklist["'][\s\S]*?<\/ul>/i;
-  const hit = html.match(UL_RE);
-  if (!hit) return { bodyWithoutChecklist: html, ulHtml: "", items: [] };
-  const ulHtml = hit[0];
-  const bodyWithoutChecklist = html.replace(UL_RE, "");
-  const items = [];
-  // pull <li> text
-  const LI_RE = /<li[^>]*>([\s\S]*?)<\/li>/gi;
-  let m;
-  while ((m = LI_RE.exec(ulHtml))) {
-    const raw = m[1].replace(/<\/?[^>]+>/g, "").trim(); // strip tags
-    if (!raw) continue;
-    const checked = /^\s*☑/.test(raw);
-    const text = raw.replace(/^\s*[☐☑]\s*/, "");
-    items.push({ text, checked });
-  }
-  return { bodyWithoutChecklist, ulHtml, items };
-}
-
-/** Build UL HTML from {text,checked}[] (always Unicode) */
-function buildChecklist(items) {
-  const lis = items.map(i => `<li>${i.checked ? "☑" : "☐"} ${escapeHtml(i.text)}</li>`).join("\n");
-  return `<ul class="lgmp-checklist">\n${lis}\n</ul>`;
-}
-
-function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  })[m]);
-}
-
-/** Create the floating button & panel for a given sheet container */
-function injectSecretsPanel(app, sheetRoot) {
-  // Only in view-mode (not editing)
-  const isEditMode =
-    sheetRoot.querySelector(".editor") ||
-    sheetRoot.querySelector(".tox-tinymce") ||
-    sheetRoot.querySelector('[contenteditable="true"]');
-  if (isEditMode) return;
-
-  const page = app?.page;
-  if (!page) return;
-
-  // Determine if page has a checklist block
-  const saved = String(page.text?.content ?? "");
-  const normalized = normalizeMarkers(saved);
-  const { items, ulHtml } = extractChecklist(normalized);
-  if (!ulHtml) return; // Nothing to manage on this page
-
-  // Ensure the .app container is positioned to host the overlay
-  const appEl = sheetRoot.closest(".app");
-  if (!appEl) return;
-  appEl.classList.add("lgmp-app-host"); // CSS sets position:relative if needed
-
-  // Avoid duplicates if re-rendering
-  if (appEl.querySelector(".lgmp-secrets-fab")) return;
-
-  // Floating action button
-  const fab = document.createElement("button");
-  fab.type = "button";
-  fab.className = "lgmp-secrets-fab";
-  fab.title = "Toggle Secrets & Clues (view mode)";
-  fab.innerHTML = "☰ Secrets";
-
-  // Panel
-  const panel = document.createElement("div");
-  panel.className = "lgmp-secrets-panel";
-  panel.setAttribute("hidden", "hidden");
-
-  // Build panel content
-  const header = document.createElement("div");
-  header.className = "lgmp-secrets-panel__header";
-  header.innerHTML = `<strong>Secrets & Clues</strong><button type="button" class="lgmp-secrets-close" title="Close">×</button>`;
-
-  const list = document.createElement("ul");
-  list.className = "lgmp-secrets-panel__list";
-
-  // Build items from saved HTML
-  items.forEach((it, idx) => {
-    const li = document.createElement("li");
-    li.dataset.index = String(idx);
-    li.innerHTML = `<button type="button" class="lgmp-secret-toggle">${it.checked ? "☑" : "☐"}</button><span class="lgmp-secret-text">${escapeHtml(it.text)}</span>`;
-    list.appendChild(li);
-  });
-
-  // Assemble
-  panel.appendChild(header);
-  panel.appendChild(list);
-  appEl.appendChild(fab);
-  appEl.appendChild(panel);
-
-  // Events
-  fab.addEventListener("click", () => {
-    const isHidden = panel.hasAttribute("hidden");
-    if (isHidden) panel.removeAttribute("hidden");
-    else panel.setAttribute("hidden", "hidden");
-  });
-  panel.querySelector(".lgmp-secrets-close")?.addEventListener("click", () => {
-    panel.setAttribute("hidden", "hidden");
-  });
-
-  // Toggle handler (click on a line)
-  panel.addEventListener("click", async (ev) => {
-    const btn = ev.target?.closest?.(".lgmp-secret-toggle");
-    if (!btn) return;
-    const lineEl = btn.closest("li");
-    const idx = Number(lineEl?.dataset?.index ?? -1);
-    if (idx < 0) return;
-
-    // Flip marker in panel UI
-    const currentlyChecked = btn.textContent?.trim() === "☑";
-    btn.textContent = currentlyChecked ? "☐" : "☑";
-
-    // Build new checklist array from panel
-    const currentItems = Array.from(panel.querySelectorAll(".lgmp-secrets-panel__list > li")).map(li => {
-      return {
-        text: li.querySelector(".lgmp-secret-text")?.textContent ?? "",
-        checked: (li.querySelector(".lgmp-secret-toggle")?.textContent?.trim() === "☑")
-      };
-    });
-
-    // Persist back into the page’s HTML by replacing the first lgmp-checklist
-    try {
-      const oldContent = String(page.text?.content ?? "");
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(normalizeMarkers(oldContent), "text/html");
-      const ul = doc.querySelector("ul.lgmp-checklist");
-      if (ul) {
-        ul.outerHTML = buildChecklist(currentItems);
-      } else {
-        // Safety: append at end if somehow missing
-        doc.body.insertAdjacentHTML("beforeend", buildChecklist(currentItems));
-      }
-      const newHtml = doc.body.innerHTML;
-      await page.update({ "text.content": newHtml });
-      // Re-render the sheet so in-page view also updates
-      app.render(true);
-    } catch (err) {
-      console.error(`${MODULE_ID} | Failed to persist Secrets toggle:`, err);
-    }
-  });
-}
-
-// Attach the overlay only when a checklist exists and only in view mode
-Hooks.on("renderJournalPageSheet", (app, html) => {
-  const root = html?.[0] ?? html;
-  if (!root) return;
-  injectSecretsPanel(app, root);
-});
-
-/* =======================================================================================
-   Module init / ready / commands / keybindings
-======================================================================================= */
 Hooks.once("init", () => {
-  console.log(`${MODULE_ID} | init`);
-  registerSettings();
-
-  // Keybinding: Alt+P (GM) -> Create Prep journal
-  game.keybindings.register(MODULE_ID, "create-prep", {
-    name: "lazy-gm-prep.keybindings.createPrep.name",
-    hint: "lazy-gm-prep.keybindings.createPrep.hint",
-    editable: [{ key: "KeyP", modifiers: ["Alt"] }],
-    onDown: () => {
-      if (!game.user.isGM) return false;
-      createPrepJournal();
-      return true;
-    },
-    restricted: true
+  // Settings: remember last source, last page
+  game.settings.register(MOD, "lastJournalId", {
+    name: "Last Source Journal ID", scope: "client", config: false, type: String, default: ""
   });
+  game.settings.register(MOD, "lastPageId", {
+    name: "Last Source Page ID", scope: "client", config: false, type: String, default: ""
+  });
+  game.settings.register(MOD, "copyOtherPages", {
+    name: "Copy Other Pages Into New Prep", scope: "client", config: false, type: Boolean, default: true
+  });
+
+  // Keybinding: Alt+P → create prep
+  try {
+    game.keybindings.register(MOD, "createPrep", {
+      name: "Create GM Prep (unchecked Secrets)",
+      hint: "Builds a new Journal with unchecked items from the Secrets & Clues page.",
+      editable: [{ key: "KeyP", modifiers: ["Alt"] }],
+      restricted: true,
+      onDown: () => { game[MOD]?.create?.(); return true; }
+    });
+  } catch (e) { /* keybindings unavailable in some envs */ }
 });
 
-Hooks.once("ready", () => {
-  console.log(`${MODULE_ID} | ready`);
-  ui.journal?.render(true);
+Hooks.on("ready", () => {
+  // Expose API for macros or other modules
+  game[MOD] = {
+    create: (opts={}) => createGMPrepFromLast(opts),
+    toggleInstall: () => installToggleHandlers(),
+  };
+  installToggleHandlers();
+  console.log(`[${MOD}] ready`);
 });
 
-// Chat command: /prep -> Create Prep (GM only)
-Hooks.on("chatMessage", (_chatLog, text) => {
-  if (!game.user.isGM) return;
-  if (text.trim().toLowerCase() === "/prep") {
-    createPrepJournal();
-    return false;
+/* ------------------------- Toggle Handlers ------------------------- */
+
+// Install once: CSS + bind to any current/future journal sheets
+function installToggleHandlers() {
+  ensureStyle();
+  // Bind already-open sheets
+  document.querySelectorAll("form.journal-sheet").forEach(bindJournalHost);
+
+  // Bind future renders; capture last journal/page when available
+  Hooks.on("renderApplicationV2", (app, el) => {
+    // Capture "last source" if this is a JournalEntrySheet with a valid page
+    const ctor = app?.constructor?.name || "";
+    if (ctor === "JournalEntrySheet") {
+      try {
+        const entry = app.entry;    // documents.JournalEntry
+        const pageId = app.pageId;  // current viewed page id
+        if (entry?.id && pageId) {
+          // Store last only when the page is the Secrets page (name or checklist present)
+          const page = entry.pages?.get?.(pageId);
+          const hasChecklist = !!String(page?.text?.content ?? "").includes('class="lgmp-checklist"');
+          const nameLooksRight = (page?.name || "").trim().toLowerCase() === SECRETS_PAGE_NAME.trim().toLowerCase();
+
+          if (nameLooksRight || hasChecklist) {
+            game.settings.set(MOD, "lastJournalId", entry.id);
+            game.settings.set(MOD, "lastPageId", pageId);
+          }
+        }
+      } catch (e) {/* ignore */}
+    }
+
+    // Bind click handler to this sheet host (if it is one)
+    if (el?.classList?.contains?.("journal-sheet")) bindJournalHost(el);
+  });
+}
+
+// Add CSS once
+function ensureStyle() {
+  if (document.getElementById(`${MOD}-style`)) return;
+  const style = document.createElement("style");
+  style.id = `${MOD}-style`;
+  style.textContent = `
+    /* Clickable checklist rows */
+    ul.lgmp-checklist li { cursor: pointer; user-select: none; }
+    ul.lgmp-checklist li:active { opacity: 0.85; }
+  `;
+  document.head.appendChild(style);
+}
+
+// Bind click-to-toggle on a specific journal host
+function bindJournalHost(host) {
+  if (!host || host.dataset[`${MOD}Bound`] === "1") return;
+
+  // Skip if in edit mode (editor active)
+  const inEdit = !!host.querySelector(".editor,.tox-tinymce,[contenteditable='true']");
+  if (inEdit) return;
+
+  host.dataset[`${MOD}Bound`] = "1";
+  host.addEventListener("click", onChecklistClick, true);
+  // console.log(`[${MOD}] bound`, host);
+}
+
+// Click handler: persist a single li toggle by mapping DOM → saved HTML
+async function onChecklistClick(ev) {
+  const liDom = ev.target.closest?.("ul.lgmp-checklist li");
+  if (!liDom) return;
+
+  // Find the host and resolve the JournalEntry document
+  const host = ev.currentTarget || liDom.closest("form.journal-sheet") || document.querySelector("form.journal-sheet");
+  const entry = resolveEntryFromHost(host);
+  if (!entry) return ui.notifications?.warn(`[${MOD}] Could not resolve JournalEntry document.`);
+
+  // Resolve the correct Secrets page (fast path: UUID; else lastPageId; else by name; else scan for first checklist)
+  const page = await resolveSecretsPage(entry);
+  if (!page) return ui.notifications?.warn(`[${MOD}] Secrets page not found on "${entry.name}".`);
+
+  // Map which UL/LI was clicked
+  const ulDom = liDom.closest("ul.lgmp-checklist");
+  const allUlsDom = Array.from(host.querySelectorAll("ul.lgmp-checklist"));
+  const ulIndex = Math.max(0, allUlsDom.indexOf(ulDom));
+  const liIndex = Array.from(ulDom.querySelectorAll(":scope > li")).indexOf(liDom);
+
+  try {
+    const saved = String(page.text?.content ?? "");
+    const doc = new DOMParser().parseFromString(saved, "text/html");
+    const allUlsSaved = doc.querySelectorAll("ul.lgmp-checklist");
+    let ulSaved = allUlsSaved?.[ulIndex] || allUlsSaved?.[0] || null;
+
+    if (!ulSaved) return ui.notifications?.warn(`[${MOD}] Saved HTML contains no <ul class="lgmp-checklist">.`);
+
+    // Prefer position, then fallback to text match
+    let liSaved = ulSaved.querySelectorAll(":scope > li")?.[liIndex] || null;
+    if (!liSaved) {
+      const clickedText = (liDom.textContent || "").replace(/^\s*[☐☑]\s*/, "").trim();
+      liSaved = Array.from(ulSaved.querySelectorAll(":scope > li"))
+        .find(li => (li.textContent || "").replace(/^\s*[☐☑]\s*/, "").trim() === clickedText) || null;
+    }
+    if (!liSaved) return ui.notifications?.warn(`[${MOD}] Could not locate matching item in saved HTML.`);
+
+    // Flip symbol and persist
+    const raw = (liSaved.textContent || "").trim();
+    const flipped = raw.startsWith("☑") ? raw.replace(/^☑/, "☐")
+                  : raw.replace(/^[☐]?/, "☑");
+    liSaved.textContent = flipped;
+
+    await page.update({ "text.content": doc.body.innerHTML });
+
+    // Ask parent entry sheet to re-render (works for embedded and pop-out)
+    page.parent?.sheet?.render?.(true);
+  } catch (err) {
+    console.error(MOD, err);
+    ui.notifications?.error(`[${MOD}] Toggle failed (see console).`);
+  }
+}
+
+// Resolve JournalEntry from the host form
+function resolveEntryFromHost(host) {
+  if (!host) return null;
+  const idFromData = host.dataset?.documentId || host.dataset?.entryId;
+  let entry = idFromData ? game.journal.get(idFromData) : null;
+  if (entry) return entry;
+
+  // Extract from form id like: "JournalEntrySheet5e-JournalEntry-<ID>"
+  const m = (host.id || "").match(/JournalEntry-([A-Za-z0-9]{16,})/);
+  const entryId = m?.[1] ?? null;
+  return entryId ? game.journal.get(entryId) : null;
+}
+
+// Resolve the correct Secrets page with multiple strategies
+async function resolveSecretsPage(entry) {
+  // 1) Explicit UUID override (if provided)
+  if (SECRETS_PAGE_UUID) {
+    try {
+      const from = await fromUuid(SECRETS_PAGE_UUID);
+      if (from?.documentName === "JournalEntryPage" && from?.parent?.id === entry.id) return from;
+    } catch (e) { /* ignore and fallback */ }
+  }
+
+  // 2) Last page id (captured when sheet rendered via AppV2; only used if it contains a checklist)
+  try {
+    const lastPageId = game.settings.get(MOD, "lastPageId");
+    const byLast = entry.pages?.get?.(lastPageId);
+    if (byLast && String(byLast.text?.content ?? "").includes('class="lgmp-checklist"')) return byLast;
+  } catch (e) { /* ignore */ }
+
+  // 3) By exact name (default: "4. Define Secrets & Clues")
+  const wanted = SECRETS_PAGE_NAME.trim().toLowerCase();
+  const byName = entry.pages?.contents?.find(p => (p.name || "").trim().toLowerCase() === wanted);
+  if (byName) return byName;
+
+  // 4) First page that contains a checklist
+  const candidates = entry.pages?.contents?.filter(p => String(p.text?.content ?? "").includes('class="lgmp-checklist"')) || [];
+  if (candidates.length) return candidates[0];
+
+  return null;
+}
+
+/* -------------------------- /prep & Builder ------------------------- */
+
+async function pickSourceJournal() {
+  const entries = game.journal?.contents ?? [];
+  if (!entries.length) return null;
+
+  const options = entries.map(e => `<option value="${e.id}">${e.name}</option>`).join("");
+  const content = `<div class="form-group"><label>Choose source Journal</label>
+    <select name="jid" style="width:100%">${options}</select></div>`;
+
+  return await Dialog.prompt({
+    title: "Select Source Journal",
+    content, label: "Use This",
+    callback: html => game.journal.get(html.querySelector("select[name='jid']").value),
+    rejectClose: false
+  });
+}
+
+async function createGMPrepFromLast(opts = {}) {
+  const {
+    newName = `GM Prep - ${new Date().toLocaleDateString()}`,
+    copyOtherPages = game.settings.get(MOD, "copyOtherPages"),
+    pageName = SECRETS_PAGE_NAME
+  } = opts;
+
+  // Resolve source Journal
+  let source = game.journal.get(game.settings.get(MOD, "lastJournalId"));
+  if (!source) {
+    source = await pickSourceJournal();
+    if (!source) return ui.notifications?.warn(`[${MOD}] No source journal selected.`);
+  }
+
+  // Resolve the Secrets page
+  let secrets = await resolveSecretsPage(source);
+  if (!secrets) {
+    // fallback by name only for the chosen source
+    const wanted = pageName.trim().toLowerCase();
+    secrets = source.pages?.contents?.find(p => (p.name || "").trim().toLowerCase() === wanted) || null;
+  }
+  if (!secrets) return ui.notifications?.warn(`[${MOD}] Source has no page named "${pageName}" or with a checklist.`);
+
+  // Extract only unchecked items from saved HTML
+  const savedHTML = String(secrets.text?.content ?? "");
+  const dom = new DOMParser().parseFromString(savedHTML, "text/html");
+  const ul = dom.querySelector("ul.lgmp-checklist");
+  if (!ul) return ui.notifications?.warn(`[${MOD}] Secrets page has no <ul class="lgmp-checklist">.`);
+
+  const unchecked = [];
+  for (const li of ul.querySelectorAll(":scope > li")) {
+    const raw = (li.textContent || "").trim();
+    const text = raw.replace(/^\s*[☐☑]\s*/, "");
+    if (!raw.startsWith("☑") && text) unchecked.push(text);
+  }
+
+  const newUL = `<ul class="lgmp-checklist">\n${unchecked.map(t => `<li>☐ ${t}</li>`).join("\n")}\n</ul>`;
+
+  // Compose pages for new Journal
+  const newPages = [];
+  if (copyOtherPages) {
+    for (const p of source.pages.contents) {
+      const data = p.toObject(); delete data._id;
+      if (p._id === secrets._id && p.type === "text") {
+        data.text = { ...(data.text ?? {}), content: newUL };
+      }
+      newPages.push(data);
+    }
+  } else {
+    // Only Secrets page as text page
+    newPages.push({
+      name: pageName, type: "text",
+      text: { format: (secrets.text?.format ?? 1), content: newUL }
+    });
+  }
+
+  const created = await JournalEntry.create({ name: newName, pages: newPages });
+  created?.sheet?.render(true);
+  ui.notifications?.info(`[${MOD}] Created "${created.name}" with ${unchecked.length} unchecked clue(s).`);
+  return created;
+}
+
+/* -------------------------- Chat Command (/prep) -------------------------- */
+
+// Optional: allow "/prep" in chat to build from last source
+Hooks.on("chatMessage", (log, message, chatData) => {
+  const parts = (message || "").trim().split(/\s+/);
+  if (parts[0]?.toLowerCase() === "/prep") {
+    createGMPrepFromLast().catch(err => {
+      console.error(MOD, err);
+      ui.notifications?.error(`[${MOD}] /prep failed (see console).`);
+    });
+    return false; // swallow the chat message
   }
 });
