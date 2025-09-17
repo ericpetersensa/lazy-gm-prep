@@ -1,6 +1,6 @@
 /* lazy-gm-prep/styles/lazy-gm-prep.css */
 @layer modules {
-  /* Inline header button tweaks (inherits core theme look via 'header-control create-entry') */
+  /* Header button in Journal Directory */
   .directory .directory-header .lazy-gm-prep-btn {
     display: inline-flex;
     align-items: center;
@@ -11,101 +11,84 @@
     font-size: 0.9em;
   }
 
-  /* ---- Lazy GM Prep: Journal List & Header Styling ---- */
-  .lgmp-header {
-    margin: 0.25rem 0 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    justify-content: space-between;
-  }
-  .lgmp-refresh {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.5rem;
-    border-radius: 6px;
-    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.25));
-    background: var(--color-bg-subtle, rgba(0,0,0,0.06));
-    color: var(--color-text);
-    cursor: pointer;
-    font: inherit;
-  }
-  .lgmp-refresh:hover {
-    background: var(--color-bg, rgba(0,0,0,0.12));
-  }
-  .lgmp-section {
-    margin-block: 0.75rem 1rem;
-  }
-  .lgmp-step-desc {
-    margin: 0.25rem 0 0.5rem;
-    opacity: 0.95;
-  }
+  /* General sections */
+  .lgmp-section { margin-block: 0.75rem 1rem; }
+  .lgmp-step-desc { margin: 0.25rem 0 0.5rem; opacity: 0.95; }
 
-  /* Actor list legacy styles (kept for consistency) */
-  .lgmp-actor-list {
-    list-style: none;
-    margin: 0.25rem 0 0;
-    padding: 0;
-    display: grid;
-    gap: 0.4rem;
-  }
-  .lgmp-actor-item {
-    display: grid;
-    grid-template-columns: 28px 1fr;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.45rem;
-    border-radius: 6px;
-    background: var(--color-bg-subtle, rgba(0,0,0,0.06));
-  }
-  .lgmp-actor-thumb {
-    width: 28px;
-    height: 28px;
-    border-radius: 4px;
-    object-fit: cover;
-  }
-  .lgmp-name {
-    font-weight: 600;
-  }
-  .lgmp-type {
-    opacity: 0.7;
-    margin-left: 0.4rem;
-  }
-  .lgmp-inline-stats {
-    opacity: 0.9;
-    font-size: 0.9em;
-    margin-left: 0.5rem;
-  }
-  .lgmp-actor-item a[data-lazy-open] {
-    text-decoration: none;
-    border-bottom: 1px dashed transparent;
-  }
-  .lgmp-actor-item a[data-lazy-open]:hover {
-    border-bottom-color: currentColor;
-  }
-  .lgmp-empty {
-    opacity: 0.7;
-    font-style: italic;
-    padding-left: 2.5rem;
-  }
+  /* Legacy actor styles (kept for compatibility) */
+  .lgmp-actor-list { list-style: none; margin: 0.25rem 0 0; padding: 0; display: grid; gap: 0.4rem; }
+  .lgmp-actor-item { display: grid; grid-template-columns: 28px 1fr; align-items: center; gap: 0.5rem;
+    padding: 0.35rem 0.45rem; border-radius: 6px; background: var(--color-bg-subtle, rgba(0,0,0,0.06)); }
+  .lgmp-actor-thumb { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; }
+  .lgmp-name { font-weight: 600; }
+  .lgmp-type { opacity: 0.7; margin-left: 0.4rem; }
+  .lgmp-inline-stats { opacity: 0.9; font-size: 0.9em; margin-left: 0.5rem; }
+  .lgmp-actor-item a[data-lazy-open] { text-decoration: none; border-bottom: 1px dashed transparent; }
+  .lgmp-actor-item a[data-lazy-open]:hover { border-bottom-color: currentColor; }
+  .lgmp-empty { opacity: 0.7; font-style: italic; padding-left: 2.5rem; }
 
-  /* --- Checklist block for Secrets & Clues --- */
-  .lgmp-checklist {
-    list-style: none;
-    margin: 0.25rem 0 0;
-    padding: 0;
-    display: grid;
-    gap: 0.35rem;
-  }
-  .lgmp-checklist li {
+  /* Checklist in-page hover (theme-aware) */
+  .lgmp-checklist { list-style: none; margin: 0.25rem 0 0; padding: 0; display: grid; gap: 0.35rem; }
+  .lgmp-checklist li { cursor: pointer; padding: 0.15em 0.25em; transition: background 0.15s, color 0.15s; border-radius: 4px; }
+  .lgmp-checklist li:hover { background: var(--color-bg-subtle, rgba(255,255,255,0.08)); }
+
+  /* === Overlay host on .app so we can absolutely-position FAB & panel === */
+  .app.lgmp-app-host { position: relative; }
+
+  /* Floating action button (view-mode only) */
+  .lgmp-secrets-fab {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 20;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
+    background: var(--color-bg, #1f1f1f);
+    color: var(--color-text, #fff);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
     cursor: pointer;
-    padding: 0.15em 0.25em;
-    transition: background 0.15s, color 0.15s;
-    border-radius: 4px;
+    font: 500 12px/1.2 var(--font-primary, system-ui, sans-serif);
   }
-  .lgmp-checklist li:hover {
-    /* Theme-aware hover (works in both light & dark); subtle fallback for older themes */
-    background: var(--color-bg-subtle, rgba(255,255,255,0.08));
+  .lgmp-secrets-fab:hover { filter: brightness(1.05); }
+
+  /* Secrets & Clues overlay panel */
+  .lgmp-secrets-panel {
+    position: absolute;
+    right: 12px;
+    bottom: 48px;
+    z-index: 21;
+    min-width: 280px;
+    max-width: clamp(280px, 32vw, 420px);
+    max-height: 50vh;
+    overflow: auto;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
+    background: var(--color-bg, #1f1f1f);
+    color: var(--color-text, #fff);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.35);
   }
+  .lgmp-secrets-panel[hidden] { display: none !important; }
+
+  .lgmp-secrets-panel__header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px; gap: 8px;
+  }
+  .lgmp-secrets-panel__header .lgmp-secrets-close {
+    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
+    border-radius: 6px; background: transparent; color: inherit; cursor: pointer; padding: 0 6px;
+  }
+  .lgmp-secrets-panel__header .lgmp-secrets-close:hover { background: var(--color-bg-subtle, rgba(255,255,255,0.08)); }
+
+  .lgmp-secrets-panel__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .lgmp-secrets-panel__list > li { display: grid; grid-template-columns: 28px 1fr; align-items: start; gap: 6px; }
+  .lgmp-secret-toggle {
+    width: 28px; min-width: 28px; height: 28px; border-radius: 6px;
+    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
+    background: var(--color-bg-subtle, rgba(255,255,255,0.06));
+    color: inherit; cursor: pointer;
+  }
+  .lgmp-secret-toggle:hover { background: var(--color-bg-subtle, rgba(255,255,255,0.12)); }
+  .lgmp-secret-text { white-space: pre-wrap; }
 }
