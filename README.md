@@ -8,7 +8,7 @@
 
 - **One-click GM Prep:** Adds a "Create GM Prep" button to the Journal Directory (inline and in the header menu).
 - **Session Journal Generator:** Creates a new journal for each session, auto-incremented and dated in your local timezone. Always uses the highest-numbered session as the source.
-- **Smart Clue Checklist:** On the "4. Define Secrets & Clues" page, only unchecked clues are copied to the next session. Blank lines are filled with "Add Clue" (no numbering).
+- **Smart Clue Checklist:** On the "4. Define Secrets & Clues" page, only unchecked clues are copied to the next session. Blank lines are filled with "Clue" (no numbering).
 - **Direct Click-to-Toggle:** Instantly mark clues as complete (☐/☑) by clicking them in view mode—no overlay required. Changes persist automatically.
 - **Overlay Panel:** Optional floating ☰ Secrets button lets you toggle clues in a pop-out panel.
 - **Horizontal Rule:** Each page now includes a horizontal rule (`<hr/>`) after the description for visual clarity.
