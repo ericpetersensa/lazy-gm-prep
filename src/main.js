@@ -4,19 +4,19 @@ import { MODULE_ID } from "./constants.js";
 import { createPrepJournal } from "./journal/generator.js";
 
 /* =======================================================================================
-   LGMP+ constants & state
+   Constants & State
 ======================================================================================= */
-const SECRETS_PAGE_NAME = "4. Define Secrets & Clues";              // <— single required title
-/** Remember the most recently rendered Journal page per Entry (for toggling). */
-const CURRENT_PAGE_BY_ENTRY_ID = new Map();
+const SECRETS_PAGE_NAME = "4. Define Secrets & Clues"; // exact title (case-insensitive)
+const CURRENT_PAGE_BY_ENTRY = new Map();               // entryId -> current pageId (for direct toggle)
 
 /* =======================================================================================
- Create GM Prep: Header button (AppV2 & v13+)
+   Create GM Prep: Header button (AppV2 & v13+)
 ======================================================================================= */
 function ensureInlineHeaderButton(rootEl) {
   if (!game.user.isGM) return;
   const header = rootEl.querySelector(".directory-header");
   if (!header) return;
+
   const container =
     header.querySelector(".action-buttons") ||
     header.querySelector(".header-actions") ||
@@ -31,8 +31,8 @@ function ensureInlineHeaderButton(rootEl) {
   btn.classList.add("lazy-gm-prep-btn", "header-control", "create-entry");
   btn.title = game.i18n.localize("lazy-gm-prep.header.buttonTooltip");
   btn.innerHTML = `<i class="fa-solid fa-clipboard-list"></i> ${game.i18n.localize("lazy-gm-prep.header.button")}`;
-  // Call the smart wrapper so the Secrets page is filtered to ☐ items
-  btn.addEventListener("click", () => createPrepJournalSmart());
+  // One-click: use your generator (it already finds previous/highest session; no prompt)
+  btn.addEventListener("click", () => createPrepJournal());
   container.appendChild(btn);
 }
 Hooks.on("renderJournalDirectory", (_app, html) => {
@@ -41,16 +41,17 @@ Hooks.on("renderJournalDirectory", (_app, html) => {
 });
 
 /* =======================================================================================
- VIEW-MODE SECRETS PANEL (works around closed Shadow DOM)
- - Adds a small floating button on Journal Page Sheet (view mode only) when a checklist exists.
- - Clicking it opens a panel that lists the current ☐/☑ items; clicking an item toggles & saves.
+   Shared HTML utilities (normalize, extract, build)
 ======================================================================================= */
 function normalizeMarkers(html) {
   let s = String(html ?? "");
+  // inputs -> unicode boxes
   s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*checked[^>]*>/gi, "☑");
   s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*>/gi, "☐");
+  // bracket -> unicode
   s = s.replace(/\[\s*\]/g, "☐");
   s = s.replace(/\[\s*[xX]\s*\]/g, "☑");
+  // unwrap labels
   s = s.replace(/<label[^>]*>/gi, "").replace(/<\/label>/gi, "");
   return s;
 }
@@ -58,8 +59,10 @@ function extractChecklist(html) {
   const UL_RE = /<ul\s+class=['"]lgmp-checklist['"][\s\S]*?<\/ul>/i;
   const hit = html.match(UL_RE);
   if (!hit) return { bodyWithoutChecklist: html, ulHtml: "", items: [] };
+
   const ulHtml = hit[0];
   const bodyWithoutChecklist = html.replace(UL_RE, "");
+
   const items = [];
   const LI_RE = /<li[^>]*>([\s\S]*?)<\/li>/gi;
   let m;
@@ -81,22 +84,23 @@ function escapeHtml(s) {
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   })[m]);
 }
+
+/* =======================================================================================
+   Overlay Panel (☰ Secrets) — view mode helper (optional UI)
+======================================================================================= */
 function injectSecretsPanel(app, sheetRoot) {
+  // Only when not editing
   const isEditMode =
     sheetRoot.querySelector(".editor") ||
     sheetRoot.querySelector(".tox-tinymce") ||
     sheetRoot.querySelector('[contenteditable="true"]');
   if (isEditMode) return;
 
-  // Record "last viewed page" for this entry and persist last source hints
+  // Track current page -> entry (used by direct toggle)
   try {
-    const pageDoc = app?.page;
-    const entryId = pageDoc?.parent?.id;
-    if (pageDoc?.id && entryId) CURRENT_PAGE_BY_ENTRY_ID.set(entryId, pageDoc.id);
-    if (pageDoc?.text?.content && (hasChecklistHTML(pageDoc.text.content) || looksLikeSecrets(pageDoc.name))) {
-      game.settings.set(MODULE_ID, "lastSourceJournalId", entryId ?? "");
-      game.settings.set(MODULE_ID, "lastSourcePageId", pageDoc.id ?? "");
-    }
+    const pg = app?.page;
+    const entryId = pg?.parent?.id;
+    if (pg?.id && entryId) CURRENT_PAGE_BY_ENTRY.set(entryId, pg.id);
   } catch (_) {}
 
   const page = app?.page;
@@ -109,15 +113,17 @@ function injectSecretsPanel(app, sheetRoot) {
 
   const appEl = sheetRoot.closest(".app");
   if (!appEl) return;
+  if (appEl.querySelector(".lgmp-secrets-fab")) return; // avoid duplicates
   appEl.classList.add("lgmp-app-host");
-  if (appEl.querySelector(".lgmp-secrets-fab")) return;
 
+  // FAB
   const fab = document.createElement("button");
   fab.type = "button";
   fab.className = "lgmp-secrets-fab";
   fab.title = "Toggle Secrets & Clues (view mode)";
   fab.innerHTML = "☰ Secrets";
 
+  // Panel
   const panel = document.createElement("div");
   panel.className = "lgmp-secrets-panel";
   panel.setAttribute("hidden", "hidden");
@@ -125,6 +131,7 @@ function injectSecretsPanel(app, sheetRoot) {
   const header = document.createElement("div");
   header.className = "lgmp-secrets-panel__header";
   header.innerHTML = `<strong>Secrets & Clues</strong><button type="button" class="lgmp-secrets-close" title="Close">×</button>`;
+
   const list = document.createElement("ul");
   list.className = "lgmp-secrets-panel__list";
 
@@ -141,14 +148,13 @@ function injectSecretsPanel(app, sheetRoot) {
   appEl.appendChild(panel);
 
   fab.addEventListener("click", () => {
-    const isHidden = panel.hasAttribute("hidden");
-    if (isHidden) panel.removeAttribute("hidden");
-    else panel.setAttribute("hidden", "hidden");
+    panel.toggleAttribute("hidden");
   });
   panel.querySelector(".lgmp-secrets-close")?.addEventListener("click", () => {
     panel.setAttribute("hidden", "hidden");
   });
 
+  // Persist toggles from panel -> Document
   panel.addEventListener("click", async (ev) => {
     const btn = ev.target?.closest?.(".lgmp-secret-toggle");
     if (!btn) return;
@@ -161,36 +167,54 @@ function injectSecretsPanel(app, sheetRoot) {
 
     try {
       const oldContent = String(page.text?.content ?? "");
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(normalizeMarkers(oldContent), "text/html");
+      const doc = new DOMParser().parseFromString(normalizeMarkers(oldContent), "text/html");
       const ul = doc.querySelector("ul.lgmp-checklist");
       if (ul) ul.outerHTML = buildChecklist(currentItems);
       else doc.body.insertAdjacentHTML("beforeend", buildChecklist(currentItems));
-
       await page.update({ "text.content": doc.body.innerHTML });
       app.render(true);
     } catch (err) {
       console.error(`${MODULE_ID} Failed to persist Secrets toggle:`, err);
+      ui.notifications?.error("Failed to save Secrets changes.");
     }
   });
 }
 Hooks.on("renderJournalPageSheet", (app, html) => {
   const root = html?.[0] ?? html;
-  if (!root) return;
-  injectSecretsPanel(app, root);
+  if (root) injectSecretsPanel(app, root);
 });
 
 /* =======================================================================================
- Direct click-to-toggle in rendered page (no overlay; persists Document)
+   Direct Click-to-Toggle in the rendered page (no overlay)
 ======================================================================================= */
-function hasChecklistHTML(html) {
-  return String(html ?? "").includes('class="lgmp-checklist"');
+function ensureClickCSS() {
+  if (document.getElementById(`${MODULE_ID}-toggle-style`)) return;
+  const style = document.createElement("style");
+  style.id = `${MODULE_ID}-toggle-style`;
+  style.textContent = `
+    ul.lgmp-checklist li { cursor: pointer; user-select: none; }
+    ul.lgmp-checklist li:active { opacity: .85; }
+  `;
+  document.head.appendChild(style);
 }
 function looksLikeSecrets(name) {
   return !!name && String(name).trim().toLowerCase() === SECRETS_PAGE_NAME.toLowerCase();
 }
+function hasChecklistHTML(html) {
+  return String(html ?? "").includes('class="lgmp-checklist"');
+}
+function entryFromHost(host) {
+  if (!host) return null;
+  const dataId = host.dataset?.documentId || host.dataset?.entryId;
+  let entry = dataId ? game.journal.get(dataId) : null;
+  if (entry) return entry;
+  const m = (host.id || "").match(/JournalEntry-([A-Za-z0-9]{16,})/);
+  const entryId = m?.[1] ?? null;
+  return entryId ? game.journal.get(entryId) : null;
+}
 function bindDirectToggle(host) {
   if (!host || host.dataset.lgmpDirectToggleBound === "1") return;
+  // Skip edit mode
   if (host.querySelector(".editor,.tox-tinymce,[contenteditable='true']")) return;
 
   host.dataset.lgmpDirectToggleBound = "1";
@@ -198,16 +222,18 @@ function bindDirectToggle(host) {
     const li = ev.target?.closest?.("ul.lgmp-checklist li");
     if (!li) return;
 
-    const entry = resolveEntryFromHost(host);
-    if (!entry) return ui.notifications?.warn(`[${MODULE_ID}] Could not resolve JournalEntry document.`);
+    const entry = entryFromHost(host);
+    if (!entry) return ui.notifications?.warn(`[${MODULE_ID}] Could not resolve JournalEntry.`);
 
+    // Resolve the correct page
     let page = null;
-    const currentId = CURRENT_PAGE_BY_ENTRY_ID.get(entry.id);
+    const currentId = CURRENT_PAGE_BY_ENTRY.get(entry.id);
     if (currentId) page = entry.pages?.get?.(currentId) || null;
     if (!page) page = entry.pages?.contents?.find(p => looksLikeSecrets(p.name)) || null;
     if (!page) page = entry.pages?.contents?.find(p => hasChecklistHTML(p.text?.content)) || null;
-    if (!page) return ui.notifications?.warn(`[${MODULE_ID}] Cannot find "${SECRETS_PAGE_NAME}" page on "${entry.name}".`);
+    if (!page) return ui.notifications?.warn(`[${MODULE_ID}] Cannot find "${SECRETS_PAGE_NAME}" on "${entry.name}".`);
 
+    // Map clicked DOM item -> saved HTML item (UL index, LI index; fallback by text)
     const ulDom = li.closest("ul.lgmp-checklist");
     const allUlsDom = Array.from(host.querySelectorAll("ul.lgmp-checklist"));
     const ulIndex = Math.max(0, allUlsDom.indexOf(ulDom));
@@ -228,6 +254,7 @@ function bindDirectToggle(host) {
       }
       if (!liSaved) return ui.notifications?.warn(`[${MODULE_ID}] Could not locate matching list item in saved HTML.`);
 
+      // Flip & persist
       const raw = (liSaved.textContent || "").trim();
       liSaved.textContent = raw.startsWith("☑") ? raw.replace(/^☑/, "☐") : raw.replace(/^[☐]?/, "☑");
 
@@ -239,16 +266,17 @@ function bindDirectToggle(host) {
     }
   }, true);
 }
-function resolveEntryFromHost(host) {
-  if (!host) return null;
-  const dataId = host.dataset?.documentId || host.dataset?.entryId;
-  let entry = dataId ? game.journal.get(dataId) : null;
-  if (entry) return entry;
-  const m = (host.id || "").match(/JournalEntry-([A-Za-z0-9]{16,})/);
-  const entryId = m?.[1] ?? null;
-  return entryId ? game.journal.get(entryId) : null;
-}
+// capture current page per entry
+Hooks.on("renderJournalPageSheet", (app, html) => {
+  try {
+    const pg = app?.page;
+    const entryId = pg?.parent?.id;
+    if (pg?.id && entryId) CURRENT_PAGE_BY_ENTRY.set(entryId, pg.id);
+  } catch (_) {}
+});
+// bind for existing/future sheets
 Hooks.on("ready", () => {
+  ensureClickCSS();
   document.querySelectorAll("form.journal-sheet").forEach(bindDirectToggle);
 });
 Hooks.on("renderApplicationV2", (_app, el) => {
@@ -256,22 +284,22 @@ Hooks.on("renderApplicationV2", (_app, el) => {
 });
 
 /* =======================================================================================
- Module init / ready / commands / keybindings
+   Module init / keybinding / chat command
 ======================================================================================= */
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} init`);
   registerSettings();
 
-  // Client settings for last source (used by /prep wrapper)
-  game.settings.register(MODULE_ID, "lastSourceJournalId", { scope: "client", config: false, type: String, default: "" });
-  game.settings.register(MODULE_ID, "lastSourcePageId",   { scope: "client", config: false, type: String, default: "" });
-
-  // Keybinding: Alt+P (GM) -> Create Prep journal (wrapper)
+  // Alt+P (GM): Create Prep (no prompt; generator uses highest/previous session)
   game.keybindings.register(MODULE_ID, "create-prep", {
     name: "lazy-gm-prep.keybindings.createPrep.name",
     hint: "lazy-gm-prep.keybindings.createPrep.hint",
     editable: [{ key: "KeyP", modifiers: ["Alt"] }],
-    onDown: () => { if (!game.user.isGM) return false; createPrepJournalSmart(); return true; },
+    onDown: () => {
+      if (!game.user.isGM) return false;
+      createPrepJournal();
+      return true;
+    },
     restricted: true
   });
 });
@@ -282,115 +310,7 @@ Hooks.once("ready", () => {
 Hooks.on("chatMessage", (_chatLog, text) => {
   if (!game.user.isGM) return;
   if (text.trim().toLowerCase() === "/prep") {
-    createPrepJournalSmart();
+    createPrepJournal();
     return false;
   }
 });
-
-/* =======================================================================================
- Create GM Prep wrapper
- - Keeps your creation flow, but ensures the Secrets page in the NEW journal only has ☐ items
-   copied from the SOURCE journal's Secrets page (exact name "4. Define Secrets & Clues").
-======================================================================================= */
-async function createPrepJournalSmart() {
-  try {
-    let postProcessPending = true;
-    const hookId = Hooks.on("createJournalEntry", async (created) => {
-      if (!postProcessPending) return;
-      postProcessPending = false;
-      Hooks.off("createJournalEntry", hookId);
-
-      try {
-        const source = await resolveSourceEntry();
-        if (!source) { ui.notifications?.warn(`[${MODULE_ID}] No source journal selected.`); return; }
-
-        const sourceSecrets = await resolveSecretsPageIn(source);
-        if (!sourceSecrets) { ui.notifications?.warn(`[${MODULE_ID}] Source has no "${SECRETS_PAGE_NAME}" page.`); return; }
-
-        const srcHTML = normalizeMarkers(String(sourceSecrets.text?.content ?? ""));
-        const ul = new DOMParser().parseFromString(srcHTML, "text/html").querySelector("ul.lgmp-checklist");
-        if (!ul) { ui.notifications?.warn(`[${MODULE_ID}] Source Secrets page has no <ul class="lgmp-checklist">.`); return; }
-
-        const unchecked = Array.from(ul.querySelectorAll(":scope > li"))
-          .map(li => li.textContent?.trim() || "")
-          .filter(raw => !!raw && !raw.startsWith("☑"))
-          .map(raw => raw.replace(/^\s*[☐☑]\s*/, ""));
-
-        const targetSecrets = await resolveSecretsPageIn(created) || await createOrPickSecretsPage(created, sourceSecrets);
-        if (!targetSecrets) { ui.notifications?.warn(`[${MODULE_ID}] Could not locate or create "${SECRETS_PAGE_NAME}" in new journal.`); return; }
-
-        const newUL = `<ul class="lgmp-checklist">\n${unchecked.map(t => `<li>☐ ${escapeHtml(t)}</li>`).join("\n")}\n</ul>`;
-        const tHTML = normalizeMarkers(String(targetSecrets.text?.content ?? ""));
-        const tDoc = new DOMParser().parseFromString(tHTML, "text/html");
-        const tUl = tDoc.querySelector("ul.lgmp-checklist");
-        if (tUl) tUl.outerHTML = newUL; else tDoc.body.insertAdjacentHTML("beforeend", newUL);
-
-        await targetSecrets.update({ "text.content": tDoc.body.innerHTML });
-        created?.sheet?.render?.(true);
-
-        game.settings.set(MODULE_ID, "lastSourceJournalId", created.id);
-        if (targetSecrets?.id) game.settings.set(MODULE_ID, "lastSourcePageId", targetSecrets.id);
-
-        ui.notifications?.info(`[${MODULE_ID}] Prep created. "${SECRETS_PAGE_NAME}" contains only unchecked clues (${unchecked.length}).`);
-      } catch (err) {
-        console.error(`${MODULE_ID}] Post-process failed`, err);
-        ui.notifications?.error(`[${MODULE_ID}] Prep post-processing failed (see console).`);
-      }
-    });
-
-    // Call your existing generator (unchanged)
-    createPrepJournal();
-
-  } catch (err) {
-    console.error(`${MODULE_ID}] createPrepJournalSmart failed`, err);
-    ui.notifications?.error(`[${MODULE_ID}] Create GM Prep failed (see console).`);
-  }
-}
-async function resolveSourceEntry() {
-  const lastJ = game.settings.get(MODULE_ID, "lastSourceJournalId");
-  if (lastJ) {
-    const byId = game.journal.get(lastJ);
-    if (byId) return byId;
-  }
-  const host = document.querySelector("form.journal-sheet");
-  const entry = resolveEntryFromHost(host);
-  if (entry) return entry;
-  return await promptPickSource(game.journal?.contents ?? []);
-}
-async function promptPickSource(entries) {
-  if (!entries?.length) return null;
-  const options = entries.map(e => `<option value="${e.id}">${e.name}</option>`).join("");
-  const content = `<div class="form-group"><label>Choose source Journal</label>
-    <select name="jid" style="width:100%">${options}</select></div>`;
-  return await Dialog.prompt({
-    title: "Select Source Journal",
-    content,
-    label: "Use This",
-    callback: html => game.journal.get(html.querySelector("select[name='jid']").value),
-    rejectClose: false
-  });
-}
-async function resolveSecretsPageIn(entry) {
-  const lastP = game.settings.get(MODULE_ID, "lastSourcePageId");
-  const byLast = entry.pages?.get?.(lastP);
-  if (byLast && (hasChecklistHTML(byLast.text?.content) || looksLikeSecrets(byLast.name))) return byLast;
-
-  const byName = entry.pages?.contents?.find(p => looksLikeSecrets(p.name));
-  if (byName) return byName;
-
-  const byChecklist = entry.pages?.contents?.find(p => hasChecklistHTML(p.text?.content));
-  if (byChecklist) return byChecklist;
-
-  return null;
-}
-async function createOrPickSecretsPage(targetEntry, sourceSecrets) {
-  const byName = targetEntry.pages?.contents?.find(p => looksLikeSecrets(p.name));
-  if (byName) return byName;
-
-  const name = SECRETS_PAGE_NAME;
-  const format = (sourceSecrets?.text?.format ?? 1);
-  const [created] = await targetEntry.createEmbeddedDocuments("JournalEntryPage", [{
-    name, type: "text", text: { format, content: "" }
-  }]);
-  return created || null;
-}
