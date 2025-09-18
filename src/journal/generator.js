@@ -144,11 +144,12 @@ ${items}
 </section>
 `;
 }
-function topUpToTen(texts, label = "Item") {
+function topUpToTen(texts, label = "Clue") {
   const out = [...texts];
-  for (let i = out.length + 1; i <= 10; i++) out.push(`${label} ${i}`);
+  while (out.length < 10) out.push(label);
   return out.slice(0, 10);
 }
+
 /** Extract our <ul class="lgmp-checklist"> and return { bodyWithoutChecklist, items: [{text,checked}] } */
 function extractModuleChecklist(html) {
   const UL_RE = /<ul\s+class=['"]lgmp-checklist['"][\s\S]*?<\/ul>/i;
