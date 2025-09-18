@@ -126,7 +126,7 @@ function sectionHeader(def) {
 }
 function sectionDescription(def) {
   const desc = game.i18n.localize(def.descKey);
-  return `<p class="lgmp-step-desc">${escapeHtml(desc)}</p>\n`;
+  return `<p class="lgmp-step-desc">${escapeHtml(desc)}</p>\n<hr/>\n`;
 }
 function notesPlaceholder() {
   const hint = game.i18n.localize("lazy-gm-prep.ui.add-notes-here") || "Add your notes here.";
