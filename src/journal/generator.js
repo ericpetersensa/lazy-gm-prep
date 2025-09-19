@@ -21,21 +21,20 @@ export async function createPrepJournal() {
   const includeDate = !!getSetting("includeDateInName", true);
 
   const folderId = await ensureFolder(folderName);
-  const seq = nextSequenceNumber(prefix); // now starts at 0 for first world run
+  const seq = nextSequenceNumber(prefix); // starts at 0 for first world run
   const isFirst = seq === 0;
 
   const entryName = includeDate
     ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
     : `${prefix} ${seq}`;
 
-  // Important: when copying from "previous", we intentionally ignore Session 0 so that
-  // first-time scaffolding never becomes the "source" for later copy. (See findPreviousSession.)
+  // Ignore Session 0 as a copy source so welcome content never propagates.
   const prev = findPreviousSession(prefix);
 
   if (separate) {
     const pages = [];
 
-    // ── FIRST-RUN: Getting Started page (Session 0 only) ────────────────────────
+    // Session 0: Getting Started page
     if (isFirst) {
       pages.push({
         name: game.i18n.localize("lazy-gm-prep.getting-started.title"),
@@ -44,12 +43,12 @@ export async function createPrepJournal() {
       });
     }
 
-    // ── Standard sections ──────────────────────────────────────────────────────
+    // Standard sections
     for (const def of PAGE_ORDER) {
       const copyOn = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
       const prevContent = copyOn ? getPreviousPageContent(prev, def) : null;
 
-      // --- Secrets & Clues
+      // Secrets & Clues
       if (def.key === "secrets-clues") {
         let content;
         if (prevContent) {
@@ -69,7 +68,7 @@ export async function createPrepJournal() {
         continue;
       }
 
-      // --- Review the Characters
+      // Review the Characters
       if (def.key === "review-characters") {
         let content;
         const initialRows = Number(getSetting(SETTINGS.initialCharacterRows, 5)) || 5;
@@ -93,7 +92,7 @@ export async function createPrepJournal() {
         continue;
       }
 
-      // --- Outline Important NPCs
+      // Important NPCs
       if (def.key === "important-npcs") {
         let content;
         const initialRows = Number(getSetting(SETTINGS.initialNpcRows, 5)) || 5;
@@ -109,7 +108,7 @@ export async function createPrepJournal() {
         continue;
       }
 
-      // --- Default for other sections
+      // Others
       let content;
       if (prevContent) {
         content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
@@ -117,7 +116,6 @@ export async function createPrepJournal() {
       } else {
         content = sectionDescription(def) + notesPlaceholder();
       }
-
       pages.push({ name: game.i18n.localize(def.titleKey), type: "text", text: { format: 1, content } });
     }
 
@@ -126,10 +124,9 @@ export async function createPrepJournal() {
     return entry;
   }
 
-  // ── Combined single page mode ─────────────────────────────────────────────────
+  // Combined single page mode
   const chunks = [];
 
-  // FIRST-RUN: put Getting Started at the top of the single page (Session 0 only)
   if (isFirst) {
     const h2 = `<h2 style="margin:0">${escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.title"))}</h2>\n`;
     chunks.push(`${h2}${gettingStartedBodyHTML({ prefix })}`);
@@ -228,15 +225,15 @@ function notesPlaceholder() {
 /* =========================== Getting Started (Session 0) =========================== */
 /** Plain body (no H2) for separate-pages; used as section body for combined mode too. */
 function gettingStartedBodyHTML({ prefix }) {
-  const quickStartTitle = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.quickstart.title"));
-  const knowTitle = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.know.title"));
-  const workflowTitle = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.workflow.title"));
+  const quickStartTitle   = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.quickstart.title"));
+  const settingsTitle     = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.settings.title"));
+  const knowTitle         = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.know.title"));
 
-  const headerBtnLabel = escapeHtml(game.i18n.localize("lazy-gm-prep.header.button")); // "Create GM Prep"
+  // Labels reused from i18n to keep naming consistent in text
   const separatePagesLabel = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.separatePages.name"));
-  const includeDateLabel = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.includeDateInName.name"));
-  const folderNameLabel = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.folderName.name"));
-  const prefixLabel = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.journalPrefix.name"));
+  const folderNameLabel    = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.folderName.name"));
+  const prefixLabel        = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.journalPrefix.name"));
+  const includeDateLabel   = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.includeDateInName.name"));
 
   return `
 <p class="lgmp-step-desc">
@@ -246,43 +243,32 @@ You’re on <strong>${escapeHtml(prefix)} 0</strong>. From here on, you’ll cre
 
 <h3 style="margin:0.5rem 0 0">${quickStartTitle}</h3>
 <ol>
-  <li>In the <em>Journal Directory</em> header, click <strong>${headerBtnLabel}</strong>.</li>
-  <li>Or press <kbd>Alt</kbd>+<kbd>P</kbd> (GM only).</li>
-  <li>Or type <code>/prep</code> in chat.</li>
+  <li>Press <kbd>Alt</kbd>+<kbd>P</kbd> (GM only) to create the next prep journal.</li>
+  <li>Type <code>/prep</code> in chat to generate a new prep journal.</li>
 </ol>
 
-<h3 style="margin:0.5rem 0 0">${knowTitle}</h3>
+<h3 style="margin:0.75rem 0 0">${settingsTitle}</h3>
 <ul>
-  <li><strong>Separate vs. Combined:</strong> Use <em>${separatePagesLabel}</em> in Module Settings to toggle one page per step or a single page with sections.</li>
-  <li><strong>Secrets &amp; Clues carry forward:</strong> Only <em>unchecked</em> secrets from the prior session are brought forward and topped up to 10.</li>
-  <li><strong>Per-page copy toggles:</strong> Each step (except Monsters by default) can copy prior content; adjust in Module Settings.</li>
-  <li><strong>Naming &amp; date:</strong> Journals are named like “${escapeHtml(prefix)} N”. Enable <em>${includeDateLabel}</em> to append today’s date.</li>
-  <li><strong>Folder &amp; prefix:</strong> Configure <em>${folderNameLabel}</em> and <em>${prefixLabel}</em> to match your campaign.</li>
-  <li><strong>Tables you can edit:</strong> “Review the Characters” and “Important NPCs” start with plain tables designed for the Foundry editor tools.</li>
-  <li><strong>Secrets helpers:</strong> In view mode, click any checklist item to toggle it. You can also use the small “☰ Secrets” overlay button to toggle from a compact panel.</li>
+  <li><strong>${separatePagesLabel}</strong>: A checkmark means that each step will have its own page. With it unchecked, all steps are combined into a single page. <em>(Default – Enabled)</em></li>
+  <li><strong>${folderNameLabel}</strong>: Type the folder name you want journals to be created under. <em>(Default – Lazy GM Prep)</em></li>
+  <li><strong>${prefixLabel}</strong>: Type the journal name you want used. <em>(Default – Session)</em></li>
+  <li><strong>${includeDateLabel}</strong>: A checkmark means that it will append the date on to the name of the journal <em>(Default – Disabled)</em></li>
+  <li><strong>Default rows in X (Characters and NPC pages)</strong>: While you can add or remove rows manually, this allows you to start with a set number of rows. <em>(Default – 5)</em></li>
+  <li><strong>Copy Previous X (All pages)</strong>: Each step can copy prior content or be toggled off if you don't want that page copied to the next journal. <em>(Default – mixed options)</em></li>
 </ul>
 
-<h3 style="margin:0.5rem 0 0">${workflowTitle}</h3>
-<ol>
-  <li>Skim <em>Review the Characters</em> and jot 1–2 player-facing priorities.</li>
-  <li>Write a punchy <em>Strong Start</em>.</li>
-  <li>List a few <em>Potential Scenes</em> you can freely reorder or discard.</li>
-  <li>Draft ~10 <em>Secrets &amp; Clues</em> (short, portable facts). Unused items roll forward.</li>
-  <li>Name 2–4 <em>Fantastic Locations</em> with evocative aspects.</li>
-  <li>Outline only the <em>Important NPCs</em> you need this session.</li>
-  <li>Pick <em>Relevant Monsters</em> that fit the fiction.</li>
-  <li>Queue up <em>Magic Item Rewards</em> that tie into story and player interests.</li>
-</ol>
+<h3 style="margin:0.75rem 0 0">${knowTitle}</h3>
+<ul>
+  <li><strong>Secrets &amp; Clues carry forward:</strong> Only <em>unchecked</em> secrets from the prior session are brought forward and topped up to 10.</li>
+  <li><strong>Tables you can edit:</strong> “Review the Characters” and “Important NPCs” start with plain tables designed for the Foundry editor tools.</li>
+  <li><strong>Actors, NPCs, and other items:</strong> You can drag and drop items into a journal page while it is in <em>edit</em> mode. Once your players have created their characters, drag and drop them into the “1. Review the Characters” table (one per row) for one‑click access to their character sheets. Same for NPCs.</li>
+</ul>
 
 <hr/>
 `.trim() + "\n";
 }
 
 /* ============================== Characters table & prompts ============================== */
-/**
- * Plain table (no classes/styles). Header cells are the first row in <tbody>
- * so the Foundry editor's "Add Row/Column" tools work reliably.
- */
 function characterReviewTableHTML(rowCount = 5) {
   const headers = [
     game.i18n.localize("lazy-gm-prep.characters.table.header.pcName"),
@@ -364,7 +350,6 @@ function topUpToTen(texts, label = "Clue") {
   while (out.length < 10) out.push(label);
   return out.slice(0, 10);
 }
-/** Extract our <ul class="lgmp-checklist"> and return { bodyWithoutChecklist, items: [{text,checked}] } */
 function extractModuleChecklist(html) {
   const UL_RE = /\<ul\s+class=['"]lgmp-checklist['"][\s\S]*?\<\/ul\>/i;
   const match = html.match(UL_RE);
@@ -422,9 +407,7 @@ async function ensureFolder(name) {
   const f = await Folder.create({ name, type: "JournalEntry", color: "#6d712d" });
   return f?.id ?? null;
 }
-/**
- * NEW: first journal in a world is 0, then 1, 2, ...
- */
+/** First journal in a world is 0, then 1, 2, ... */
 function nextSequenceNumber(prefix) {
   const existing = (game.journal?.contents ?? []).filter(j => j.name?.startsWith(prefix));
   if (!existing.length) return 0;
@@ -441,7 +424,7 @@ function findPreviousSession(prefix) {
       const n = j.name.match(/\b(\d+)\b/)?.[1] ?? null;
       return { num: n ? parseInt(n, 10) : 0, journal: j };
     })
-    .filter(x => x.num > 0) // << Keep ignoring "0" on purpose so it never serves as a copy source
+    .filter(x => x.num > 0) // ignore Session 0 on purpose
     .sort((a, b) => b.num - a.num);
   return list.length ? list[0].journal : null;
 }
