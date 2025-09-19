@@ -9,7 +9,7 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
  * - Copy non-secrets => scrub legacy headers/desc; keep content.
  * - Combined page mode: includes H2 per section; same checklist logic.
  * - Normalizes legacy [ ] / [x] and <input type="checkbox"> to ☐ / ☑ before processing.
- * - NEW: "review-characters" => inject a 6×5 blank table + four GM prompts on fresh pages.
+ * - "review-characters" => inject a 6×5 blank table + four GM prompts on fresh pages.
  */
 export async function createPrepJournal() {
   const separate = !!getSetting(SETTINGS.separatePages, true);
@@ -53,8 +53,7 @@ export async function createPrepJournal() {
         continue;
       }
 
-      // --- NEW: Review the Characters (special handling) ---
-      // Inject a 6×5 blank table + four prompts on fresh pages (or when scrubbed content ends up empty).
+      // --- Review the Characters (special handling) ---
       if (def.key === "review-characters") {
         let content;
         if (prevContent) {
@@ -119,7 +118,7 @@ export async function createPrepJournal() {
       continue;
     }
 
-    // NEW: Characters in combined page
+    // Characters in combined page
     if (def.key === "review-characters") {
       let bodyHtml;
       if (prevContent) {
@@ -166,19 +165,25 @@ function sectionDescription(def) {
   return `<p class="lgmp-step-desc">${escapeHtml(desc)}</p>\n<hr/>\n`;
 }
 function notesPlaceholder() {
-  const hint = game.i18n.localize("lazy-gm-prep.ui.add-notes-here") ||
-               "Add your notes here.";
+  const hint = game.i18n.localize("lazy-gm-prep.ui.add-notes-here") || "Add your notes here.";
   return `<p><em>${escapeHtml(hint)}</em></p>\n`;
 }
 
-/* ============================== Characters table & prompts ============================== */
-/** 6 columns, 5 rows blank. English labels are inline to avoid touching en.json. */
+/* ============================== Characters table & prompts (i18n) ============================== */
 function characterReviewTableHTML(rowCount = 5) {
-  const headers = ["PC Name", "Player", "Concept/Role", "Goal/Hook", "Bond/Drama", "Recent Note"]
-    .map(escapeHtml);
+  const headers = [
+    game.i18n.localize("lazy-gm-prep.characters.table.header.pcName"),
+    game.i18n.localize("lazy-gm-prep.characters.table.header.player"),
+    game.i18n.localize("lazy-gm-prep.characters.table.header.conceptRole"),
+    game.i18n.localize("lazy-gm-prep.characters.table.header.goalHook"),
+    game.i18n.localize("lazy-gm-prep.characters.table.header.bondDrama"),
+    game.i18n.localize("lazy-gm-prep.characters.table.header.recentNote")
+  ].map(escapeHtml);
+
   const rows = Array.from({ length: rowCount }, () =>
     "<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>"
   ).join("\n");
+
   return `
 <table style="width:100%; border-collapse: collapse;" border="1">
   <thead>
@@ -197,14 +202,21 @@ ${rows}
 </table>
 `.trim() + "\n";
 }
-/** Four GM review questions (below the table) */
+
 function gmReviewPromptsHTML() {
+  const lines = [
+    game.i18n.localize("lazy-gm-prep.characters.prompts.spotlight"),
+    game.i18n.localize("lazy-gm-prep.characters.prompts.unresolved"),
+    game.i18n.localize("lazy-gm-prep.characters.prompts.bonds"),
+    game.i18n.localize("lazy-gm-prep.characters.prompts.reward")
+  ].map(escapeHtml);
+
   return `
 <ul>
-  <li>Who hasn’t had a spotlight moment lately?</li>
-  <li>Anyone have unresolved goals or secrets?</li>
-  <li>Any PC bonds or rivalries to bring up this session?</li>
-  <li>Who is due for a magic item or cool reward?</li>
+  <li>${lines[0]}</li>
+  <li>${lines[1]}</li>
+  <li>${lines[2]}</li>
+  <li>${lines[3]}</li>
 </ul>
 `.trim() + "\n";
 }
