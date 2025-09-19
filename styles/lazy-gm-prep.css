@@ -17,15 +17,8 @@
 
   /* Legacy actor styles (kept for compatibility) */
   .lgmp-actor-list { list-style: none; margin: 0.25rem 0 0; padding: 0; display: grid; gap: 0.4rem; }
-  .lgmp-actor-item {
-    display: grid;
-    grid-template-columns: 28px 1fr;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.45rem;
-    border-radius: 6px;
-    background: var(--color-bg-subtle, rgba(0,0,0,0.06));
-  }
+  .lgmp-actor-item { display: grid; grid-template-columns: 28px 1fr; align-items: center; gap: 0.5rem;
+    padding: 0.35rem 0.45rem; border-radius: 6px; background: var(--color-bg-subtle, rgba(0,0,0,0.06)); }
   .lgmp-actor-thumb { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; }
   .lgmp-name { font-weight: 600; }
   .lgmp-type { opacity: 0.7; margin-left: 0.4rem; }
@@ -77,12 +70,17 @@
     box-shadow: 0 8px 16px rgba(0,0,0,0.35);
   }
   .lgmp-secrets-panel[hidden] { display: none !important; }
-  .lgmp-secrets-panel__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 8px; }
+
+  .lgmp-secrets-panel__header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px; gap: 8px;
+  }
   .lgmp-secrets-panel__header .lgmp-secrets-close {
     border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
     border-radius: 6px; background: transparent; color: inherit; cursor: pointer; padding: 0 6px;
   }
   .lgmp-secrets-panel__header .lgmp-secrets-close:hover { background: var(--color-bg-subtle, rgba(255,255,255,0.08)); }
+
   .lgmp-secrets-panel__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
   .lgmp-secrets-panel__list > li { display: grid; grid-template-columns: 28px 1fr; align-items: start; gap: 6px; }
   .lgmp-secret-toggle {
@@ -93,24 +91,4 @@
   }
   .lgmp-secret-toggle:hover { background: var(--color-bg-subtle, rgba(255,255,255,0.12)); }
   .lgmp-secret-text { white-space: pre-wrap; }
-
-  /* ===== NEW: Characters quick table + prompts ===== */
-  .lgmp-char-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .lgmp-char-table th,
-  .lgmp-char-table td {
-    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
-    padding: 4px 6px;
-    vertical-align: top;
-  }
-  .lgmp-char-table thead th {
-    text-align: left;
-    background: var(--color-bg-subtle, rgba(255,255,255,0.06));
-  }
-  .lgmp-review-prompts {
-    margin: 0.5rem 0 0;
-    padding-left: 1.2rem; /* normal bullet indent */
-  }
 }
