@@ -10,7 +10,8 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
  * - Copy non-secrets => scrub legacy headers/desc; keep content.
  * - Combined page mode: includes H2 per section; same checklist logic.
  * - Normalizes legacy [ ] / [x] and <input type="checkbox"> to ☐ / ☑ before processing.
- * - "review-characters" => inject a blank, editor-native table + four GM prompts on fresh pages.
+ * - "review-characters" => inject a blank, editor-native character table + prompts.
+ * - "important-npcs" => inject a blank, editor-native NPC table tuned for Lazy DM usage.
  */
 export async function createPrepJournal() {
   const separate = !!getSetting(SETTINGS.separatePages, true);
@@ -19,12 +20,12 @@ export async function createPrepJournal() {
   const includeDate = !!getSetting("includeDateInName", true);
 
   const folderId = await ensureFolder(folderName);
-  const seq = nextSequenceNumber(prefix); // next session number based on highest existing
+  const seq = nextSequenceNumber(prefix);
   const entryName = includeDate
     ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
     : `${prefix} ${seq}`;
 
-  const prev = findPreviousSession(prefix); // highest-numbered existing session (source)
+  const prev = findPreviousSession(prefix);
 
   if (separate) {
     const pages = [];
@@ -32,34 +33,30 @@ export async function createPrepJournal() {
       const copyOn = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
       const prevContent = copyOn ? getPreviousPageContent(prev, def) : null;
 
-      // --- Secrets & Clues (special handling) ---
+      // --- Secrets & Clues ---
       if (def.key === "secrets-clues") {
         let content;
         if (prevContent) {
-          // Normalize + rebuild from UNCHECKED
           const normalized = normalizeMarkers(
             scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false })
           );
           const { bodyWithoutChecklist, items } = extractModuleChecklist(normalized);
           const uncheckedTexts = items.filter(i => !i.checked).map(i => i.text.trim());
           const toRender = topUpToTen(uncheckedTexts, "Clue");
-          const bodyCore = bodyWithoutChecklist?.trim()
-            ? `${bodyWithoutChecklist.trim()}\n`
-            : "";
+          const bodyCore = bodyWithoutChecklist?.trim() ? `${bodyWithoutChecklist.trim()}\n` : "";
           content = `${bodyCore}${renderChecklist(toRender)}`;
           if (!bodyCore) content = sectionDescription(def) + notesPlaceholder() + content;
         } else {
-          // Fresh page
           content = sectionDescription(def) + notesPlaceholder() + renderChecklist(topUpToTen([], "Clue"));
         }
         pages.push({ name: game.i18n.localize(def.titleKey), type: "text", text: { format: 1, content } });
         continue;
       }
 
-      // --- Review the Characters (special handling) ---
+      // --- Review the Characters ---
       if (def.key === "review-characters") {
         let content;
-        const initialRows = Number(getSetting("initialCharacterRows", 5)) || 5;
+        const initialRows = Number(getSetting(SETTINGS.initialCharacterRows, 5)) || 5;
 
         if (prevContent) {
           content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
@@ -71,7 +68,6 @@ export async function createPrepJournal() {
               notesPlaceholder();
           }
         } else {
-          // Fresh page
           content =
             sectionDescription(def) +
             characterReviewTableHTML(initialRows) +
@@ -82,7 +78,30 @@ export async function createPrepJournal() {
         continue;
       }
 
-      // --- Default handling for other pages ---
+      // --- Outline Important NPCs ---
+      if (def.key === "important-npcs") {
+        let content;
+        const initialRows = Number(getSetting(SETTINGS.initialNpcRows, 5)) || 5;
+
+        if (prevContent) {
+          content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
+          if (!content.trim()) {
+            content =
+              sectionDescription(def) +
+              importantNpcsTableHTML(initialRows) +
+              notesPlaceholder();
+          }
+        } else {
+          content =
+            sectionDescription(def) +
+            importantNpcsTableHTML(initialRows) +
+            notesPlaceholder();
+        }
+        pages.push({ name: game.i18n.localize(def.titleKey), type: "text", text: { format: 1, content } });
+        continue;
+      }
+
+      // --- Default for other sections ---
       let content;
       if (prevContent) {
         content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
@@ -125,7 +144,7 @@ export async function createPrepJournal() {
 
     if (def.key === "review-characters") {
       let bodyHtml;
-      const initialRows = Number(getSetting("initialCharacterRows", 5)) || 5;
+      const initialRows = Number(getSetting(SETTINGS.initialCharacterRows, 5)) || 5;
 
       if (prevContent) {
         bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
@@ -138,7 +157,22 @@ export async function createPrepJournal() {
       continue;
     }
 
-    // Other sections (combined)
+    if (def.key === "important-npcs") {
+      let bodyHtml;
+      const initialRows = Number(getSetting(SETTINGS.initialNpcRows, 5)) || 5;
+
+      if (prevContent) {
+        bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
+        if (!bodyHtml.trim())
+          bodyHtml = importantNpcsTableHTML(initialRows) + notesPlaceholder();
+      } else {
+        bodyHtml = importantNpcsTableHTML(initialRows) + notesPlaceholder();
+      }
+      chunks.push(`${headerHtml}${bodyHtml}`);
+      continue;
+    }
+
+    // Others
     let bodyHtml;
     if (prevContent) {
       bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
@@ -178,12 +212,10 @@ function notesPlaceholder() {
   return `<p><em>${escapeHtml(hint)}</em></p>\n`;
 }
 
-/* ============================== Characters table & prompts (i18n) ============================== */
+/* ============================== Characters table & prompts ============================== */
 /**
- * IMPORTANT for editor-compatibility:
- * - No classes or inline styles
- * - No <thead>; put header <th> cells in the FIRST ROW of <tbody>
- *   (ensures Add Row/Column works from any selection in the table)
+ * Plain table (no classes/styles). Header cells are the first row in <tbody>
+ * so the Foundry editor's "Add Row/Column" tools work reliably.
  */
 function characterReviewTableHTML(rowCount = 5) {
   const headers = [
@@ -225,6 +257,38 @@ function gmReviewPromptsHTML() {
   <li>${lines[2]}</li>
   <li>${lines[3]}</li>
 </ul>
+`.trim() + "\n";
+}
+
+/* ============================== Important NPCs table ============================== */
+/**
+ * Plain table aligned to "Outline Important NPCs":
+ * Name | Connection/Role | Archetype | Goal/Motivation | Relationship to PCs | Notes
+ * (Book emphasizes name, connection, archetype; relationship optional.)  Source: [LazyDM-Return.pdf](https://usawest-my.sharepoint.com/personal/eric_petersen_usw_salvationarmy_org/Documents/Documents/My%20Games/D%26D/Resources/DMTools/LazyDM/2018LazyDM-Return/LazyDM-Return.pdf?EntityRepresentationId=c7d0b590-5e74-4335-a771-cf436ef408a5), Ch. 8. [1](https://usawest-my.sharepoint.com/personal/eric_petersen_usw_salvationarmy_org/Documents/Documents/My%20Games/D%26D/Resources/DMTools/LazyDM/2018LazyDM-Return/LazyDM-Return.pdf)
+ */
+function importantNpcsTableHTML(rowCount = 5) {
+  const headers = [
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.name"),
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.connection"),
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.archetype"),
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.goal"),
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.relationship"),
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.notes")
+  ].map(escapeHtml);
+
+  const cols = headers.length;
+  const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
+  const bodyRows = Array.from({ length: rowCount }, () =>
+    `<tr>${"<td></td>".repeat(cols)}</tr>`
+  ).join("\n");
+
+  return `
+<table>
+  <tbody>
+${headerRow}
+${bodyRows}
+  </tbody>
+</table>
 `.trim() + "\n";
 }
 
@@ -303,7 +367,6 @@ async function ensureFolder(name) {
   return f?.id ?? null;
 }
 function nextSequenceNumber(prefix) {
-  // enumerate using collection contents to avoid missing items
   const existing = (game.journal?.contents ?? []).filter(j => j.name?.startsWith(prefix));
   const nums = existing
     .map(j => j.name.match(/\b(\d+)\b/)?.[1] ?? null)
