@@ -17,8 +17,15 @@
 
   /* Legacy actor styles (kept for compatibility) */
   .lgmp-actor-list { list-style: none; margin: 0.25rem 0 0; padding: 0; display: grid; gap: 0.4rem; }
-  .lgmp-actor-item { display: grid; grid-template-columns: 28px 1fr; align-items: center; gap: 0.5rem;
-    padding: 0.35rem 0.45rem; border-radius: 6px; background: var(--color-bg-subtle, rgba(0,0,0,0.06)); }
+  .lgmp-actor-item {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.45rem;
+    border-radius: 6px;
+    background: var(--color-bg-subtle, rgba(0,0,0,0.06));
+  }
   .lgmp-actor-thumb { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; }
   .lgmp-name { font-weight: 600; }
   .lgmp-type { opacity: 0.7; margin-left: 0.4rem; }
@@ -70,7 +77,6 @@
     box-shadow: 0 8px 16px rgba(0,0,0,0.35);
   }
   .lgmp-secrets-panel[hidden] { display: none !important; }
-
   .lgmp-secrets-panel__header {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 6px; gap: 8px;
@@ -80,7 +86,6 @@
     border-radius: 6px; background: transparent; color: inherit; cursor: pointer; padding: 0 6px;
   }
   .lgmp-secrets-panel__header .lgmp-secrets-close:hover { background: var(--color-bg-subtle, rgba(255,255,255,0.08)); }
-
   .lgmp-secrets-panel__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
   .lgmp-secrets-panel__list > li { display: grid; grid-template-columns: 28px 1fr; align-items: start; gap: 6px; }
   .lgmp-secret-toggle {
@@ -91,4 +96,86 @@
   }
   .lgmp-secret-toggle:hover { background: var(--color-bg-subtle, rgba(255,255,255,0.12)); }
   .lgmp-secret-text { white-space: pre-wrap; }
+
+  /* ======================================================================
+     NEW: Characters quick table + prompts
+     ----------------------------------------------------------------------
+     Base style: .lgmp-char-table
+     Optional modifiers:
+       - .lgmp-char-table--compact  (denser, smaller padding/font)
+       - .lgmp-char-table--roomy    (spacious, larger padding/line-height)
+     ====================================================================== */
+
+  .lgmp-char-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* predictable wrapping across columns */
+  }
+  .lgmp-char-table th,
+  .lgmp-char-table td {
+    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
+    padding: 4px 6px;
+    vertical-align: top;
+    overflow-wrap: anywhere; /* wrap long words/links gracefully */
+  }
+  .lgmp-char-table thead th {
+    text-align: left;
+    background: var(--color-bg-subtle, rgba(255,255,255,0.06));
+    position: sticky; /* keep column labels visible while scrolling */
+    top: 0;
+    z-index: 1;
+  }
+  .lgmp-char-table tbody tr:nth-child(even) td {
+    background: var(--color-bg-subtle, rgba(0,0,0,0.05)); /* gentle zebra striping */
+  }
+
+  /* Modifier: COMPACT (denser layout) */
+  .lgmp-char-table.lgmp-char-table--compact th,
+  .lgmp-char-table.lgmp-char-table--compact td {
+    padding: 2px 4px;
+    font-size: 0.92em;
+    line-height: 1.2;
+  }
+  .lgmp-char-table.lgmp-char-table--compact thead th {
+    backdrop-filter: none; /* ensure crisp text in small headers */
+  }
+
+  /* Modifier: ROOMY (more spacious layout) */
+  .lgmp-char-table.lgmp-char-table--roomy th,
+  .lgmp-char-table.lgmp-char-table--roomy td {
+    padding: 8px 10px;
+    font-size: 1.02em;
+    line-height: 1.4;
+  }
+  .lgmp-char-table.lgmp-char-table--roomy thead th {
+    background: var(--color-bg-subtle, rgba(255,255,255,0.08));
+  }
+
+  /* GM review prompts list below the table */
+  .lgmp-review-prompts {
+    margin: 0.6rem 0 0;
+    padding-left: 1.2rem; /* standard bullet indent */
+  }
+  .lgmp-review-prompts li {
+    margin: 0.15rem 0;
+  }
+
+  /* Responsive niceties: slightly reduce density on very narrow panes */
+  @media (max-width: 680px) {
+    .lgmp-char-table { font-size: 0.97em; }
+    .lgmp-char-table.lgmp-char-table--compact { font-size: 0.9em; }
+  }
+}
+
+/* Print-friendly adjustments */
+@media print {
+  .lgmp-char-table th,
+  .lgmp-char-table td {
+    border-color: #000 !important;
+  }
+  .lgmp-char-table thead th {
+    background: #eaeaea !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
