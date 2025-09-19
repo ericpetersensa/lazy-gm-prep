@@ -14,6 +14,7 @@
   "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g., \"Session\").",
   "lazy-gm-prep.settings.includeDateInName.name": "Include today’s date on the Journal name",
   "lazy-gm-prep.settings.includeDateInName.hint": "If enabled, the current date will be appended to the journal name (e.g., 'Session 3: 9/16/2025'). If disabled, only the prefix and number are used.",
+
   "lazy-gm-prep.settings.initialCharacterRows.name": "Default rows in “Review the Characters”",
   "lazy-gm-prep.settings.initialCharacterRows.hint": "Sets how many empty rows the Characters table starts with. You can still add/delete rows in the editor as needed.",
   "lazy-gm-prep.settings.initialNpcRows.name": "Default rows in “Important NPCs”",
@@ -76,7 +77,6 @@
   "lazy-gm-prep.npcs.table.header.relationship": "Relationship to PCs",
   "lazy-gm-prep.npcs.table.header.notes": "Notes",
 
-  /*** NEW: Getting Started ***/
   "lazy-gm-prep.getting-started.title": "0. Getting Started",
   "lazy-gm-prep.getting-started.quickstart.title": "Quick Start",
   "lazy-gm-prep.getting-started.know.title": "Things to Know",
