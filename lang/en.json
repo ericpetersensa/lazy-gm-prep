@@ -56,7 +56,6 @@
 
   "lazy-gm-prep.ui.add-notes-here": "Add your notes here.",
 
-  /* ===== NEW: Characters table headers + prompts ===== */
   "lazy-gm-prep.characters.table.header.pcName": "PC Name",
   "lazy-gm-prep.characters.table.header.player": "Player",
   "lazy-gm-prep.characters.table.header.conceptRole": "Concept/Role",
