@@ -1,6 +1,7 @@
 // src/journal/generator.js
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { PAGE_ORDER, getSetting } from "../settings.js";
+
 /**
  * Create a new GM Prep journal for the next session.
  * - Separate pages: no in-body H2 (avoid duplicate with page name).
@@ -9,18 +10,20 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
  * - Copy non-secrets => scrub legacy headers/desc; keep content.
  * - Combined page mode: includes H2 per section; same checklist logic.
  * - Normalizes legacy [ ] / [x] and <input type="checkbox"> to ☐ / ☑ before processing.
- * - "review-characters" => inject a 6×5 blank table + four GM prompts on fresh pages.
+ * - "review-characters" => inject a blank table + four GM prompts on fresh pages.
  */
 export async function createPrepJournal() {
   const separate = !!getSetting(SETTINGS.separatePages, true);
   const folderName = getSetting(SETTINGS.folderName, "GM Prep");
   const prefix = getSetting(SETTINGS.journalPrefix, "Session");
   const includeDate = !!getSetting("includeDateInName", true);
+
   const folderId = await ensureFolder(folderName);
   const seq = nextSequenceNumber(prefix); // next session number based on highest existing
   const entryName = includeDate
     ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
     : `${prefix} ${seq}`;
+
   const prev = findPreviousSession(prefix); // highest-numbered existing session (source)
 
   if (separate) {
@@ -56,12 +59,14 @@ export async function createPrepJournal() {
       // --- Review the Characters (special handling) ---
       if (def.key === "review-characters") {
         let content;
+        const initialRows = Number(getSetting("initialCharacterRows", 5)) || 5;
+
         if (prevContent) {
           content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
           if (!content.trim()) {
             content =
               sectionDescription(def) +
-              characterReviewTableHTML(5) +
+              characterReviewTableHTML(initialRows) +
               gmReviewPromptsHTML() +
               notesPlaceholder();
           }
@@ -69,7 +74,7 @@ export async function createPrepJournal() {
           // Fresh page
           content =
             sectionDescription(def) +
-            characterReviewTableHTML(5) +
+            characterReviewTableHTML(initialRows) +
             gmReviewPromptsHTML() +
             notesPlaceholder();
         }
@@ -118,14 +123,16 @@ export async function createPrepJournal() {
       continue;
     }
 
-    // Characters in combined page
     if (def.key === "review-characters") {
       let bodyHtml;
+      const initialRows = Number(getSetting("initialCharacterRows", 5)) || 5;
+
       if (prevContent) {
         bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
-        if (!bodyHtml.trim()) bodyHtml = characterReviewTableHTML(5) + gmReviewPromptsHTML() + notesPlaceholder();
+        if (!bodyHtml.trim())
+          bodyHtml = characterReviewTableHTML(initialRows) + gmReviewPromptsHTML() + notesPlaceholder();
       } else {
-        bodyHtml = characterReviewTableHTML(5) + gmReviewPromptsHTML() + notesPlaceholder();
+        bodyHtml = characterReviewTableHTML(initialRows) + gmReviewPromptsHTML() + notesPlaceholder();
       }
       chunks.push(`${headerHtml}${bodyHtml}`);
       continue;
@@ -165,7 +172,7 @@ function sectionDescription(def) {
   return `<p class="lgmp-step-desc">${escapeHtml(desc)}</p>\n<hr/>\n`;
 }
 function notesPlaceholder() {
-  const hint = game.i18n.localize("lazy-gm-prep.ui.add-notes-here") || "Add your notes here.";
+  const hint = game.i18n.localize("lazy-gm-prep.ui.add-notes-here") ?? "Add your notes here.";
   return `<p><em>${escapeHtml(hint)}</em></p>\n`;
 }
 
@@ -180,24 +187,18 @@ function characterReviewTableHTML(rowCount = 5) {
     game.i18n.localize("lazy-gm-prep.characters.table.header.recentNote")
   ].map(escapeHtml);
 
-  const rows = Array.from({ length: rowCount }, () =>
-    "<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>"
+  const cols = headers.length;
+  const bodyRows = Array.from({ length: rowCount }, () =>
+    `<tr>${"<td></td>".repeat(cols)}</tr>`
   ).join("\n");
 
   return `
-<table style="width:100%; border-collapse: collapse;" border="1">
+<table class="lgmp-char-table lgmp-char-table--compact">
   <thead>
-    <tr>
-      <th>${headers[0]}</th>
-      <th>${headers[1]}</th>
-      <th>${headers[2]}</th>
-      <th>${headers[3]}</th>
-      <th>${headers[4]}</th>
-      <th>${headers[5]}</th>
-    </tr>
+    <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
   </thead>
   <tbody>
-${rows}
+${bodyRows}
   </tbody>
 </table>
 `.trim() + "\n";
@@ -210,7 +211,6 @@ function gmReviewPromptsHTML() {
     game.i18n.localize("lazy-gm-prep.characters.prompts.bonds"),
     game.i18n.localize("lazy-gm-prep.characters.prompts.reward")
   ].map(escapeHtml);
-
   return `
 <ul>
   <li>${lines[0]}</li>
@@ -239,13 +239,13 @@ function topUpToTen(texts, label = "Clue") {
 }
 /** Extract our <ul class="lgmp-checklist"> and return { bodyWithoutChecklist, items: [{text,checked}] } */
 function extractModuleChecklist(html) {
-  const UL_RE = /<ul\s+class=['"]lgmp-checklist['"][\s\S]*?<\/ul>/i;
+  const UL_RE = /\<ul\s+class=['"]lgmp-checklist['"][\s\S]*?\<\/ul\>/i;
   const match = html.match(UL_RE);
   if (!match) return { bodyWithoutChecklist: html, items: [] };
   const ulHtml = match[0];
   const bodyWithoutChecklist = html.replace(UL_RE, "");
   const items = [];
-  const LI_RE = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+  const LI_RE = /\<li[^\>]*\>([\s\S]*?)\<\/li\>/gi;
   let m;
   while ((m = LI_RE.exec(ulHtml))) {
     const raw = stripTags(m[1]).trim();
@@ -258,30 +258,30 @@ function extractModuleChecklist(html) {
 }
 function normalizeMarkers(html) {
   let s = String(html ?? "");
-  s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*checked[^>]*>/gi, "☑");
-  s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*>/gi, "☐");
+  s = s.replace(/\<input[^\>]*type=['"]checkbox['"][^\>]*checked[^\>]*\>/gi, "☑");
+  s = s.replace(/\<input[^\>]*type=['"]checkbox['"][^\>]*\>/gi, "☐");
   s = s.replace(/\[\s*\]/g, "☐");
   s = s.replace(/\[\s*[xX]\s*\]/g, "☑");
-  s = s.replace(/<label[^>]*>/gi, "").replace(/<\/label>/gi, "");
+  s = s.replace(/\<label[^\>]*\>/gi, "").replace(/\<\/label\>/gi, "");
   return s;
 }
 function scrubContent(rawHtml, def, { stripTitle = true, stripLegacyHeader = true, stripDesc = false } = {}) {
   let html = String(rawHtml ?? "");
   if (stripLegacyHeader) {
-    html = html.replace(/<div\s+class=['"]lgmp-header['"][\s\S]*?<\/div>/i, "");
+    html = html.replace(/\<div\s+class=['"]lgmp-header['"][\s\S]*?\<\/div\>/i, "");
   }
   if (stripTitle) {
     const titleText = game.i18n.localize(def.titleKey);
     const reTitle = new RegExp(
-      `<h[12][^>]*>\\s*(?:\\d+\\.\\s*)?${escapeRegExp(titleText)}\\s*<\\/h[12]>`,
+      `\\<h[12][^\\>]*\\>\\s*(?:\\d+\\.\\s*)?${escapeRegExp(titleText)}\\s*\\<\\/h[12]\\>`,
       "i"
     );
     html = html.replace(reTitle, "");
   }
   if (stripDesc) {
-    html = html.replace(/<p[^>]*class=['"]lgmp-step-desc['"][^>]*>[\s\S]*?<\/p>/i, "");
+    html = html.replace(/\<p[^\>]*class=['"]lgmp-step-desc['"][^\>]*\>[\s\S]*?\<\/p\>/i, "");
     const descText = game.i18n.localize(def.descKey);
-    const reDesc = new RegExp(`<p[^>]*>\\s*${escapeRegExp(descText)}\\s*<\\/p>`, "i");
+    const reDesc = new RegExp(`\\<p[^\\>]*\\>\\s*${escapeRegExp(descText)}\\s*\\<\\/p\\>`, "i");
     html = html.replace(reDesc, "");
   }
   return html;
@@ -329,7 +329,7 @@ function getPreviousPageContent(prevJournal, def) {
 
 /* ================================= string utils ================================= */
 function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, m => ({
+  return String(s ?? "").replace(/[&<>"']/g, (m) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   })[m]);
 }
@@ -337,7 +337,7 @@ function escapeRegExp(s) {
   return String(s ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 function stripTags(s) {
-  return String(s ?? "").replace(/<\/?[^>]+>/g, "");
+  return String(s ?? "").replace(/\<\/?[^>]+\>/g, "");
 }
 function splitMarker(line) {
   const trimmed = String(line ?? "").trim();
