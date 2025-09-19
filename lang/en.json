@@ -1,181 +1,70 @@
-/* lazy-gm-prep/styles/lazy-gm-prep.css */
-@layer modules {
-  /* Header button in Journal Directory */
-  .directory .directory-header .lazy-gm-prep-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    white-space: nowrap;
-  }
-  .directory .directory-header .lazy-gm-prep-btn i {
-    font-size: 0.9em;
-  }
+{
+  "lazy-gm-prep.module.name": "Lazy GM Prep",
+  "lazy-gm-prep.header.button": "Create GM Prep",
+  "lazy-gm-prep.header.buttonTooltip": "Create a new prep journal for your next session",
+  "lazy-gm-prep.notifications.created": "Created: {name}",
 
-  /* General sections */
-  .lgmp-section { margin-block: 0.75rem 1rem; }
-  .lgmp-step-desc { margin: 0.25rem 0 0.5rem; opacity: 0.95; }
+  "lazy-gm-prep.keybindings.createPrep.name": "Create GM Prep",
+  "lazy-gm-prep.keybindings.createPrep.hint": "Create a new prep journal (GM only). Default: Alt+P",
 
-  /* Legacy actor styles (kept for compatibility) */
-  .lgmp-actor-list { list-style: none; margin: 0.25rem 0 0; padding: 0; display: grid; gap: 0.4rem; }
-  .lgmp-actor-item {
-    display: grid;
-    grid-template-columns: 28px 1fr;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.45rem;
-    border-radius: 6px;
-    background: var(--color-bg-subtle, rgba(0,0,0,0.06));
-  }
-  .lgmp-actor-thumb { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; }
-  .lgmp-name { font-weight: 600; }
-  .lgmp-type { opacity: 0.7; margin-left: 0.4rem; }
-  .lgmp-inline-stats { opacity: 0.9; font-size: 0.9em; margin-left: 0.5rem; }
-  .lgmp-actor-item a[data-lazy-open] { text-decoration: none; border-bottom: 1px dashed transparent; }
-  .lgmp-actor-item a[data-lazy-open]:hover { border-bottom-color: currentColor; }
-  .lgmp-empty { opacity: 0.7; font-style: italic; padding-left: 2.5rem; }
+  "lazy-gm-prep.settings.separatePages.name": "Separate Pages for Each Step",
+  "lazy-gm-prep.settings.separatePages.hint": "If enabled, create one page per step; otherwise combine all steps into one page.",
+  "lazy-gm-prep.settings.folderName.name": "Folder Name for Prep Journals",
+  "lazy-gm-prep.settings.folderName.hint": "The folder in which to store generated prep journals.",
+  "lazy-gm-prep.settings.journalPrefix.name": "Journal Name Prefix",
+  "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g., \"Session\").",
+  "lazy-gm-prep.settings.includeDateInName.name": "Include today’s date on the Journal name",
+  "lazy-gm-prep.settings.includeDateInName.hint": "If enabled, the current date will be appended to the journal name (e.g., 'Session 3: 9/16/2025'). If disabled, only the prefix and number are used.",
 
-  /* Checklist in-page hover (theme-aware) */
-  .lgmp-checklist { list-style: none; margin: 0.25rem 0 0; padding: 0; display: grid; gap: 0.35rem; }
-  .lgmp-checklist li { cursor: pointer; padding: 0.15em 0.25em; transition: background 0.15s, color 0.15s; border-radius: 4px; }
-  .lgmp-checklist li:hover { background: var(--color-bg-subtle, rgba(255,255,255,0.08)); }
+  "lazy-gm-prep.settings.copy.review-characters.name": "Copy previous: 1. Review the Characters",
+  "lazy-gm-prep.settings.copy.review-characters.hint": "If enabled, copy this page’s content from the previous session (when available).",
+  "lazy-gm-prep.settings.copy.strong-start.name": "Copy previous: 2. Create a Strong Start",
+  "lazy-gm-prep.settings.copy.strong-start.hint": "If enabled, copy this page’s content from the previous session (when available).",
+  "lazy-gm-prep.settings.copy.outline-scenes.name": "Copy previous: 3. Outline Potential Scenes",
+  "lazy-gm-prep.settings.copy.outline-scenes.hint": "If enabled, copy this page’s content from the previous session (when available).",
+  "lazy-gm-prep.settings.copy.secrets-clues.name": "Copy previous: 4. Define Secrets & Clues",
+  "lazy-gm-prep.settings.copy.secrets-clues.hint": "If enabled, copy this page’s content from the previous session (when available).",
+  "lazy-gm-prep.settings.copy.fantastic-locations.name": "Copy previous: 5. Develop Fantastic Locations",
+  "lazy-gm-prep.settings.copy.fantastic-locations.hint": "If enabled, copy this page’s content from the previous session (when available).",
+  "lazy-gm-prep.settings.copy.important-npcs.name": "Copy previous: 6. Outline Important NPCs",
+  "lazy-gm-prep.settings.copy.important-npcs.hint": "If enabled, copy this page’s content from the previous session (when available).",
+  "lazy-gm-prep.settings.copy.choose-monsters.name": "Copy previous: 7. Choose Relevant Monsters",
+  "lazy-gm-prep.settings.copy.choose-monsters.hint": "If enabled, copy this page’s content from the previous session (when available).",
+  "lazy-gm-prep.settings.copy.magic-item-rewards.name": "Copy previous: 8. Select Magic Item Rewards",
+  "lazy-gm-prep.settings.copy.magic-item-rewards.hint": "If enabled, copy this page’s content from the previous session (when available).",
+  "lazy-gm-prep.settings.copy.other-notes.name": "Copy previous: Other Notes",
+  "lazy-gm-prep.settings.copy.other-notes.hint": "If enabled, copy this page’s content from the previous session (when available).",
 
-  /* === Overlay host on .app so we can absolutely-position FAB & panel === */
-  .app.lgmp-app-host { position: relative; }
+  "lazy-gm-prep.steps.review-characters.title": "1. Review the Characters",
+  "lazy-gm-prep.steps.review-characters.description": "Refresh names, backgrounds, motivations, and player interests so the rest of your prep wraps around the PCs. Keep it short—this primes your brain for everything else.",
+  "lazy-gm-prep.steps.strong-start.title": "2. Create a Strong Start",
+  "lazy-gm-prep.steps.strong-start.description": "Define a vivid opening that drops the party near the action—an event, hook, or immediate scene that propels the session forward. When in doubt, start with conflict.",
+  "lazy-gm-prep.steps.outline-scenes.title": "3. Outline Potential Scenes",
+  "lazy-gm-prep.steps.outline-scenes.description": "Jot a loose list of likely scenes—just a few words each—to gain confidence without overcommitting. Be ready to throw them away when play goes elsewhere.",
+  "lazy-gm-prep.steps.secrets-clues.title": "4. Define Secrets & Clues",
+  "lazy-gm-prep.steps.secrets-clues.description": "Write short, system‑agnostic facts the characters can discover anywhere during play. Aim for ~10.",
+  "lazy-gm-prep.steps.fantastic-locations.title": "5. Develop Fantastic Locations",
+  "lazy-gm-prep.steps.fantastic-locations.description": "Name evocative places and list a few striking aspects (scale, age, weirdness). These become memorable backdrops you can drop in as needed.",
+  "lazy-gm-prep.steps.important-npcs.title": "6. Outline Important NPCs",
+  "lazy-gm-prep.steps.important-npcs.description": "List only the NPCs that drive the session. Give each a name, a role in the story, and a quick hook/archetype; improvise the rest at the table.",
+  "lazy-gm-prep.steps.choose-monsters.title": "7. Choose Relevant Monsters",
+  "lazy-gm-prep.steps.choose-monsters.description": "Pick foes that fit the situation and location. Treat difficulty as a loose gauge; let story and context shape the encounter. Prepare more for bosses as needed.",
+  "lazy-gm-prep.steps.magic-item-rewards.title": "8. Select Magic Item Rewards",
+  "lazy-gm-prep.steps.magic-item-rewards.description": "Plan an item or two that excites the players and ties into the story. Items can anchor secrets and become tangible hooks.",
+  "lazy-gm-prep.steps.other-notes.title": "Other Notes",
+  "lazy-gm-prep.steps.other-notes.description": "Scratch pad for reminders, marching order, pacing beats, or anything else you want at your fingertips.",
 
-  /* Floating action button (view-mode only) */
-  .lgmp-secrets-fab {
-    position: absolute;
-    right: 12px;
-    bottom: 12px;
-    z-index: 20;
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
-    background: var(--color-bg, #1f1f1f);
-    color: var(--color-text, #fff);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    cursor: pointer;
-    font: 500 12px/1.2 var(--font-primary, system-ui, sans-serif);
-  }
-  .lgmp-secrets-fab:hover { filter: brightness(1.05); }
+  "lazy-gm-prep.ui.add-notes-here": "Add your notes here.",
 
-  /* Secrets & Clues overlay panel */
-  .lgmp-secrets-panel {
-    position: absolute;
-    right: 12px;
-    bottom: 48px;
-    z-index: 21;
-    min-width: 280px;
-    max-width: clamp(280px, 32vw, 420px);
-    max-height: 50vh;
-    overflow: auto;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
-    background: var(--color-bg, #1f1f1f);
-    color: var(--color-text, #fff);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.35);
-  }
-  .lgmp-secrets-panel[hidden] { display: none !important; }
-  .lgmp-secrets-panel__header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 6px; gap: 8px;
-  }
-  .lgmp-secrets-panel__header .lgmp-secrets-close {
-    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
-    border-radius: 6px; background: transparent; color: inherit; cursor: pointer; padding: 0 6px;
-  }
-  .lgmp-secrets-panel__header .lgmp-secrets-close:hover { background: var(--color-bg-subtle, rgba(255,255,255,0.08)); }
-  .lgmp-secrets-panel__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
-  .lgmp-secrets-panel__list > li { display: grid; grid-template-columns: 28px 1fr; align-items: start; gap: 6px; }
-  .lgmp-secret-toggle {
-    width: 28px; min-width: 28px; height: 28px; border-radius: 6px;
-    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
-    background: var(--color-bg-subtle, rgba(255,255,255,0.06));
-    color: inherit; cursor: pointer;
-  }
-  .lgmp-secret-toggle:hover { background: var(--color-bg-subtle, rgba(255,255,255,0.12)); }
-  .lgmp-secret-text { white-space: pre-wrap; }
+  "lazy-gm-prep.characters.table.header.pcName": "PC Name",
+  "lazy-gm-prep.characters.table.header.player": "Player",
+  "lazy-gm-prep.characters.table.header.conceptRole": "Concept/Role",
+  "lazy-gm-prep.characters.table.header.goalHook": "Goal/Hook",
+  "lazy-gm-prep.characters.table.header.bondDrama": "Bond/Drama",
+  "lazy-gm-prep.characters.table.header.recentNote": "Recent Note",
 
-  /* ======================================================================
-     NEW: Characters quick table + prompts
-     ----------------------------------------------------------------------
-     Base style: .lgmp-char-table
-     Optional modifiers:
-       - .lgmp-char-table--compact  (denser, smaller padding/font)
-       - .lgmp-char-table--roomy    (spacious, larger padding/line-height)
-     ====================================================================== */
-
-  .lgmp-char-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed; /* predictable wrapping across columns */
-  }
-  .lgmp-char-table th,
-  .lgmp-char-table td {
-    border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
-    padding: 4px 6px;
-    vertical-align: top;
-    overflow-wrap: anywhere; /* wrap long words/links gracefully */
-  }
-  .lgmp-char-table thead th {
-    text-align: left;
-    background: var(--color-bg-subtle, rgba(255,255,255,0.06));
-    position: sticky; /* keep column labels visible while scrolling */
-    top: 0;
-    z-index: 1;
-  }
-  .lgmp-char-table tbody tr:nth-child(even) td {
-    background: var(--color-bg-subtle, rgba(0,0,0,0.05)); /* gentle zebra striping */
-  }
-
-  /* Modifier: COMPACT (denser layout) */
-  .lgmp-char-table.lgmp-char-table--compact th,
-  .lgmp-char-table.lgmp-char-table--compact td {
-    padding: 2px 4px;
-    font-size: 0.92em;
-    line-height: 1.2;
-  }
-  .lgmp-char-table.lgmp-char-table--compact thead th {
-    backdrop-filter: none; /* ensure crisp text in small headers */
-  }
-
-  /* Modifier: ROOMY (more spacious layout) */
-  .lgmp-char-table.lgmp-char-table--roomy th,
-  .lgmp-char-table.lgmp-char-table--roomy td {
-    padding: 8px 10px;
-    font-size: 1.02em;
-    line-height: 1.4;
-  }
-  .lgmp-char-table.lgmp-char-table--roomy thead th {
-    background: var(--color-bg-subtle, rgba(255,255,255,0.08));
-  }
-
-  /* GM review prompts list below the table */
-  .lgmp-review-prompts {
-    margin: 0.6rem 0 0;
-    padding-left: 1.2rem; /* standard bullet indent */
-  }
-  .lgmp-review-prompts li {
-    margin: 0.15rem 0;
-  }
-
-  /* Responsive niceties: slightly reduce density on very narrow panes */
-  @media (max-width: 680px) {
-    .lgmp-char-table { font-size: 0.97em; }
-    .lgmp-char-table.lgmp-char-table--compact { font-size: 0.9em; }
-  }
-}
-
-/* Print-friendly adjustments */
-@media print {
-  .lgmp-char-table th,
-  .lgmp-char-table td {
-    border-color: #000 !important;
-  }
-  .lgmp-char-table thead th {
-    background: #eaeaea !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
+  "lazy-gm-prep.characters.prompts.spotlight": "Who hasn’t had a spotlight moment lately?",
+  "lazy-gm-prep.characters.prompts.unresolved": "Anyone have unresolved goals or secrets?",
+  "lazy-gm-prep.characters.prompts.bonds": "Any PC bonds or rivalries to bring up this session?",
+  "lazy-gm-prep.characters.prompts.reward": "Who is due for a magic item or cool reward?"
 }
