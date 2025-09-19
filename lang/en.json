@@ -1,7 +1,9 @@
 {
   "lazy-gm-prep.module.name": "Lazy GM Prep",
+
   "lazy-gm-prep.header.button": "Create GM Prep",
   "lazy-gm-prep.header.buttonTooltip": "Create a new prep journal for your next session",
+
   "lazy-gm-prep.notifications.created": "Created: {name}",
 
   "lazy-gm-prep.keybindings.createPrep.name": "Create GM Prep",
@@ -9,10 +11,13 @@
 
   "lazy-gm-prep.settings.separatePages.name": "Separate Pages for Each Step",
   "lazy-gm-prep.settings.separatePages.hint": "If enabled, create one page per step; otherwise combine all steps into one page.",
+
   "lazy-gm-prep.settings.folderName.name": "Folder Name for Prep Journals",
   "lazy-gm-prep.settings.folderName.hint": "The folder in which to store generated prep journals.",
+
   "lazy-gm-prep.settings.journalPrefix.name": "Journal Name Prefix",
   "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g., \"Session\").",
+
   "lazy-gm-prep.settings.includeDateInName.name": "Include today’s date on the Journal name",
   "lazy-gm-prep.settings.includeDateInName.hint": "If enabled, the current date will be appended to the journal name (e.g., 'Session 3: 9/16/2025'). If disabled, only the prefix and number are used.",
 
@@ -39,32 +44,27 @@
   "lazy-gm-prep.steps.review-characters.description": "Refresh names, backgrounds, motivations, and player interests so the rest of your prep wraps around the PCs. Keep it short—this primes your brain for everything else.",
   "lazy-gm-prep.steps.strong-start.title": "2. Create a Strong Start",
   "lazy-gm-prep.steps.strong-start.description": "Define a vivid opening that drops the party near the action—an event, hook, or immediate scene that propels the session forward. When in doubt, start with conflict.",
+
   "lazy-gm-prep.steps.outline-scenes.title": "3. Outline Potential Scenes",
   "lazy-gm-prep.steps.outline-scenes.description": "Jot a loose list of likely scenes—just a few words each—to gain confidence without overcommitting. Be ready to throw them away when play goes elsewhere.",
+
   "lazy-gm-prep.steps.secrets-clues.title": "4. Define Secrets & Clues",
   "lazy-gm-prep.steps.secrets-clues.description": "Write short, system‑agnostic facts the characters can discover anywhere during play. Aim for ~10.",
+
   "lazy-gm-prep.steps.fantastic-locations.title": "5. Develop Fantastic Locations",
   "lazy-gm-prep.steps.fantastic-locations.description": "Name evocative places and list a few striking aspects (scale, age, weirdness). These become memorable backdrops you can drop in as needed.",
+
   "lazy-gm-prep.steps.important-npcs.title": "6. Outline Important NPCs",
   "lazy-gm-prep.steps.important-npcs.description": "List only the NPCs that drive the session. Give each a name, a role in the story, and a quick hook/archetype; improvise the rest at the table.",
+
   "lazy-gm-prep.steps.choose-monsters.title": "7. Choose Relevant Monsters",
   "lazy-gm-prep.steps.choose-monsters.description": "Pick foes that fit the situation and location. Treat difficulty as a loose gauge; let story and context shape the encounter. Prepare more for bosses as needed.",
+
   "lazy-gm-prep.steps.magic-item-rewards.title": "8. Select Magic Item Rewards",
   "lazy-gm-prep.steps.magic-item-rewards.description": "Plan an item or two that excites the players and ties into the story. Items can anchor secrets and become tangible hooks.",
+
   "lazy-gm-prep.steps.other-notes.title": "Other Notes",
   "lazy-gm-prep.steps.other-notes.description": "Scratch pad for reminders, marching order, pacing beats, or anything else you want at your fingertips.",
 
-  "lazy-gm-prep.ui.add-notes-here": "Add your notes here.",
-
-  "lazy-gm-prep.characters.table.header.pcName": "PC Name",
-  "lazy-gm-prep.characters.table.header.player": "Player",
-  "lazy-gm-prep.characters.table.header.conceptRole": "Concept/Role",
-  "lazy-gm-prep.characters.table.header.goalHook": "Goal/Hook",
-  "lazy-gm-prep.characters.table.header.bondDrama": "Bond/Drama",
-  "lazy-gm-prep.characters.table.header.recentNote": "Recent Note",
-
-  "lazy-gm-prep.characters.prompts.spotlight": "Who hasn’t had a spotlight moment lately?",
-  "lazy-gm-prep.characters.prompts.unresolved": "Anyone have unresolved goals or secrets?",
-  "lazy-gm-prep.characters.prompts.bonds": "Any PC bonds or rivalries to bring up this session?",
-  "lazy-gm-prep.characters.prompts.reward": "Who is due for a magic item or cool reward?"
+  "lazy-gm-prep.ui.add-notes-here": "Add your notes here."
 }
