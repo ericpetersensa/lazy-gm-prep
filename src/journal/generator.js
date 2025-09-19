@@ -174,4 +174,164 @@ function notesPlaceholder() {
 /* ============================== Characters table & prompts ============================== */
 /** 6 columns, 5 rows blank. English labels are inline to avoid touching en.json. */
 function characterReviewTableHTML(rowCount = 5) {
-  const headers = ["PC Name", "Player", "Concept/Role", "Goal/Hook", "Bond/Drama", "
+  const headers = ["PC Name", "Player", "Concept/Role", "Goal/Hook", "Bond/Drama", "Recent Note"]
+    .map(escapeHtml);
+  const rows = Array.from({ length: rowCount }, () =>
+    "<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>"
+  ).join("\n");
+  return `
+<table style="width:100%; border-collapse: collapse;" border="1">
+  <thead>
+    <tr>
+      <th>${headers[0]}</th>
+      <th>${headers[1]}</th>
+      <th>${headers[2]}</th>
+      <th>${headers[3]}</th>
+      <th>${headers[4]}</th>
+      <th>${headers[5]}</th>
+    </tr>
+  </thead>
+  <tbody>
+${rows}
+  </tbody>
+</table>
+`.trim() + "\n";
+}
+/** Four GM review questions (below the table) */
+function gmReviewPromptsHTML() {
+  return `
+<ul>
+  <li>Who hasn’t had a spotlight moment lately?</li>
+  <li>Anyone have unresolved goals or secrets?</li>
+  <li>Any PC bonds or rivalries to bring up this session?</li>
+  <li>Who is due for a magic item or cool reward?</li>
+</ul>
+`.trim() + "\n";
+}
+
+/* ============================== checklist utilities ============================== */
+function renderChecklist(texts) {
+  const items = texts.map(t => `<li>☐ ${escapeHtml(t)}</li>`).join("\n");
+  return `
+<section class="lgmp-section lgmp-checklist">
+  <ul class="lgmp-checklist">
+${items}
+  </ul>
+</section>
+`.trim() + "\n";
+}
+function topUpToTen(texts, label = "Clue") {
+  const out = [...texts];
+  while (out.length < 10) out.push(label);
+  return out.slice(0, 10);
+}
+/** Extract our <ul class="lgmp-checklist"> and return { bodyWithoutChecklist, items: [{text,checked}] } */
+function extractModuleChecklist(html) {
+  const UL_RE = /<ul\s+class=['"]lgmp-checklist['"][\s\S]*?<\/ul>/i;
+  const match = html.match(UL_RE);
+  if (!match) return { bodyWithoutChecklist: html, items: [] };
+  const ulHtml = match[0];
+  const bodyWithoutChecklist = html.replace(UL_RE, "");
+  const items = [];
+  const LI_RE = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+  let m;
+  while ((m = LI_RE.exec(ulHtml))) {
+    const raw = stripTags(m[1]).trim();
+    const { marker, text } = splitMarker(raw);
+    if (!text) continue;
+    const checked = marker === "☑";
+    items.push({ text, checked });
+  }
+  return { bodyWithoutChecklist, items };
+}
+function normalizeMarkers(html) {
+  let s = String(html ?? "");
+  s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*checked[^>]*>/gi, "☑");
+  s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*>/gi, "☐");
+  s = s.replace(/\[\s*\]/g, "☐");
+  s = s.replace(/\[\s*[xX]\s*\]/g, "☑");
+  s = s.replace(/<label[^>]*>/gi, "").replace(/<\/label>/gi, "");
+  return s;
+}
+function scrubContent(rawHtml, def, { stripTitle = true, stripLegacyHeader = true, stripDesc = false } = {}) {
+  let html = String(rawHtml ?? "");
+  if (stripLegacyHeader) {
+    html = html.replace(/<div\s+class=['"]lgmp-header['"][\s\S]*?<\/div>/i, "");
+  }
+  if (stripTitle) {
+    const titleText = game.i18n.localize(def.titleKey);
+    const reTitle = new RegExp(
+      `<h[12][^>]*>\\s*(?:\\d+\\.\\s*)?${escapeRegExp(titleText)}\\s*<\\/h[12]>`,
+      "i"
+    );
+    html = html.replace(reTitle, "");
+  }
+  if (stripDesc) {
+    html = html.replace(/<p[^>]*class=['"]lgmp-step-desc['"][^>]*>[\s\S]*?<\/p>/i, "");
+    const descText = game.i18n.localize(def.descKey);
+    const reDesc = new RegExp(`<p[^>]*>\\s*${escapeRegExp(descText)}\\s*<\\/p>`, "i");
+    html = html.replace(reDesc, "");
+  }
+  return html;
+}
+
+/* ================================== core helpers ================================== */
+async function ensureFolder(name) {
+  if (!name) return null;
+  const existing = game.folders?.find(f => f.type === "JournalEntry" && f.name === name);
+  if (existing) return existing.id;
+  const f = await Folder.create({ name, type: "JournalEntry", color: "#6d712d" });
+  return f?.id ?? null;
+}
+function nextSequenceNumber(prefix) {
+  // enumerate using collection contents to avoid missing items
+  const existing = (game.journal?.contents ?? []).filter(j => j.name?.startsWith(prefix));
+  const nums = existing
+    .map(j => j.name.match(/\b(\d+)\b/)?.[1] ?? null)
+    .map(n => (n ? parseInt(n, 10) : 0));
+  const max = nums.length ? Math.max(...nums) : 0;
+  return max + 1;
+}
+function findPreviousSession(prefix) {
+  const list = (game.journal?.contents ?? [])
+    .filter(j => j.name?.startsWith(prefix))
+    .map(j => {
+      const n = j.name.match(/\b(\d+)\b/)?.[1] ?? null;
+      return { num: n ? parseInt(n, 10) : 0, journal: j };
+    })
+    .filter(x => x.num > 0)
+    .sort((a, b) => b.num - a.num);
+  return list.length ? list[0].journal : null;
+}
+function getPreviousPageContent(prevJournal, def) {
+  if (!prevJournal) return null;
+  try {
+    const wantedName = game.i18n.localize(def.titleKey);
+    const page = prevJournal.pages.find(p => (p.name ?? "") === wantedName);
+    if (page?.text?.content) return page.text.content;
+  } catch (err) {
+    console.warn(`${MODULE_ID} previous page fetch failed`, err);
+  }
+  return null;
+}
+
+/* ================================= string utils ================================= */
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, m => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[m]);
+}
+function escapeRegExp(s) {
+  return String(s ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+function stripTags(s) {
+  return String(s ?? "").replace(/<\/?[^>]+>/g, "");
+}
+function splitMarker(line) {
+  const trimmed = String(line ?? "").trim();
+  if (/^☑\s*/.test(trimmed)) return { marker: "☑", text: trimmed.replace(/^☑\s*/, "") };
+  if (/^☐\s*/.test(trimmed)) return { marker: "☐", text: trimmed.replace(/^☐\s*/, "") };
+  if (/^\[\s*[xX]\s*\]\s*/.test(trimmed)) return { marker: "☑", text: trimmed.replace(/^\[\s*[xX]\s*\]\s*/, "") };
+  if (/^\[\s*\]\s*/.test(trimmed)) return { marker: "☐", text: trimmed.replace(/^\[\s*\]\s*/, "") };
+  return { marker: "", text: trimmed };
+}
