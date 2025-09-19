@@ -43,7 +43,7 @@ export function registerSettings() {
     type: String
   });
 
-  // NEW: Include date in journal name
+  // Include date in journal name (unchanged behavior)
   game.settings.register(MODULE_ID, "includeDateInName", {
     name: game.i18n.localize("lazy-gm-prep.settings.includeDateInName.name"),
     hint: game.i18n.localize("lazy-gm-prep.settings.includeDateInName.hint"),
@@ -51,6 +51,16 @@ export function registerSettings() {
     config: true,
     type: Boolean,
     default: true
+  });
+
+  // NEW: Default number of rows in the "Review the Characters" table
+  game.settings.register(MODULE_ID, SETTINGS.initialCharacterRows, {
+    name: game.i18n.localize("lazy-gm-prep.settings.initialCharacterRows.name"),
+    hint: game.i18n.localize("lazy-gm-prep.settings.initialCharacterRows.hint"),
+    scope: "world",
+    config: true,
+    type: Number,
+    default: DEFAULTS.initialCharacterRows
   });
 
   // Nine per-page “copy” toggles. Monsters default OFF.
