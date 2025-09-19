@@ -4,13 +4,13 @@ import { MODULE_ID } from "./constants.js";
 import { createPrepJournal } from "./journal/generator.js";
 
 /* =======================================================================================
-   Constants & State
+ Constants & State
 ======================================================================================= */
 const SECRETS_PAGE_NAME = "4. Define Secrets & Clues"; // exact title (case-insensitive)
-const CURRENT_PAGE_BY_ENTRY = new Map();               // entryId -> current pageId (for direct toggle)
+const CURRENT_PAGE_BY_ENTRY = new Map(); // entryId -> current pageId (for direct toggle)
 
 /* =======================================================================================
-   Create GM Prep: Header button (AppV2 & v13+)
+ Create GM Prep: Header button (AppV2 & v13+)
 ======================================================================================= */
 function ensureInlineHeaderButton(rootEl) {
   if (!game.user.isGM) return;
@@ -31,6 +31,7 @@ function ensureInlineHeaderButton(rootEl) {
   btn.classList.add("lazy-gm-prep-btn", "header-control", "create-entry");
   btn.title = game.i18n.localize("lazy-gm-prep.header.buttonTooltip");
   btn.innerHTML = `<i class="fa-solid fa-clipboard-list"></i> ${game.i18n.localize("lazy-gm-prep.header.button")}`;
+
   // One-click: use your generator (it already finds previous/highest session; no prompt)
   btn.addEventListener("click", () => createPrepJournal());
   container.appendChild(btn);
@@ -41,33 +42,31 @@ Hooks.on("renderJournalDirectory", (_app, html) => {
 });
 
 /* =======================================================================================
-   Shared HTML utilities (normalize, extract, build)
+ Shared HTML utilities (normalize, extract, build)
 ======================================================================================= */
 function normalizeMarkers(html) {
   let s = String(html ?? "");
   // inputs -> unicode boxes
-  s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*checked[^>]*>/gi, "☑");
-  s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*>/gi, "☐");
+  s = s.replace(/\<input[^\>]*type=['"]checkbox['"][^\>]*checked[^\>]*\>/gi, "☑");
+  s = s.replace(/\<input[^\>]*type=['"]checkbox['"][^\>]*\>/gi, "☐");
   // bracket -> unicode
   s = s.replace(/\[\s*\]/g, "☐");
   s = s.replace(/\[\s*[xX]\s*\]/g, "☑");
   // unwrap labels
-  s = s.replace(/<label[^>]*>/gi, "").replace(/<\/label>/gi, "");
+  s = s.replace(/\<label[^\>]*\>/gi, "").replace(/\<\/label\>/gi, "");
   return s;
 }
 function extractChecklist(html) {
-  const UL_RE = /<ul\s+class=['"]lgmp-checklist['"][\s\S]*?<\/ul>/i;
+  const UL_RE = /\<ul\s+class=['"]lgmp-checklist['"][\s\S]*?\<\/ul\>/i;
   const hit = html.match(UL_RE);
   if (!hit) return { bodyWithoutChecklist: html, ulHtml: "", items: [] };
-
   const ulHtml = hit[0];
   const bodyWithoutChecklist = html.replace(UL_RE, "");
-
   const items = [];
-  const LI_RE = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+  const LI_RE = /\<li[^\>]*\>([\s\S]*?)\<\/li\>/gi;
   let m;
   while ((m = LI_RE.exec(ulHtml))) {
-    const raw = m[1].replace(/<\/?[^>]+>/g, "").trim();
+    const raw = m[1].replace(/\<\/?[^>]+\>/g, "").trim();
     if (!raw) continue;
     const checked = /^\s*☑/.test(raw);
     const text = raw.replace(/^\s*[☐☑]\s*/, "");
@@ -76,7 +75,9 @@ function extractChecklist(html) {
   return { bodyWithoutChecklist, ulHtml, items };
 }
 function buildChecklist(items) {
-  const lis = items.map(i => `<li>${i.checked ? "☑" : "☐"} ${escapeHtml(i.text)}</li>`).join("\n");
+  const lis = items
+    .map(i => `<li>${i.checked ? "☑" : "☐"} ${escapeHtml(i.text)}</li>`)
+    .join("\n");
   return `<ul class="lgmp-checklist">\n${lis}\n</ul>`;
 }
 function escapeHtml(s) {
@@ -86,7 +87,7 @@ function escapeHtml(s) {
 }
 
 /* =======================================================================================
-   Overlay Panel (☰ Secrets) — view mode helper (optional UI)
+ Overlay Panel (☰ Secrets) — view mode helper (optional UI)
 ======================================================================================= */
 function injectSecretsPanel(app, sheetRoot) {
   // Only when not editing
@@ -114,6 +115,7 @@ function injectSecretsPanel(app, sheetRoot) {
   const appEl = sheetRoot.closest(".app");
   if (!appEl) return;
   if (appEl.querySelector(".lgmp-secrets-fab")) return; // avoid duplicates
+
   appEl.classList.add("lgmp-app-host");
 
   // FAB
@@ -134,7 +136,6 @@ function injectSecretsPanel(app, sheetRoot) {
 
   const list = document.createElement("ul");
   list.className = "lgmp-secrets-panel__list";
-
   items.forEach((it, idx) => {
     const li = document.createElement("li");
     li.dataset.index = String(idx);
@@ -185,16 +186,16 @@ Hooks.on("renderJournalPageSheet", (app, html) => {
 });
 
 /* =======================================================================================
-   Direct Click-to-Toggle in the rendered page (no overlay)
+ Direct Click-to-Toggle in the rendered page (no overlay)
 ======================================================================================= */
 function ensureClickCSS() {
   if (document.getElementById(`${MODULE_ID}-toggle-style`)) return;
   const style = document.createElement("style");
   style.id = `${MODULE_ID}-toggle-style`;
   style.textContent = `
-    ul.lgmp-checklist li { cursor: pointer; user-select: none; }
-    ul.lgmp-checklist li:active { opacity: .85; }
-  `;
+ ul.lgmp-checklist li { cursor: pointer; user-select: none; }
+ ul.lgmp-checklist li:active { opacity: .85; }
+ `;
   document.head.appendChild(style);
 }
 function looksLikeSecrets(name) {
@@ -208,7 +209,8 @@ function entryFromHost(host) {
   const dataId = host.dataset?.documentId || host.dataset?.entryId;
   let entry = dataId ? game.journal.get(dataId) : null;
   if (entry) return entry;
-  const m = (host.id || "").match(/JournalEntry-([A-Za-z0-9]{16,})/);
+
+  const m = (host.id || "").match(/JournalEntry\-([A-Za-z0-9]{16,})/);
   const entryId = m?.[1] ?? null;
   return entryId ? game.journal.get(entryId) : null;
 }
@@ -250,18 +252,16 @@ function bindDirectToggle(host) {
       if (!liSaved) {
         const clickedText = (li.textContent || "").replace(/^\s*[☐☑]\s*/, "").trim();
         liSaved = Array.from(ulSaved.querySelectorAll(":scope > li"))
-          .find(x => (x.textContent || "").replace(/^\s*[☐☑]\s*/, "").trim() === clickedText) || null;
+          .find(x => ((x.textContent || "").replace(/^\s*[☐☑]\s*/, "").trim() === clickedText)) || null;
       }
       if (!liSaved) return ui.notifications?.warn(`[${MODULE_ID}] Could not locate matching list item in saved HTML.`);
 
-      // Flip & persist
       const raw = (liSaved.textContent || "").trim();
       liSaved.textContent = raw.startsWith("☑") ? raw.replace(/^☑/, "☐") : raw.replace(/^[☐]?/, "☑");
-
       await page.update({ "text.content": doc.body.innerHTML });
       page.parent?.sheet?.render?.(true);
     } catch (err) {
-      console.error(`${MODULE_ID}] Toggle failed`, err);
+      console.error(`[${MODULE_ID}] Toggle failed`, err);
       ui.notifications?.error(`[${MODULE_ID}] Toggle failed (see console).`);
     }
   }, true);
@@ -284,12 +284,11 @@ Hooks.on("renderApplicationV2", (_app, el) => {
 });
 
 /* =======================================================================================
-   Module init / keybinding / chat command
+ Module init / keybinding / chat command
 ======================================================================================= */
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} init`);
   registerSettings();
-
   // Alt+P (GM): Create Prep (no prompt; generator uses highest/previous session)
   game.keybindings.register(MODULE_ID, "create-prep", {
     name: "lazy-gm-prep.keybindings.createPrep.name",
