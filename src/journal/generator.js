@@ -4,37 +4,35 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
 
 /**
  * Create a new GM Prep journal for the next session.
- * - First-run enhancement: inject "0. Getting Started" only when creating Session 0.
- * - Separate pages: no in-body H2 (avoid duplicate with page name).
- * - Fresh "secrets-clues" => description + notes + 10 blank ☐ Clue lines.
- * - Copy "secrets-clues" => rebuild checklist from UNCHECKED items only (top up to 10).
- * - Copy non-secrets => scrub legacy headers/desc; keep content.
- * - Combined page mode: includes H2 per section; same checklist logic.
- * - Normalizes legacy [ ] / [x] and <input type="checkbox"> to ☐ / ☑ before processing.
- * - "review-characters" => inject a blank, editor-native character table + prompts.
- * - "important-npcs" => inject a blank, editor-native NPC table tuned for Lazy DM usage.
+ * - Session 0: inject "0. Getting Started" (separate page or top section in combined).
+ * - Separate pages: one page per step; no in-body H2 (name is the title).
+ * - Combined page: one page with H2 sections; same copy logic per section.
+ * - "Secrets & Clues": copy UNCHECKED only from previous, then top up to 10.
+ * - Normalize legacy checkboxes ([ ], [x], <input type="checkbox">) to ☐/☑.
+ * - Characters/NPCs: provide editor-friendly plain tables.
+ * - Numbering: first journal is 0; Session 0 is NOT a copy source by design.
  */
 export async function createPrepJournal() {
-  const separate = !!getSetting(SETTINGS.separatePages, true);
-  const folderName = getSetting(SETTINGS.folderName, "GM Prep");
-  const prefix = getSetting(SETTINGS.journalPrefix, "Session");
+  const separate    = !!getSetting(SETTINGS.separatePages, true);
+  const folderName  = getSetting(SETTINGS.folderName, "GM Prep");
+  const prefix      = getSetting(SETTINGS.journalPrefix, "Session");
   const includeDate = !!getSetting("includeDateInName", true);
 
   const folderId = await ensureFolder(folderName);
-  const seq = nextSequenceNumber(prefix); // starts at 0 for first world run
-  const isFirst = seq === 0;
+  const seq      = nextSequenceNumber(prefix);   // first in a world -> 0
+  const isFirst  = seq === 0;
 
   const entryName = includeDate
     ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
     : `${prefix} ${seq}`;
 
-  // Ignore Session 0 as a copy source so welcome content never propagates.
+  // We never copy from Session 0 so the welcome page/section doesn't propagate.
   const prev = findPreviousSession(prefix);
 
   if (separate) {
     const pages = [];
 
-    // Session 0: Getting Started page
+    // --- Session 0: Getting Started page
     if (isFirst) {
       pages.push({
         name: game.i18n.localize("lazy-gm-prep.getting-started.title"),
@@ -43,10 +41,10 @@ export async function createPrepJournal() {
       });
     }
 
-    // Standard sections
+    // --- Standard sections
     for (const def of PAGE_ORDER) {
-      const copyOn = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
-      const prevContent = copyOn ? getPreviousPageContent(prev, def) : null;
+      const copyOn = !!getSetting(`copy.${def.key}`, true);
+      const prevContent = copyOn ? getPreviousSectionHTML(prev, def) : null;
 
       // Secrets & Clues
       if (def.key === "secrets-clues") {
@@ -124,17 +122,18 @@ export async function createPrepJournal() {
     return entry;
   }
 
-  // Combined single page mode
+  // --- Combined single-page mode -------------------------------------------------------
   const chunks = [];
 
+  // Session 0: Getting Started section at the top
   if (isFirst) {
     const h2 = `<h2 style="margin:0">${escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.title"))}</h2>\n`;
     chunks.push(`${h2}${gettingStartedBodyHTML({ prefix })}`);
   }
 
   for (const def of PAGE_ORDER) {
-    const copyOn = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
-    const prevContent = copyOn ? getPreviousPageContent(prev, def) : null;
+    const copyOn = !!getSetting(`copy.${def.key}`, true);
+    const prevContent = copyOn ? getPreviousSectionHTML(prev, def) : null;
     const headerHtml = sectionHeader(def) + sectionDescription(def);
 
     if (def.key === "secrets-clues") {
@@ -223,13 +222,11 @@ function notesPlaceholder() {
 }
 
 /* =========================== Getting Started (Session 0) =========================== */
-/** Plain body (no H2) for separate-pages; used as section body for combined mode too. */
 function gettingStartedBodyHTML({ prefix }) {
-  const quickStartTitle   = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.quickstart.title"));
-  const settingsTitle     = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.settings.title"));
-  const knowTitle         = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.know.title"));
+  const quickStartTitle = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.quickstart.title"));
+  const settingsTitle   = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.settings.title"));
+  const knowTitle       = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.know.title"));
 
-  // Labels reused from i18n to keep naming consistent in text
   const separatePagesLabel = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.separatePages.name"));
   const folderNameLabel    = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.folderName.name"));
   const prefixLabel        = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.journalPrefix.name"));
@@ -252,9 +249,9 @@ You’re on <strong>${escapeHtml(prefix)} 0</strong>. From here on, you’ll cre
   <li><strong>${separatePagesLabel}</strong>: A checkmark means that each step will have its own page. With it unchecked, all steps are combined into a single page. <em>(Default – Enabled)</em></li>
   <li><strong>${folderNameLabel}</strong>: Type the folder name you want journals to be created under. <em>(Default – Lazy GM Prep)</em></li>
   <li><strong>${prefixLabel}</strong>: Type the journal name you want used. <em>(Default – Session)</em></li>
-  <li><strong>${includeDateLabel}</strong>: A checkmark means that it will append the date on to the name of the journal <em>(Default – Disabled)</em></li>
+  <li><strong>${includeDateLabel}</strong>: A checkmark means that it will append the date on to the name of the journal <em>(Default – Enabled)</em></li>
   <li><strong>Default rows in X (Characters and NPC pages)</strong>: While you can add or remove rows manually, this allows you to start with a set number of rows. <em>(Default – 5)</em></li>
-  <li><strong>Copy Previous X (All pages)</strong>: Each step can copy prior content or be toggled off if you don't want that page copied to the next journal. <em>(Default – mixed options)</em></li>
+  <li><strong>Copy Previous X (All pages)</strong>: Each step can copy prior content or be toggled off if you don't want that page copied to the next journal. <em>(Default – Enabled)</em></li>
 </ul>
 
 <h3 style="margin:0.75rem 0 0">${knowTitle}</h3>
@@ -280,9 +277,7 @@ function characterReviewTableHTML(rowCount = 5) {
   ].map(escapeHtml);
   const cols = headers.length;
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
-  const bodyRows = Array.from({ length: rowCount }, () =>
-    `<tr>${"<td></td>".repeat(cols)}</tr>`
-  ).join("\n");
+  const bodyRows = Array.from({ length: rowCount }, () => `<tr>${"<td></td>".repeat(cols)}</tr>`).join("\n");
   return `
 <table>
   <tbody>
@@ -321,9 +316,7 @@ function importantNpcsTableHTML(rowCount = 5) {
   ].map(escapeHtml);
   const cols = headers.length;
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
-  const bodyRows = Array.from({ length: rowCount }, () =>
-    `<tr>${"<td></td>".repeat(cols)}</tr>`
-  ).join("\n");
+  const bodyRows = Array.from({ length: rowCount }, () => `<tr>${"<td></td>".repeat(cols)}</tr>`).join("\n");
   return `
 <table>
   <tbody>
@@ -350,6 +343,7 @@ function topUpToTen(texts, label = "Clue") {
   while (out.length < 10) out.push(label);
   return out.slice(0, 10);
 }
+/** Extract our <ul class="lgmp-checklist"> and return { bodyWithoutChecklist, items: [{text,checked}] } */
 function extractModuleChecklist(html) {
   const UL_RE = /\<ul\s+class=['"]lgmp-checklist['"][\s\S]*?\<\/ul\>/i;
   const match = html.match(UL_RE);
@@ -395,6 +389,8 @@ function scrubContent(rawHtml, def, { stripTitle = true, stripLegacyHeader = tru
     const descText = game.i18n.localize(def.descKey);
     const reDesc = new RegExp(`\\<p[^\\>]*\\>\\s*${escapeRegExp(descText)}\\s*\\<\\/p\\>`, "i");
     html = html.replace(reDesc, "");
+    // Remove a leading <hr/> that often follows the description in combined sections
+    html = html.replace(/^\s*\<hr\s*\/?\>\s*/i, "");
   }
   return html;
 }
@@ -410,13 +406,14 @@ async function ensureFolder(name) {
 /** First journal in a world is 0, then 1, 2, ... */
 function nextSequenceNumber(prefix) {
   const existing = (game.journal?.contents ?? []).filter(j => j.name?.startsWith(prefix));
-  if (!existing.length) return 0;
+  if (!existing.length) return 0;  // first run -> 0
   const nums = existing
     .map(j => j.name.match(/\b(\d+)\b/)?.[1] ?? null)
     .map(n => (n ? parseInt(n, 10) : 0));
   const max = nums.length ? Math.max(...nums) : 0;
   return max + 1;
 }
+/** Ignore Session 0 as a copy source (on purpose). */
 function findPreviousSession(prefix) {
   const list = (game.journal?.contents ?? [])
     .filter(j => j.name?.startsWith(prefix))
@@ -424,20 +421,58 @@ function findPreviousSession(prefix) {
       const n = j.name.match(/\b(\d+)\b/)?.[1] ?? null;
       return { num: n ? parseInt(n, 10) : 0, journal: j };
     })
-    .filter(x => x.num > 0) // ignore Session 0 on purpose
+    .filter(x => x.num > 0)
     .sort((a, b) => b.num - a.num);
   return list.length ? list[0].journal : null;
 }
-function getPreviousPageContent(prevJournal, def) {
+
+/**
+ * Get previous section HTML for either mode.
+ * - Separate mode: returns text of the page whose name == localized title.
+ * - Combined mode: finds the combined page, extracts the <h2>Section</h2> chunk.
+ */
+function getPreviousSectionHTML(prevJournal, def) {
   if (!prevJournal) return null;
   try {
-    const wantedName = game.i18n.localize(def.titleKey);
-    const page = prevJournal.pages.find(p => (p.name ?? "") === wantedName);
-    if (page?.text?.content) return page.text.content;
+    const wantedTitle = game.i18n.localize(def.titleKey);
+
+    // 1) Separate-page lookup
+    const separatePage = prevJournal.pages.find(p => (p.name ?? "") === wantedTitle);
+    if (separatePage?.text?.content) return separatePage.text.content;
+
+    // 2) Combined-page extraction
+    const combinedName = game.i18n.localize("lazy-gm-prep.module.name");
+    const combinedHost =
+      prevJournal.pages.find(p => (p.name ?? "") === combinedName && p.text?.content) ||
+      prevJournal.pages.find(p => p.type === "text" && p.text?.content);
+    if (!combinedHost?.text?.content) return null;
+
+    return extractCombinedSection(combinedHost.text.content, wantedTitle);
   } catch (err) {
-    console.warn(`${MODULE_ID} previous page fetch failed`, err);
+    console.warn(`${MODULE_ID} previous section fetch failed`, err);
+    return null;
   }
-  return null;
+}
+
+/** Extract HTML between <h2>{sectionTitle}</h2> and the next <h2> (or end). */
+function extractCombinedSection(pageHtml, sectionTitle) {
+  try {
+    const doc = new DOMParser().parseFromString(String(pageHtml ?? ""), "text/html");
+    const headers = Array.from(doc.querySelectorAll("h2"));
+    const target = headers.find(h => (h.textContent || "").trim() === String(sectionTitle || "").trim());
+    if (!target) return null;
+
+    const container = doc.createElement("div");
+    let node = target.nextSibling;
+    while (node) {
+      if (node.nodeType === 1 && node.tagName?.toLowerCase() === "h2") break;
+      container.appendChild(node.cloneNode(true));
+      node = node.nextSibling;
+    }
+    return container.innerHTML;
+  } catch {
+    return null;
+  }
 }
 
 /* ================================= string utils ================================= */
