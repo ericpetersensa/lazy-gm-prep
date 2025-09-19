@@ -10,7 +10,7 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
  * - Copy non-secrets => scrub legacy headers/desc; keep content.
  * - Combined page mode: includes H2 per section; same checklist logic.
  * - Normalizes legacy [ ] / [x] and <input type="checkbox"> to ☐ / ☑ before processing.
- * - "review-characters" => inject a blank table + four GM prompts on fresh pages.
+ * - "review-characters" => inject a blank, editor-native table + four GM prompts on fresh pages.
  */
 export async function createPrepJournal() {
   const separate = !!getSetting(SETTINGS.separatePages, true);
@@ -152,11 +152,13 @@ export async function createPrepJournal() {
   const entry = await JournalEntry.create({
     name: entryName,
     folder: folderId,
-    pages: [{
-      name: game.i18n.localize("lazy-gm-prep.module.name"),
-      type: "text",
-      text: { format: 1, content: chunks.join("\n<hr/>\n") }
-    }]
+    pages: [
+      {
+        name: game.i18n.localize("lazy-gm-prep.module.name"),
+        type: "text",
+        text: { format: 1, content: chunks.join("\n<hr/>\n") }
+      }
+    ]
   });
   ui.notifications?.info(game.i18n.format("lazy-gm-prep.notifications.created", { name: entry.name }));
   return entry;
@@ -177,6 +179,12 @@ function notesPlaceholder() {
 }
 
 /* ============================== Characters table & prompts (i18n) ============================== */
+/**
+ * IMPORTANT for editor-compatibility:
+ * - No classes or inline styles
+ * - No <thead>; put header <th> cells in the FIRST ROW of <tbody>
+ *   (ensures Add Row/Column works from any selection in the table)
+ */
 function characterReviewTableHTML(rowCount = 5) {
   const headers = [
     game.i18n.localize("lazy-gm-prep.characters.table.header.pcName"),
@@ -188,16 +196,15 @@ function characterReviewTableHTML(rowCount = 5) {
   ].map(escapeHtml);
 
   const cols = headers.length;
+  const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
   const bodyRows = Array.from({ length: rowCount }, () =>
     `<tr>${"<td></td>".repeat(cols)}</tr>`
   ).join("\n");
 
   return `
-<table class="lgmp-char-table lgmp-char-table--compact">
-  <thead>
-    <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
-  </thead>
+<table>
   <tbody>
+${headerRow}
 ${bodyRows}
   </tbody>
 </table>
