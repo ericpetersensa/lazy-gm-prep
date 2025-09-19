@@ -1,9 +1,7 @@
 {
   "lazy-gm-prep.module.name": "Lazy GM Prep",
-
   "lazy-gm-prep.header.button": "Create GM Prep",
   "lazy-gm-prep.header.buttonTooltip": "Create a new prep journal for your next session",
-
   "lazy-gm-prep.notifications.created": "Created: {name}",
 
   "lazy-gm-prep.keybindings.createPrep.name": "Create GM Prep",
@@ -23,25 +21,34 @@
 
   "lazy-gm-prep.settings.copy.review-characters.name": "Copy previous: 1. Review the Characters",
   "lazy-gm-prep.settings.copy.review-characters.hint": "If enabled, copy this page’s content from the previous session (when available).",
+
   "lazy-gm-prep.settings.copy.strong-start.name": "Copy previous: 2. Create a Strong Start",
   "lazy-gm-prep.settings.copy.strong-start.hint": "If enabled, copy this page’s content from the previous session (when available).",
+
   "lazy-gm-prep.settings.copy.outline-scenes.name": "Copy previous: 3. Outline Potential Scenes",
   "lazy-gm-prep.settings.copy.outline-scenes.hint": "If enabled, copy this page’s content from the previous session (when available).",
+
   "lazy-gm-prep.settings.copy.secrets-clues.name": "Copy previous: 4. Define Secrets & Clues",
   "lazy-gm-prep.settings.copy.secrets-clues.hint": "If enabled, copy this page’s content from the previous session (when available).",
+
   "lazy-gm-prep.settings.copy.fantastic-locations.name": "Copy previous: 5. Develop Fantastic Locations",
   "lazy-gm-prep.settings.copy.fantastic-locations.hint": "If enabled, copy this page’s content from the previous session (when available).",
+
   "lazy-gm-prep.settings.copy.important-npcs.name": "Copy previous: 6. Outline Important NPCs",
   "lazy-gm-prep.settings.copy.important-npcs.hint": "If enabled, copy this page’s content from the previous session (when available).",
+
   "lazy-gm-prep.settings.copy.choose-monsters.name": "Copy previous: 7. Choose Relevant Monsters",
   "lazy-gm-prep.settings.copy.choose-monsters.hint": "If enabled, copy this page’s content from the previous session (when available).",
+
   "lazy-gm-prep.settings.copy.magic-item-rewards.name": "Copy previous: 8. Select Magic Item Rewards",
   "lazy-gm-prep.settings.copy.magic-item-rewards.hint": "If enabled, copy this page’s content from the previous session (when available).",
+
   "lazy-gm-prep.settings.copy.other-notes.name": "Copy previous: Other Notes",
   "lazy-gm-prep.settings.copy.other-notes.hint": "If enabled, copy this page’s content from the previous session (when available).",
 
   "lazy-gm-prep.steps.review-characters.title": "1. Review the Characters",
   "lazy-gm-prep.steps.review-characters.description": "Refresh names, backgrounds, motivations, and player interests so the rest of your prep wraps around the PCs. Keep it short—this primes your brain for everything else.",
+
   "lazy-gm-prep.steps.strong-start.title": "2. Create a Strong Start",
   "lazy-gm-prep.steps.strong-start.description": "Define a vivid opening that drops the party near the action—an event, hook, or immediate scene that propels the session forward. When in doubt, start with conflict.",
 
@@ -66,5 +73,18 @@
   "lazy-gm-prep.steps.other-notes.title": "Other Notes",
   "lazy-gm-prep.steps.other-notes.description": "Scratch pad for reminders, marching order, pacing beats, or anything else you want at your fingertips.",
 
-  "lazy-gm-prep.ui.add-notes-here": "Add your notes here."
+  "lazy-gm-prep.ui.add-notes-here": "Add your notes here.",
+
+  /* ===== NEW: Characters table headers + prompts ===== */
+  "lazy-gm-prep.characters.table.header.pcName": "PC Name",
+  "lazy-gm-prep.characters.table.header.player": "Player",
+  "lazy-gm-prep.characters.table.header.conceptRole": "Concept/Role",
+  "lazy-gm-prep.characters.table.header.goalHook": "Goal/Hook",
+  "lazy-gm-prep.characters.table.header.bondDrama": "Bond/Drama",
+  "lazy-gm-prep.characters.table.header.recentNote": "Recent Note",
+
+  "lazy-gm-prep.characters.prompts.spotlight": "Who hasn’t had a spotlight moment lately?",
+  "lazy-gm-prep.characters.prompts.unresolved": "Anyone have unresolved goals or secrets?",
+  "lazy-gm-prep.characters.prompts.bonds": "Any PC bonds or rivalries to bring up this session?",
+  "lazy-gm-prep.characters.prompts.reward": "Who is due for a magic item or cool reward?"
 }
