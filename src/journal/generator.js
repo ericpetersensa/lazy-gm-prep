@@ -262,6 +262,9 @@ You’re on <strong>${escapeHtml(prefix)} 0</strong>. From here on, you’ll cre
 </ul>
 
 <hr/>
+<p style="margin:0.35rem 0 0.25rem">
+  #Open Module Settings</a>
+</p>
 `.trim() + "\n";
 }
 
