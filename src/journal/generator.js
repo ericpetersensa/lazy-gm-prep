@@ -4,12 +4,12 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
 
 /**
  * Create a new GM Prep journal for the next session.
- * - Separate pages: no in-body H2 (avoid duplicate with page name).
- * - Fresh "secrets-clues" => description + notes + 10 blank ☐ Clue lines.
- * - Copy "secrets-clues" => rebuild checklist from UNCHECKED items only (top up to 10).
- * - Copy non-secrets => scrub legacy headers/desc; keep content.
- * - Combined page mode: includes H2 per section; same checklist logic.
+ * - Separate pages: one per step (no H2 in body; page name is the title).
+ * - "Secrets & Clues" page: auto-build checklist from UNCHECKED items of previous session, topping up to 10.
+ * - Other pages: copy previous content (scrub legacy wrappers) or create fresh placeholders.
+ * - Combined page mode: all sections on one page with H2 headers; same checklist logic.
  * - Normalizes legacy [ ] / [x] and <input type="checkbox"> to ☐ / ☑ before processing.
+ * - NEW: For "review-characters", inject a 6x5 blank table + GM prompts when creating fresh content.
  */
 export async function createPrepJournal() {
   const separate = !!getSetting(SETTINGS.separatePages, true);
@@ -23,7 +23,7 @@ export async function createPrepJournal() {
     ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
     : `${prefix} ${seq}`;
 
-  const prev = findPreviousSession(prefix); // highest-numbered existing session (source)
+  const prev = findPreviousSession(prefix); // previous (highest-numbered) prep entry
 
   if (separate) {
     const pages = [];
@@ -31,6 +31,7 @@ export async function createPrepJournal() {
       const copyOn = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
       const prevContent = copyOn ? getPreviousPageContent(prev, def) : null;
 
+      // ======== Special handling: "4. Secrets & Clues" (checklist) ========
       if (def.key === "secrets-clues") {
         let content;
         if (prevContent) {
@@ -41,22 +42,34 @@ export async function createPrepJournal() {
           const { bodyWithoutChecklist, items } = extractModuleChecklist(normalized);
           const uncheckedTexts = items.filter(i => !i.checked).map(i => i.text.trim());
           const toRender = topUpToTen(uncheckedTexts, "Clue");
-
-          const bodyCore = bodyWithoutChecklist?.trim()
-            ? `${bodyWithoutChecklist.trim()}\n`
-            : "";
+          const bodyCore = bodyWithoutChecklist?.trim() ? `${bodyWithoutChecklist.trim()}\n` : "";
           content = `${bodyCore}${renderChecklist(toRender)}`;
           if (!bodyCore) content = sectionDescription(def) + notesPlaceholder() + content;
         } else {
           // Fresh page
           content = sectionDescription(def) + notesPlaceholder() + renderChecklist(topUpToTen([], "Clue"));
         }
-
         pages.push({ name: game.i18n.localize(def.titleKey), type: "text", text: { format: 1, content } });
         continue;
       }
 
-      // Non-Secrets pages
+      // ======== NEW: Special handling: "1. Review the Characters" (table + prompts) ========
+      if (def.key === "review-characters") {
+        let content;
+        if (prevContent) {
+          content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
+          if (!content.trim()) {
+            content = sectionDescription(def) + characterReviewTableHTML(5) + gmReviewPromptsHTML() + notesPlaceholder();
+          }
+        } else {
+          // Fresh page
+          content = sectionDescription(def) + characterReviewTableHTML(5) + gmReviewPromptsHTML() + notesPlaceholder();
+        }
+        pages.push({ name: game.i18n.localize(def.titleKey), type: "text", text: { format: 1, content } });
+        continue;
+      }
+
+      // ======== Default handling for non-Secrets pages ========
       let content;
       if (prevContent) {
         content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
@@ -72,7 +85,7 @@ export async function createPrepJournal() {
     return entry;
   }
 
-  // Combined single page mode
+  // ======== Combined single page mode ========
   const chunks = [];
   for (const def of PAGE_ORDER) {
     const copyOn = !!getSetting(`copy.${def.key}`, def.key !== "choose-monsters");
@@ -94,26 +107,43 @@ export async function createPrepJournal() {
         bodyHtml = notesPlaceholder() + renderChecklist(topUpToTen([], "Clue"));
       }
       chunks.push(`${headerHtml}${bodyHtml}`);
-    } else {
+      continue;
+    }
+
+    // NEW: Characters in combined page
+    if (def.key === "review-characters") {
       let bodyHtml;
       if (prevContent) {
         bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
-        if (!bodyHtml.trim()) bodyHtml = notesPlaceholder();
+        if (!bodyHtml.trim()) bodyHtml = characterReviewTableHTML(5) + gmReviewPromptsHTML() + notesPlaceholder();
       } else {
-        bodyHtml = notesPlaceholder();
+        bodyHtml = characterReviewTableHTML(5) + gmReviewPromptsHTML() + notesPlaceholder();
       }
       chunks.push(`${headerHtml}${bodyHtml}`);
+      continue;
     }
+
+    // Other sections (combined mode)
+    let bodyHtml;
+    if (prevContent) {
+      bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
+      if (!bodyHtml.trim()) bodyHtml = notesPlaceholder();
+    } else {
+      bodyHtml = notesPlaceholder();
+    }
+    chunks.push(`${headerHtml}${bodyHtml}`);
   }
 
   const entry = await JournalEntry.create({
     name: entryName,
     folder: folderId,
-    pages: [{
-      name: game.i18n.localize("lazy-gm-prep.module.name"),
-      type: "text",
-      text: { format: 1, content: chunks.join("\n<hr/>\n") }
-    }]
+    pages: [
+      {
+        name: game.i18n.localize("lazy-gm-prep.module.name"),
+        type: "text",
+        text: { format: 1, content: chunks.join("\n<hr/>\n") }
+      }
+    ]
   });
   ui.notifications?.info(game.i18n.format("lazy-gm-prep.notifications.created", { name: entry.name }));
   return entry;
@@ -129,15 +159,63 @@ function sectionDescription(def) {
   return `<p class="lgmp-step-desc">${escapeHtml(desc)}</p>\n<hr/>\n`;
 }
 function notesPlaceholder() {
-  const hint = game.i18n.localize("lazy-gm-prep.ui.add-notes-here") || "Add your notes here.";
+  const hint =
+    game.i18n.localize("lazy-gm-prep.ui.add-notes-here") ||
+    "Add your notes here.";
   return `<p><em>${escapeHtml(hint)}</em></p>\n`;
+}
+
+/** ===== Characters: table + prompts (system-agnostic) ===== */
+function characterReviewTableHTML(rowCount = 5) {
+  const t = (k) => game.i18n.localize(k);
+  const headers = [
+    t("lazy-gm-prep.characters.table.header.pcName"),
+    t("lazy-gm-prep.characters.table.header.player"),
+    t("lazy-gm-prep.characters.table.header.conceptRole"),
+    t("lazy-gm-prep.characters.table.header.goalHook"),
+    t("lazy-gm-prep.characters.table.header.bondDrama"),
+    t("lazy-gm-prep.characters.table.header.recentNote")
+  ].map(escapeHtml);
+
+  const rows = Array.from({ length: rowCount }, () =>
+    "<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>"
+  ).join("\n");
+
+  return `
+<table class="lgmp-char-table">
+  <thead>
+    <tr>
+      <th>${headers[0]}</th>
+      <th>${headers[1]}</th>
+      <th>${headers[2]}</th>
+      <th>${headers[3]}</th>
+      <th>${headers[4]}</th>
+      <th>${headers[5]}</th>
+    </tr>
+  </thead>
+  <tbody>
+${rows}
+  </tbody>
+</table>
+`;
+}
+function gmReviewPromptsHTML() {
+  const t = (k) => escapeHtml(game.i18n.localize(k));
+  return `
+<ul class="lgmp-review-prompts">
+  <li>${t("lazy-gm-prep.characters.prompts.spotlight")}</li>
+  <li>${t("lazy-gm-prep.characters.prompts.unresolved")}</li>
+  <li>${t("lazy-gm-prep.characters.prompts.bonds")}</li>
+  <li>${t("lazy-gm-prep.characters.prompts.reward")}</li>
+</ul>
+`;
 }
 
 /* ============================== checklist utilities ============================== */
 function renderChecklist(texts) {
   const items = texts.map(t => `<li>☐ ${escapeHtml(t)}</li>`).join("\n");
   return `
-<section class="lgmp-section lgmp-checklist">
+<section class="lgmp-section lgmp-checklist-wrap">
   <ul class="lgmp-checklist">
 ${items}
   </ul>
@@ -149,16 +227,13 @@ function topUpToTen(texts, label = "Clue") {
   while (out.length < 10) out.push(label);
   return out.slice(0, 10);
 }
-
 /** Extract our <ul class="lgmp-checklist"> and return { bodyWithoutChecklist, items: [{text,checked}] } */
 function extractModuleChecklist(html) {
   const UL_RE = /<ul\s+class=['"]lgmp-checklist['"][\s\S]*?<\/ul>/i;
-  const match = html.match(UL_RE);
+  const match = String(html ?? "").match(UL_RE);
   if (!match) return { bodyWithoutChecklist: html, items: [] };
-
   const ulHtml = match[0];
-  const bodyWithoutChecklist = html.replace(UL_RE, "");
-
+  const bodyWithoutChecklist = String(html ?? "").replace(UL_RE, "");
   const items = [];
   const LI_RE = /<li[^>]*>([\s\S]*?)<\/li>/gi;
   let m;
@@ -176,7 +251,7 @@ function normalizeMarkers(html) {
   s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*checked[^>]*>/gi, "☑");
   s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*>/gi, "☐");
   s = s.replace(/\[\s*\]/g, "☐");
-  s = s.replace(/\[\s*\[xX]\s*\]/g, "☑");
+  s = s.replace(/\[\s*[xX]\s*\]/g, "☑");
   s = s.replace(/<label[^>]*>/gi, "").replace(/<\/label>/gi, "");
   return s;
 }
@@ -187,7 +262,10 @@ function scrubContent(rawHtml, def, { stripTitle = true, stripLegacyHeader = tru
   }
   if (stripTitle) {
     const titleText = game.i18n.localize(def.titleKey);
-    const reTitle = new RegExp(`<h[12][^>]*>\\s*(?:\\d+\\.\\s*)?${escapeRegExp(titleText)}\\s*<\\/h[12]>`, "i");
+    const reTitle = new RegExp(
+      `<h[12][^>]*>\\s*(?:\\d+\\.\\s*)?${escapeRegExp(titleText)}\\s*<\\/h[12]>`,
+      "i"
+    );
     html = html.replace(reTitle, "");
   }
   if (stripDesc) {
@@ -208,7 +286,6 @@ async function ensureFolder(name) {
   return f?.id ?? null;
 }
 function nextSequenceNumber(prefix) {
-  // enumerate using collection contents to avoid missing items
   const existing = (game.journal?.contents ?? []).filter(j => j.name?.startsWith(prefix));
   const nums = existing
     .map(j => j.name.match(/\b(\d+)\b/)?.[1] ?? null)
@@ -241,9 +318,9 @@ function getPreviousPageContent(prevJournal, def) {
 
 /* ================================= string utils ================================= */
 function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, m => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  }[m]));
+  return String(s ?? "").replace(/[&<>\"']/g, m => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+  })[m]);
 }
 function escapeRegExp(s) {
   return String(s ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -255,7 +332,7 @@ function splitMarker(line) {
   const trimmed = String(line ?? "").trim();
   if (/^☑\s*/.test(trimmed)) return { marker: "☑", text: trimmed.replace(/^☑\s*/, "") };
   if (/^☐\s*/.test(trimmed)) return { marker: "☐", text: trimmed.replace(/^☐\s*/, "") };
-  if (/^\[\s*\[xX]\s*\]\s*/.test(trimmed)) return { marker: "☑", text: trimmed.replace(/^\[\s*\[xX]\s*\]\s*/, "") };
+  if (/^\[\s*[xX]\s*\]\s*/.test(trimmed)) return { marker: "☑", text: trimmed.replace(/^\[\s*[xX]\s*\]\s*/, "") };
   if (/^\[\s*\]\s*/.test(trimmed)) return { marker: "☐", text: trimmed.replace(/^\[\s*\]\s*/, "") };
   return { marker: "", text: trimmed };
 }
