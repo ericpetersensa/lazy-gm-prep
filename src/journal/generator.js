@@ -10,7 +10,7 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
  * - "Secrets & Clues": copy UNCHECKED only from previous, then top up to 10.
  * - Normalize legacy checkboxes ([ ], [x], <input type="checkbox">) to ☐/☑.
  * - Characters/NPCs: provide editor-friendly plain tables.
- * - Numbering: first journal is 0; Session 0 IS a valid copy source (so S0 → S1 works).
+ * - Numbering: first journal is 0; Session 0 IS a valid copy source (S0 → S1 works).
  */
 export async function createPrepJournal() {
   const separate    = !!getSetting(SETTINGS.separatePages, true);
@@ -26,7 +26,7 @@ export async function createPrepJournal() {
     ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
     : `${prefix} ${seq}`;
 
-  // Previous session (now includes Session 0)
+  // Previous session (includes Session 0 now)
   const prev = findPreviousSession(prefix);
 
   if (separate) {
@@ -262,9 +262,11 @@ You’re on <strong>${escapeHtml(prefix)} 0</strong>. From here on, you’ll cre
 </ul>
 
 <hr/>
-<p style="margin:0.35rem 0 0.25rem">
-  <a href="#" data-lazy-open-settings
-/p>
+<p style="margin:0.5rem 0 0.25rem">
+  <button type="button" class="lgmp-open-settings-btn" data-lazy-open-settings aria-label="Open Module Settings">
+    <i class="fa-solid fa-gear" aria-hidden="true"></i><span>Open Module Settings</span>
+  </button>
+</p>
 `.trim() + "\n";
 }
 
