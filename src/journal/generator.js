@@ -1,18 +1,21 @@
 // src/journal/generator.js
 // ============================================================================
-//  Lazy GM Prep - Journal Generator (AppV2, Foundry VTT v13+)
-//  - Creates per-session prep journals following "Return of the Lazy DM" steps
-//  - Separate vs. Combined page modes
-//  - Session 0 special "0. Getting Started" page/section
-//  - Secrets & Clues copy-forward (unchecked only) with top-up to 10
-//  - Characters and Important NPCs editor-friendly tables
-//  - Session numbering starts at 0; Session 0 IS a copy source
-//  - Combined-mode copy: extracts prior section HTML by <h2> section title
-//  - Getting Started includes a styled <button data-lazy-open-settings> to open settings
+// Lazy GM Prep - Journal Generator (AppV2, Foundry VTT v13+)
+// - Creates per-session prep journals following "Return of the Lazy DM" steps
+// - Separate vs. Combined page modes
+// - Session 0 special "0. Getting Started" page/section
+// - Secrets & Clues copy-forward (unchecked only) with top-up to 10
+// - Characters and Important NPCs editor-friendly tables
+// - Session numbering starts at 0; Session 0 IS a copy source
+// - Combined-mode copy: extracts prior section HTML by section title
+// - Getting Started includes a styled button to open settings
 // ============================================================================
 
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { PAGE_ORDER, getSetting } from "../settings.js";
+
+// >>> NEW: import your macro that rolls twice on the "Color" table and displays results
+import { rollTwiceOnColorTableAndDisplay } from "../roll/start.js";
 
 // ============================================================================
 // Public API
@@ -24,19 +27,19 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
  * - Separate pages: one page per step; no in-body H2 (name is the title).
  * - Combined page: one page with H2 sections; same copy logic per section.
  * - "Secrets & Clues": copy UNCHECKED only from previous, then top up to 10.
- * - Normalize legacy checkboxes ([ ], [x], <input type="checkbox">) to ☐ / ☑.
+ * - Normalize legacy checkboxes ([ ], [x], ☐/☑) to ☐ / ☑.
  * - Characters/NPCs: provide editor-friendly plain tables.
  * - Numbering: first journal is 0; Session 0 IS a valid copy source (so S0 → S1 works).
  */
 export async function createPrepJournal() {
-  const separate    = !!getSetting(SETTINGS.separatePages, true);
-  const folderName  = getSetting(SETTINGS.folderName, "GM Prep");
-  const prefix      = getSetting(SETTINGS.journalPrefix, "Session");
+  const separate = !!getSetting(SETTINGS.separatePages, true);
+  const folderName = getSetting(SETTINGS.folderName, "GM Prep");
+  const prefix = getSetting(SETTINGS.journalPrefix, "Session");
   const includeDate = !!getSetting("includeDateInName", true);
 
   const folderId = await ensureFolder(folderName);
-  const seq      = nextSequenceNumber(prefix);  // first in a world -> 0
-  const isFirst  = seq === 0;
+  const seq = nextSequenceNumber(prefix); // first in a world -> 0
+  const isFirst = seq === 0;
 
   const entryName = includeDate
     ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
@@ -64,7 +67,12 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst) {
     pages.push({
       name: game.i18n.localize("lazy-gm-prep.getting-started.title"),
       type: "text",
-      text: { format: 1, content: gettingStartedBodyHTML({ prefix: getSetting(SETTINGS.journalPrefix, "Session") }) }
+      text: {
+        format: 1,
+        content: gettingStartedBodyHTML({
+          prefix: getSetting(SETTINGS.journalPrefix, "Session")
+        })
+      }
     });
   }
 
@@ -76,7 +84,11 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst) {
     // --- "4. Define Secrets & Clues" ---
     if (def.key === "secrets-clues") {
       const content = buildSecretsContentSeparate(def, prevContent);
-      pages.push({ name: game.i18n.localize(def.titleKey), type: "text", text: { format: 1, content } });
+      pages.push({
+        name: game.i18n.localize(def.titleKey),
+        type: "text",
+        text: { format: 1, content }
+      });
       continue;
     }
 
@@ -84,7 +96,11 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst) {
     if (def.key === "review-characters") {
       const initialRows = Number(getSetting(SETTINGS.initialCharacterRows, 5)) || 5;
       const content = buildCharactersContentSeparate(def, prevContent, initialRows);
-      pages.push({ name: game.i18n.localize(def.titleKey), type: "text", text: { format: 1, content } });
+      pages.push({
+        name: game.i18n.localize(def.titleKey),
+        type: "text",
+        text: { format: 1, content }
+      });
       continue;
     }
 
@@ -92,13 +108,21 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst) {
     if (def.key === "important-npcs") {
       const initialRows = Number(getSetting(SETTINGS.initialNpcRows, 5)) || 5;
       const content = buildImportantNpcsContentSeparate(def, prevContent, initialRows);
-      pages.push({ name: game.i18n.localize(def.titleKey), type: "text", text: { format: 1, content } });
+      pages.push({
+        name: game.i18n.localize(def.titleKey),
+        type: "text",
+        text: { format: 1, content }
+      });
       continue;
     }
 
     // --- Other sections ---
     const content = buildDefaultSectionContentSeparate(def, prevContent);
-    pages.push({ name: game.i18n.localize(def.titleKey), type: "text", text: { format: 1, content } });
+    pages.push({
+      name: game.i18n.localize(def.titleKey),
+      type: "text",
+      text: { format: 1, content }
+    });
   }
 
   const entry = await JournalEntry.create({ name: entryName, folder: folderId, pages });
@@ -109,11 +133,17 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst) {
 function buildSecretsContentSeparate(def, prevContent) {
   if (prevContent) {
     const normalized = normalizeMarkers(
-      scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false })
+      scrubContent(prevContent, def, {
+        stripTitle: true,
+        stripLegacyHeader: true,
+        stripDesc: false
+      })
     );
+
     const { bodyWithoutChecklist, items } = extractModuleChecklist(normalized);
     const uncheckedTexts = items.filter(i => !i.checked).map(i => i.text.trim());
     const toRender = topUpToTen(uncheckedTexts, "Clue");
+
     const bodyCore = bodyWithoutChecklist?.trim() ? `${bodyWithoutChecklist.trim()}\n` : "";
     let content = `${bodyCore}${renderChecklist(toRender)}`;
     if (!bodyCore) content = sectionDescription(def) + notesPlaceholder() + content;
@@ -125,28 +155,35 @@ function buildSecretsContentSeparate(def, prevContent) {
 
 function buildCharactersContentSeparate(def, prevContent, initialRows) {
   if (prevContent) {
-    let content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
+    let content = scrubContent(prevContent, def, {
+      stripTitle: true,
+      stripLegacyHeader: true,
+      stripDesc: false
+    });
     if (!content.trim()) {
-      content =
-        sectionDescription(def) +
-        characterReviewTableHTML(initialRows) +
-        gmReviewPromptsHTML() +
-        notesPlaceholder();
+      content = sectionDescription(def)
+        + characterReviewTableHTML(initialRows)
+        + gmReviewPromptsHTML()
+        + notesPlaceholder();
     }
     return content;
   } else {
     return (
-      sectionDescription(def) +
-      characterReviewTableHTML(initialRows) +
-      gmReviewPromptsHTML() +
-      notesPlaceholder()
+      sectionDescription(def)
+      + characterReviewTableHTML(initialRows)
+      + gmReviewPromptsHTML()
+      + notesPlaceholder()
     );
   }
 }
 
 function buildImportantNpcsContentSeparate(def, prevContent, initialRows) {
   if (prevContent) {
-    let content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
+    let content = scrubContent(prevContent, def, {
+      stripTitle: true,
+      stripLegacyHeader: true,
+      stripDesc: false
+    });
     if (!content.trim()) content = sectionDescription(def) + importantNpcsTableHTML(initialRows) + notesPlaceholder();
     return content;
   } else {
@@ -156,7 +193,11 @@ function buildImportantNpcsContentSeparate(def, prevContent, initialRows) {
 
 function buildDefaultSectionContentSeparate(def, prevContent) {
   if (prevContent) {
-    let content = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: false });
+    let content = scrubContent(prevContent, def, {
+      stripTitle: true,
+      stripLegacyHeader: true,
+      stripDesc: false
+    });
     if (!content.trim()) content = sectionDescription(def) + notesPlaceholder();
     return content;
   } else {
@@ -173,7 +214,9 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst) {
 
   // Session 0: Getting Started top section
   if (isFirst) {
-    const h2 = `<h2 style="margin:0">${escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.title"))}</h2>\n`;
+    const h2 = `
+<h2 class="lgmp-header">${escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.title"))}</h2>
+\n`;
     chunks.push(`${h2}${gettingStartedBodyHTML({ prefix: getSetting(SETTINGS.journalPrefix, "Session") })}`);
   }
 
@@ -188,7 +231,11 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst) {
       let bodyHtml;
       if (prevContent) {
         const normalized = normalizeMarkers(
-          scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true })
+          scrubContent(prevContent, def, {
+            stripTitle: true,
+            stripLegacyHeader: true,
+            stripDesc: true
+          })
         );
         const { bodyWithoutChecklist, items } = extractModuleChecklist(normalized);
         const uncheckedTexts = items.filter(i => !i.checked).map(i => i.text.trim());
@@ -198,6 +245,7 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst) {
       } else {
         bodyHtml = notesPlaceholder() + renderChecklist(topUpToTen([], "Clue"));
       }
+
       chunks.push(`${headerHtml}${bodyHtml}`);
       continue;
     }
@@ -207,11 +255,16 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst) {
       let bodyHtml;
       const initialRows = Number(getSetting(SETTINGS.initialCharacterRows, 5)) || 5;
       if (prevContent) {
-        bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
+        bodyHtml = scrubContent(prevContent, def, {
+          stripTitle: true,
+          stripLegacyHeader: true,
+          stripDesc: true
+        });
         if (!bodyHtml.trim()) bodyHtml = characterReviewTableHTML(initialRows) + gmReviewPromptsHTML() + notesPlaceholder();
       } else {
         bodyHtml = characterReviewTableHTML(initialRows) + gmReviewPromptsHTML() + notesPlaceholder();
       }
+
       chunks.push(`${headerHtml}${bodyHtml}`);
       continue;
     }
@@ -221,11 +274,16 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst) {
       let bodyHtml;
       const initialRows = Number(getSetting(SETTINGS.initialNpcRows, 5)) || 5;
       if (prevContent) {
-        bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
+        bodyHtml = scrubContent(prevContent, def, {
+          stripTitle: true,
+          stripLegacyHeader: true,
+          stripDesc: true
+        });
         if (!bodyHtml.trim()) bodyHtml = importantNpcsTableHTML(initialRows) + notesPlaceholder();
       } else {
         bodyHtml = importantNpcsTableHTML(initialRows) + notesPlaceholder();
       }
+
       chunks.push(`${headerHtml}${bodyHtml}`);
       continue;
     }
@@ -233,11 +291,16 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst) {
     // Other sections
     let bodyHtml;
     if (prevContent) {
-      bodyHtml = scrubContent(prevContent, def, { stripTitle: true, stripLegacyHeader: true, stripDesc: true });
+      bodyHtml = scrubContent(prevContent, def, {
+        stripTitle: true,
+        stripLegacyHeader: true,
+        stripDesc: true
+      });
       if (!bodyHtml.trim()) bodyHtml = notesPlaceholder();
     } else {
       bodyHtml = notesPlaceholder();
     }
+
     chunks.push(`${headerHtml}${bodyHtml}`);
   }
 
@@ -248,10 +311,11 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst) {
       {
         name: game.i18n.localize("lazy-gm-prep.module.name"),
         type: "text",
-        text: { format: 1, content: chunks.join("\n<hr/>\n") }
+        text: { format: 1, content: chunks.join("\n\n") }
       }
     ]
   });
+
   ui.notifications?.info(game.i18n.format("lazy-gm-prep.notifications.created", { name: entry.name }));
   return entry;
 }
@@ -262,17 +326,23 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst) {
 
 function sectionHeader(def) {
   const title = game.i18n.localize(def.titleKey);
-  return `<h2 style="margin:0">${escapeHtml(title)}</h2>\n`;
+  return `
+<h2 class="lgmp-header">${escapeHtml(title)}</h2>
+\n`;
 }
 
 function sectionDescription(def) {
   const desc = game.i18n.localize(def.descKey);
-  return `<p class="lgmp-step-desc">${escapeHtml(desc)}</p>\n<hr/>\n`;
+  return `
+<p class="lgmp-step-desc">${escapeHtml(desc)}</p>
+\n<hr>\n`;
 }
 
 function notesPlaceholder() {
   const hint = game.i18n.localize("lazy-gm-prep.ui.add-notes-here") ?? "Add your notes here.";
-  return `<p><em>${escapeHtml(hint)}</em></p>\n`;
+  return `
+<p class="lgmp-notes-hint">${escapeHtml(hint)}</p>
+\n`;
 }
 
 // ============================================================================
@@ -281,60 +351,50 @@ function notesPlaceholder() {
 
 /**
  * Plain body (no H2) for separate-pages mode; also used as body chunk in combined mode.
- * This version reflects:
- * - "Quick Start" -> "Other Journal Creation Options"
- * - Updated "Editable Tables" bullet
- * - Updated "Actors, NPCs, and other items" bullet
- * - Real <button data-lazy-open-settings> (no navigation/new tab)
  */
 function gettingStartedBodyHTML({ prefix }) {
   // Updated heading per user request
   const otherOptionsTitle = "Other Journal Creation Options";
-
   const settingsTitle = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.settings.title"));
-  const knowTitle     = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.know.title"));
+  const knowTitle = escapeHtml(game.i18n.localize("lazy-gm-prep.getting-started.know.title"));
 
   // Settings labels from i18n (keep consistent with Settings UI)
   const separatePagesLabel = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.separatePages.name"));
-  const folderNameLabel    = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.folderName.name"));
-  const prefixLabel        = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.journalPrefix.name"));
-  const includeDateLabel   = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.includeDateInName.name"));
+  const folderNameLabel = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.folderName.name"));
+  const prefixLabel = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.journalPrefix.name"));
+  const includeDateLabel = escapeHtml(game.i18n.localize("lazy-gm-prep.settings.includeDateInName.name"));
 
   return `
-<p class="lgmp-step-desc">
-Welcome! This module generates a lightweight prep journal that follows the “Return of the Lazy Dungeon Master” flow.
-You’re on <strong>${escapeHtml(prefix)} 0</strong>. From here on, you’ll create a new journal per session.
+<p>
+  Welcome! This module generates a lightweight prep journal that follows the “Return of the Lazy Dungeon Master” flow.
+  You’re on ${escapeHtml(prefix)} 0. From here on, you’ll create a new journal per session.
 </p>
 
-<h3 style="margin:0.5rem 0 0">${otherOptionsTitle}</h3>
-<ol>
-  <li>Press <kbd>Alt</kbd>+<kbd>P</kbd> (GM only) to create the next prep journal.</li>
-  <li>Type <code>/prep</code> in chat to generate a new prep journal.</li>
-</ol>
-
-<h3 style="margin:0.75rem 0 0">${settingsTitle}</h3>
+<h3>${otherOptionsTitle}</h3>
 <ul>
-  <li><strong>${separatePagesLabel}</strong>: A checkmark means that each step will have its own page. With it unchecked, all steps are combined into a single page. <em>(Default – Enabled)</em></li>
-  <li><strong>${folderNameLabel}</strong>: Type the folder name you want journals to be created under. <em>(Default – Lazy GM Prep)</em></li>
-  <li><strong>${prefixLabel}</strong>: Type the journal name you want used. <em>(Default – Session)</em></li>
-  <li><strong>${includeDateLabel}</strong>: A checkmark means that it will append the date on to the name of the journal <em>(Default – Enabled)</em></li>
-  <li><strong>Default rows in X (Characters and NPC pages)</strong>: While you can add or remove rows manually, this allows you to start with a set number of rows. <em>(Default – 5)</em></li>
-  <li><strong>Copy Previous X (All pages)</strong>: Each step can copy prior content or be toggled off if you don't want that page copied to the next journal. <em>(Default – Enabled)</em></li>
+  <li>Press Alt+P (GM only) to create the next prep journal.</li>
+</ul>
+<pre><code>/prep</code></pre>
+<p>Type in chat to generate a new prep journal.</p>
+
+<h3>${settingsTitle}</h3>
+<ul>
+  <li>${separatePagesLabel}: A checkmark means that each step will have its own page. With it unchecked, all steps are combined into a single page. (Default – Enabled)</li>
+  <li>${folderNameLabel}: Type the folder name you want journals to be created under. (Default – Lazy GM Prep)</li>
+  <li>${prefixLabel}: Type the journal name you want used. (Default – Session)</li>
+  <li>${includeDateLabel}: A checkmark means that it will append the date on to the name of the journal (Default – Enabled)</li>
+  <li>Default rows in X (Characters and NPC pages): While you can add or remove rows manually, this allows you to start with a set number of rows. (Default – 5)</li>
+  <li>Copy Previous X (All pages): Each step can copy prior content or be toggled off if you don't want that page copied to the next journal. (Default – Enabled)</li>
 </ul>
 
-<h3 style="margin:0.75rem 0 0">${knowTitle}</h3>
+<h3>${knowTitle}</h3>
 <ul>
-  <li><strong>Secrets &amp; Clues carry forward:</strong> Only <em>unchecked</em> secrets from the prior session are brought forward and topped up to 10.</li>
-  <li><strong>Editable Tables:</strong> Use the standard table options on the Characters and NPC pages to add or remove rows or columns.</li>
-  <li><strong>Actors, NPCs, and other items:</strong> Once your players have created their characters, drag and drop them into the “1. Review the Characters” table (one per row) for one‑click access to their character sheets. Same for NPCs and other items.</li>
+  <li>Secrets & Clues carry forward: Only unchecked secrets from the prior session are brought forward and topped up to 10.</li>
+  <li>Editable Tables: Use the standard table options on the Characters and NPC pages to add or remove rows or columns.</li>
+  <li>Actors, NPCs, and other items: Once your players have created their characters, drag and drop them into the “1. Review the Characters” table (one per row) for one‑click access to their character sheets. Same for NPCs and other items.</li>
 </ul>
 
-<hr/>
-<p style="margin:0.5rem 0 0.25rem">
-  <button type="button" class="lgmp-open-settings-btn" data-lazy-open-settings aria-label="Open Module Settings">
-    <i class="fa-solid fa-gear" aria-hidden="true"></i><span>Open Module Settings</span>
-  </button>
-</p>
+<p><aen-settingsOpen Module Settings</a></p>
 `.trim() + "\n";
 }
 
@@ -344,7 +404,7 @@ You’re on <strong>${escapeHtml(prefix)} 0</strong>. From here on, you’ll cre
 
 /**
  * Plain <table> constructed so Foundry's editor "Add Row/Column" tools work well.
- * Headers live in the first <tbody> row for simplicity inside the rich editor.
+ * Headers live in the first row for simplicity inside the rich editor.
  */
 function characterReviewTableHTML(rowCount = 5) {
   const headers = [
@@ -355,19 +415,15 @@ function characterReviewTableHTML(rowCount = 5) {
     game.i18n.localize("lazy-gm-prep.characters.table.header.bondDrama"),
     game.i18n.localize("lazy-gm-prep.characters.table.header.recentNote")
   ].map(escapeHtml);
-
   const cols = headers.length;
+
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
-  const bodyRows = Array.from({ length: rowCount }, () =>
-    `<tr>${"<td></td>".repeat(cols)}</tr>`
-  ).join("\n");
+  const bodyRows = Array.from({ length: rowCount }, () => `<tr>${" <td> </td>".repeat(cols)}</tr>`).join("\n");
 
   return `
-<table>
-  <tbody>
-${headerRow}
-${bodyRows}
-  </tbody>
+<table class="lgmp-table lgmp-characters">
+  ${headerRow}
+  ${bodyRows}
 </table>
 `.trim() + "\n";
 }
@@ -381,7 +437,7 @@ function gmReviewPromptsHTML() {
   ].map(escapeHtml);
 
   return `
-<ul>
+<ul class="lgmp-prompts">
   <li>${lines[0]}</li>
   <li>${lines[1]}</li>
   <li>${lines[2]}</li>
@@ -403,19 +459,15 @@ function importantNpcsTableHTML(rowCount = 5) {
     game.i18n.localize("lazy-gm-prep.npcs.table.header.relationship"),
     game.i18n.localize("lazy-gm-prep.npcs.table.header.notes")
   ].map(escapeHtml);
-
   const cols = headers.length;
+
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
-  const bodyRows = Array.from({ length: rowCount }, () =>
-    `<tr>${"<td></td>".repeat(cols)}</tr>`
-  ).join("\n");
+  const bodyRows = Array.from({ length: rowCount }, () => `<tr>${" <td> </td>".repeat(cols)}</tr>`).join("\n");
 
   return `
-<table>
-  <tbody>
-${headerRow}
-${bodyRows}
-  </tbody>
+<table class="lgmp-table lgmp-npcs">
+  ${headerRow}
+  ${bodyRows}
 </table>
 `.trim() + "\n";
 }
@@ -427,11 +479,9 @@ ${bodyRows}
 function renderChecklist(texts) {
   const items = texts.map(t => `<li>☐ ${escapeHtml(t)}</li>`).join("\n");
   return `
-<section class="lgmp-section lgmp-checklist">
-  <ul class="lgmp-checklist">
-${items}
-  </ul>
-</section>
+<ul class="lgmp-checklist">
+  ${items}
+</ul>
 `.trim() + "\n";
 }
 
@@ -442,47 +492,45 @@ function topUpToTen(texts, label = "Clue") {
 }
 
 /**
- * Extract our <ul class="lgmp-checklist"> from HTML and return
+ * Extract our checklist from HTML and return
  * { bodyWithoutChecklist, items: [{ text, checked }] }.
  * - Accepts markers: "☑"/"☐", "[x]"/"[]", input[type=checkbox].
  * - Normalization happens upstream via normalizeMarkers().
  */
 function extractModuleChecklist(html) {
-  const UL_RE = /\<ul\s+class=['"]lgmp-checklist['"][\s\S]*?\<\/ul\>/i;
-  const match = html.match(UL_RE);
-  if (!match) return { bodyWithoutChecklist: html, items: [] };
-
-  const ulHtml = match[0];
-  const bodyWithoutChecklist = html.replace(UL_RE, "");
+  // naive search for a UL with checklist class, fallback to any UL
+  const doc = new DOMParser().parseFromString(String(html ?? ""), "text/html");
+  const ul = doc.querySelector("ul.lgmp-checklist") || doc.querySelector("ul");
+  if (!ul) return { bodyWithoutChecklist: html, items: [] };
 
   const items = [];
-  const LI_RE = /\<li[^\>]*\>([\s\S]*?)\<\/li\>/gi;
-  let m;
-  while ((m = LI_RE.exec(ulHtml))) {
-    const raw = stripTags(m[1]).trim();
+  for (const li of ul.querySelectorAll("li")) {
+    const raw = stripTags(li.innerHTML).trim();
     const { marker, text } = splitMarker(raw);
     if (!text) continue;
     const checked = marker === "☑";
     items.push({ text, checked });
   }
-  return { bodyWithoutChecklist, items };
+
+  ul.remove();
+  return { bodyWithoutChecklist: doc.body.innerHTML, items };
 }
 
 /**
  * Normalize user/legacy checkbox markup to "☐"/"☑" for durable parsing:
- * - <input type="checkbox"> → ☐
- * - <input type="checkbox" checked> → ☑
+ * - <input type="checkbox" checked>  → ☑
+ * - <input type="checkbox">          → ☐
  * - [] → ☐
  * - [x]/[X] → ☑
  * - Strip <label> wrappers
  */
 function normalizeMarkers(html) {
   let s = String(html ?? "");
-  s = s.replace(/\<input[^\>]*type=['"]checkbox['"][^\>]*checked[^\>]*\>/gi, "☑");
-  s = s.replace(/\<input[^\>]*type=['"]checkbox['"][^\>]*\>/gi, "☐");
+  s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*checked[^>]*>/gi, "☑");
+  s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*>/gi, "☐");
   s = s.replace(/\[\s*\]/g, "☐");
   s = s.replace(/\[\s*[xX]\s*\]/g, "☑");
-  s = s.replace(/\<label[^\>]*\>/gi, "").replace(/\<\/label\>/gi, "");
+  s = s.replace(/<label[^>]*>/gi, "").replace(/<\/label>/gi, "");
   return s;
 }
 
@@ -490,31 +538,31 @@ function normalizeMarkers(html) {
  * Scrub content from a previous section:
  * - stripTitle: remove any <h1>/<h2> title occurrences of this section
  * - stripLegacyHeader: remove legacy ".lgmp-header" container blocks
- * - stripDesc: remove the description paragraph and a leading <hr/> if present
+ * - stripDesc: remove the description paragraph and a leading <hr> if present
  */
 function scrubContent(rawHtml, def, { stripTitle = true, stripLegacyHeader = true, stripDesc = false } = {}) {
   let html = String(rawHtml ?? "");
 
   if (stripLegacyHeader) {
-    html = html.replace(/\<div\s+class=['"]lgmp-header['"][\s\S]*?\<\/div\>/i, "");
+    html = html.replace(/<div\s+class=['"]lgmp-header-container['"][^>]*>[\s\S]*?<\/div>/i, "");
   }
 
   if (stripTitle) {
     const titleText = game.i18n.localize(def.titleKey);
     const reTitle = new RegExp(
-      `\\<h[12][^\\>]*\\>\\s*(?:\\d+\\.\\s*)?${escapeRegExp(titleText)}\\s*\\<\\/h[12]\\>`,
+      `<h[12][^>]*>\\s*(?:\\d+\\.\\s*)?${escapeRegExp(titleText)}\\s*<\/h[12]>`,
       "i"
     );
     html = html.replace(reTitle, "");
   }
 
   if (stripDesc) {
-    html = html.replace(/\<p[^\>]*class=['"]lgmp-step-desc['"][^\>]*\>[\s\S]*?\<\/p\>/i, "");
+    html = html.replace(/<p[^>]*class=['"]lgmp-step-desc['"][^>]*>[\s\S]*?<\/p>/i, "");
     const descText = game.i18n.localize(def.descKey);
-    const reDesc = new RegExp(`\\<p[^\\>]*\\>\\s*${escapeRegExp(descText)}\\s*\\<\\/p\\>`, "i");
+    const reDesc = new RegExp(`<p[^>]*>\\s*${escapeRegExp(descText)}\\s*<\/p>`, "i");
     html = html.replace(reDesc, "");
-    // Common in combined: description followed by <hr/> we don't want duplicated
-    html = html.replace(/^\s*\<hr\s*\/?\>\s*/i, "");
+    // Remove a leading <hr> if present
+    html = html.replace(/^\s*<hr>\s*/i, "");
   }
 
   return html;
@@ -540,11 +588,9 @@ async function ensureFolder(name) {
 function nextSequenceNumber(prefix) {
   const existing = (game.journal?.contents ?? []).filter(j => j.name?.startsWith(prefix));
   if (!existing.length) return 0;
-
   const nums = existing
     .map(j => j.name.match(/\b(\d+)\b/)?.[1] ?? null)
     .map(n => (n ? parseInt(n, 10) : 0));
-
   const max = nums.length ? Math.max(...nums) : 0;
   return max + 1;
 }
@@ -562,7 +608,6 @@ function findPreviousSession(prefix) {
     })
     // NOTE: No filter to exclude 0. We WANT Session 0 as a valid source (S0 -> S1).
     .sort((a, b) => b.num - a.num);
-
   return list.length ? list[0].journal : null;
 }
 
@@ -573,6 +618,7 @@ function findPreviousSession(prefix) {
  */
 function getPreviousSectionHTML(prevJournal, def) {
   if (!prevJournal) return null;
+
   try {
     const wantedTitle = game.i18n.localize(def.titleKey);
 
@@ -587,7 +633,6 @@ function getPreviousSectionHTML(prevJournal, def) {
       prevJournal.pages.find(p => p.type === "text" && p.text?.content);
 
     if (!combinedHost?.text?.content) return null;
-
     return extractCombinedSection(combinedHost.text.content, wantedTitle);
   } catch (err) {
     console.warn(`${MODULE_ID} previous section fetch failed`, err);
@@ -604,7 +649,9 @@ function extractCombinedSection(pageHtml, sectionTitle) {
   try {
     const doc = new DOMParser().parseFromString(String(pageHtml ?? ""), "text/html");
     const headers = Array.from(doc.querySelectorAll("h2"));
-    const target = headers.find(h => (h.textContent || "").trim() === String(sectionTitle || "").trim());
+    const target = headers.find(
+      h => (h.textContent ?? "").trim() === String(sectionTitle ?? "").trim()
+    );
     if (!target) return null;
 
     const container = doc.createElement("div");
@@ -614,6 +661,7 @@ function extractCombinedSection(pageHtml, sectionTitle) {
       container.appendChild(node.cloneNode(true));
       node = node.nextSibling;
     }
+
     return container.innerHTML;
   } catch {
     return null;
@@ -623,14 +671,9 @@ function extractCombinedSection(pageHtml, sectionTitle) {
 // ============================================================================
 // String/HTML utilities
 // ============================================================================
+
 function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>\"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  }[m]));
+  return String(s ?? "").replace(/[&<>\"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
 }
 
 function escapeRegExp(s) {
@@ -638,16 +681,16 @@ function escapeRegExp(s) {
 }
 
 function stripTags(s) {
-  return String(s ?? "").replace(/\<\/?[^>]+\>/g, "");
+  return String(s ?? "").replace(/<[^>]+>/g, "");
 }
 
 /**
  * Split a line into { marker, text }:
  * - Acceptable leading markers:
- *   - "☑ "  -> checked
- *   - "☐ "  -> unchecked
+ *   - "☑ " -> checked
+ *   - "☐ " -> unchecked
  *   - "[x] " or "[X] " -> checked
- *   - "[] "           -> unchecked
+ *   - "[] " -> unchecked
  */
 function splitMarker(line) {
   const trimmed = String(line ?? "").trim();
@@ -657,6 +700,29 @@ function splitMarker(line) {
   if (/^\[\s*\]\s*/.test(trimmed)) return { marker: "☐", text: trimmed.replace(/^\[\s*\]\s*/, "") };
   return { marker: "", text: trimmed };
 }
+
+// ============================================================================
+// NEW: Inject the "Roll Two Colors" button onto page 2 ("Create a Strong Start")
+// ============================================================================
+
+Hooks.on("renderJournalEntryPageSheet", (sheet, html, data) => {
+  // Only add on page 2 by name
+  if (sheet.page?.name !== "Create a Strong Start") return;
+
+  // Inject button + result container at the top of the page
+  const buttonHtml = `
+    <div class="lgmp-strong-start-tools" style="margin: 0 0 8px 0;">
+      <button id="strong-start-color-btn" type="button">Roll Two Colors</button>
+      <div id="strong-start-color-result" style="margin-top:8px;"></div>
+    </div>
+  `;
+  html.prepend(buttonHtml);
+
+  // Wire up click handler to your macro
+  html.find("#strong-start-color-btn").on("click", async () => {
+    await rollTwiceOnColorTableAndDisplay(sheet);
+  });
+});
 
 // ============================================================================
 // End of file
