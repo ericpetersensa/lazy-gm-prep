@@ -10,7 +10,7 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
  * - "Secrets & Clues": copy UNCHECKED only from previous, then top up to 10.
  * - Normalize legacy checkboxes ([ ], [x], <input type="checkbox">) to ☐/☑.
  * - Characters/NPCs: provide editor-friendly plain tables.
- * - Numbering: first journal is 0; Session 0 **is allowed** as a copy source now.
+ * - Numbering: first journal is 0; Session 0 IS a valid copy source (so S0 → S1 works).
  */
 export async function createPrepJournal() {
   const separate    = !!getSetting(SETTINGS.separatePages, true);
@@ -26,7 +26,7 @@ export async function createPrepJournal() {
     ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
     : `${prefix} ${seq}`;
 
-  // Previous session (now includes Session 0 when present)
+  // Previous session (now includes Session 0)
   const prev = findPreviousSession(prefix);
 
   if (separate) {
@@ -263,8 +263,8 @@ You’re on <strong>${escapeHtml(prefix)} 0</strong>. From here on, you’ll cre
 
 <hr/>
 <p style="margin:0.35rem 0 0.25rem">
-  <a hrefodule Settings</a>
-</p>
+  <a href="#" data-lazy-open-settings
+/p>
 `.trim() + "\n";
 }
 
@@ -420,7 +420,7 @@ function nextSequenceNumber(prefix) {
   const max = nums.length ? Math.max(...nums) : 0;
   return max + 1;
 }
-/** Get last session journal (now includes Session 0). */
+/** Get last session journal (includes Session 0). */
 function findPreviousSession(prefix) {
   const list = (game.journal?.contents ?? [])
     .filter(j => j.name?.startsWith(prefix))
@@ -428,7 +428,6 @@ function findPreviousSession(prefix) {
       const n = j.name.match(/\b(\d+)\b/)?.[1] ?? null;
       return { num: n ? parseInt(n, 10) : 0, journal: j };
     })
-    // NOTE: no filter to exclude 0 — Session 0 is a valid copy source now
     .sort((a, b) => b.num - a.num);
   return list.length ? list[0].journal : null;
 }
@@ -484,7 +483,9 @@ function extractCombinedSection(pageHtml, sectionTitle) {
 
 /* ================================= string utils ================================= */
 function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>\"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  return String(s ?? "").replace(/[&<>\"']/g, (m) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]
+  ));
 }
 function escapeRegExp(s) {
   return String(s ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
