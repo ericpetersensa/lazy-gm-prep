@@ -10,7 +10,7 @@ import { PAGE_ORDER, getSetting } from "../settings.js";
  * - "Secrets & Clues": copy UNCHECKED only from previous, then top up to 10.
  * - Normalize legacy checkboxes ([ ], [x], <input type="checkbox">) to ☐/☑.
  * - Characters/NPCs: provide editor-friendly plain tables.
- * - Numbering: first journal is 0; Session 0 is NOT a copy source by design.
+ * - Numbering: first journal is 0; Session 0 **is allowed** as a copy source now.
  */
 export async function createPrepJournal() {
   const separate    = !!getSetting(SETTINGS.separatePages, true);
@@ -26,7 +26,7 @@ export async function createPrepJournal() {
     ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
     : `${prefix} ${seq}`;
 
-  // We never copy from Session 0 so the welcome page/section doesn't propagate.
+  // Previous session (now includes Session 0 when present)
   const prev = findPreviousSession(prefix);
 
   if (separate) {
@@ -263,7 +263,7 @@ You’re on <strong>${escapeHtml(prefix)} 0</strong>. From here on, you’ll cre
 
 <hr/>
 <p style="margin:0.35rem 0 0.25rem">
-  #Open Module Settings</a>
+  <a hrefodule Settings</a>
 </p>
 `.trim() + "\n";
 }
@@ -280,7 +280,9 @@ function characterReviewTableHTML(rowCount = 5) {
   ].map(escapeHtml);
   const cols = headers.length;
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
-  const bodyRows = Array.from({ length: rowCount }, () => `<tr>${"<td></td>".repeat(cols)}</tr>`).join("\n");
+  const bodyRows = Array.from({ length: rowCount }, () =>
+    `<tr>${"<td></td>".repeat(cols)}</tr>`
+  ).join("\n");
   return `
 <table>
   <tbody>
@@ -319,7 +321,9 @@ function importantNpcsTableHTML(rowCount = 5) {
   ].map(escapeHtml);
   const cols = headers.length;
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
-  const bodyRows = Array.from({ length: rowCount }, () => `<tr>${"<td></td>".repeat(cols)}</tr>`).join("\n");
+  const bodyRows = Array.from({ length: rowCount }, () =>
+    `<tr>${"<td></td>".repeat(cols)}</tr>`
+  ).join("\n");
   return `
 <table>
   <tbody>
@@ -416,7 +420,7 @@ function nextSequenceNumber(prefix) {
   const max = nums.length ? Math.max(...nums) : 0;
   return max + 1;
 }
-/** Ignore Session 0 as a copy source (on purpose). */
+/** Get last session journal (now includes Session 0). */
 function findPreviousSession(prefix) {
   const list = (game.journal?.contents ?? [])
     .filter(j => j.name?.startsWith(prefix))
@@ -424,7 +428,7 @@ function findPreviousSession(prefix) {
       const n = j.name.match(/\b(\d+)\b/)?.[1] ?? null;
       return { num: n ? parseInt(n, 10) : 0, journal: j };
     })
-    .filter(x => x.num > 0)
+    // NOTE: no filter to exclude 0 — Session 0 is a valid copy source now
     .sort((a, b) => b.num - a.num);
   return list.length ? list[0].journal : null;
 }
