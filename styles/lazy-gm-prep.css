@@ -10,9 +10,7 @@
     gap: 0.35rem;
     white-space: nowrap;
   }
-  .directory .directory-header .lazy-gm-prep-btn i {
-    font-size: 0.9em;
-  }
+  .directory .directory-header .lazy-gm-prep-btn i { font-size: 0.9em; }
 
   /* General sections */
   .lgmp-section { margin-block: 0.75rem 1rem; }
@@ -24,12 +22,8 @@
     display: grid; gap: 0.4rem;
   }
   .lgmp-actor-item {
-    display: grid;
-    grid-template-columns: 28px 1fr;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.45rem;
-    border-radius: 6px;
+    display: grid; grid-template-columns: 28px 1fr; align-items: center; gap: 0.5rem;
+    padding: 0.35rem 0.45rem; border-radius: 6px;
     background: var(--color-bg-subtle, rgba(0,0,0,0.06));
   }
   .lgmp-actor-thumb { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; }
@@ -40,7 +34,7 @@
   .lgmp-actor-item a[data-lazy-open]:hover { border-bottom-color: currentColor; }
   .lgmp-empty { opacity: 0.7; font-style: italic; padding-left: 2.5rem; }
 
-  /* Checklist in-page hover (theme-aware) */
+  /* Checklist hover */
   .lgmp-checklist {
     list-style: none; margin: 0.25rem 0 0; padding: 0;
     display: grid; gap: 0.35rem;
@@ -56,36 +50,22 @@
 
   /* Floating action button (view-mode only) */
   .lgmp-secrets-fab {
-    position: absolute;
-    right: 12px;
-    bottom: 12px;
-    z-index: 20;
-    padding: 6px 10px;
-    border-radius: 8px;
+    position: absolute; right: 12px; bottom: 12px; z-index: 20;
+    padding: 6px 10px; border-radius: 8px;
     border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
-    background: var(--color-bg, #1f1f1f);
-    color: var(--color-text, #fff);
+    background: var(--color-bg, #1f1f1f); color: var(--color-text, #fff);
     box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    cursor: pointer;
-    font: 500 12px/1.2 var(--font-primary, system-ui, sans-serif);
+    cursor: pointer; font: 500 12px/1.2 var(--font-primary, system-ui, sans-serif);
   }
   .lgmp-secrets-fab:hover { filter: brightness(1.05); }
 
   /* Secrets & Clues overlay panel */
   .lgmp-secrets-panel {
-    position: absolute;
-    right: 12px;
-    bottom: 48px;
-    z-index: 21;
-    min-width: 280px;
-    max-width: clamp(280px, 32vw, 420px);
-    max-height: 50vh;
-    overflow: auto;
-    padding: 10px;
-    border-radius: 8px;
+    position: absolute; right: 12px; bottom: 48px; z-index: 21;
+    min-width: 280px; max-width: clamp(280px, 32vw, 420px); max-height: 50vh; overflow: auto;
+    padding: 10px; border-radius: 8px;
     border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
-    background: var(--color-bg, #1f1f1f);
-    color: var(--color-text, #fff);
+    background: var(--color-bg, #1f1f1f); color: var(--color-text, #fff);
     box-shadow: 0 8px 16px rgba(0,0,0,0.35);
   }
   .lgmp-secrets-panel[hidden] { display: none !important; }
@@ -115,20 +95,18 @@
   .lgmp-secret-toggle:hover { background: var(--color-bg-subtle, rgba(255,255,255,0.12)); }
   .lgmp-secret-text { white-space: pre-wrap; }
 
-  /* Removed unused print rules for .lgmp-char-table */
-
-  /* === Subtle "Open Module Settings" button (tiny pill) === */
-  a[data-lazy-open-settings] {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 4px 8px;
-    border-radius: 6px;
+  /* === Subtle "Open Module Settings" pill button === */
+  .lgmp-open-settings-btn {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 6px 10px;
+    border-radius: 8px;
     border: 1px solid var(--color-border-strong, rgba(0,0,0,0.35));
     background: var(--color-bg, #1f1f1f);
     color: var(--color-text, #fff);
     text-decoration: none;
-    font: 500 12px/1.2 var(--font-primary, system-ui, sans-serif);
+    cursor: pointer;
+    font: 600 12px/1.2 var(--font-primary, system-ui, sans-serif);
   }
-  a[data-lazy-open-settings]:hover { filter: brightness(1.05); }
+  .lgmp-open-settings-btn:hover { filter: brightness(1.05); }
+  .lgmp-open-settings-btn i { font-size: 0.9em; }
 }
