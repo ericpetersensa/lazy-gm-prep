@@ -54,4 +54,4 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst) {
   return entry;
 }
 
-// ... (Combined page logic would be similar, calling the same page modules)
+// You can add createCombinedPage logic here, similar to createSeparatePages, using the same modular page creators.
