@@ -1,7 +1,8 @@
 // src/journal/pages/gettingStarted.js
-import { getSetting } from '../settings.js';
+import { getSetting } from '../../settings.js';
 
 function gettingStartedBodyHTML({ prefix }) {
+  const openSettingsLabel = game.i18n.localize("lazy-gm-prep.getting-started.settings.title");
   return `
 Welcome! This module generates a lightweight prep journal that follows the “Return of the Lazy Dungeon Master” flow. You’re on ${prefix} 0. From here on, you’ll create a new journal per session.
 
@@ -25,7 +26,7 @@ Type in chat to generate a new prep journal.
 - Editable Tables: Use the default Foundry table options on the Characters and NPC pages to add or remove rows or columns.
 - Actors, NPCs, and other items: Drag and drop them into the “Review the Characters” table for one‑click access to their character sheets. Same for NPCs and other items.
 
-<a  ${game.i18n.localize("lazy-gm-prep.getting-started.settings.title")}
+<a href="#" class="lid fa-gear"></i> ${openSettingsLabel}
 </a>
 `.trim() + "\n";
 }
