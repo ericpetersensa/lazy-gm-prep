@@ -1,17 +1,4 @@
-// src/journal/pages/gettingStarted.js
-export function createGettingStartedPage() {
-  return {
-    name: game.i18n.localize('lazy-gm-prep.getting-started.title'),
-    type: 'text',
-    text: {
-      format: 1,
-      content: gettingStartedBodyHTML({ prefix: 'Session' })
-    }
-  };
-}
-
 function gettingStartedBodyHTML({ prefix }) {
-  // Paste your original gettingStartedBodyHTML logic here from generator.js
   return `
     <p>
       Welcome! This module generates a lightweight prep journal that follows the “Return of the Lazy Dungeon Master” flow.
@@ -35,9 +22,13 @@ function gettingStartedBodyHTML({ prefix }) {
     <h3>Good to Know</h3>
     <ul>
       <li>Secrets & Clues carry forward: Only unchecked secrets from the prior session are brought forward and topped up to 10.</li>
-      <li>Editable Tables: Use the standard table options on the Characters and NPC pages to add or remove rows or columns.</li>
+      <li>Editable Tables: Use the default Foundry table options on the Characters and NPC pages to add or remove rows or columns.</li>
       <li>Actors, NPCs, and other items: Drag and drop them into the “Review the Characters” table for one-click access to their character sheets. Same for NPCs and other items.</li>
     </ul>
-    <p><a data-lazy-open-settings>Open Module Settings</a></p>
+    <p>
+      <button type="button" class="lgmp-settings-btn" data-lazy-open-settings>
+        <i class="fa fa-gear" style="margin-right:4px;"></i> Open Module Settings
+      </button>
+    </p>
   `.trim() + "\n";
 }
