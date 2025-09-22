@@ -5,9 +5,7 @@
   "lazy-gm-prep.notifications.created": "Created: {name}",
   "lazy-gm-prep.keybindings.createPrep.name": "Create GM Prep",
   "lazy-gm-prep.keybindings.createPrep.hint": "Create a new prep journal (GM only). Default: Alt+P",
-
   "lazy-gm-prep.getting-started.settings.title": "Settings (Configure Settings > Lazy GM Prep)",
-
   "lazy-gm-prep.settings.separatePages.name": "Separate Pages for Each Step",
   "lazy-gm-prep.settings.separatePages.hint": "If enabled, create one page per step; otherwise combine all steps into one page.",
   "lazy-gm-prep.settings.folderName.name": "Folder Name for Prep Journals",
@@ -16,12 +14,10 @@
   "lazy-gm-prep.settings.journalPrefix.hint": "Text prefix for generated journals (e.g., \"Session\").",
   "lazy-gm-prep.settings.includeDateInName.name": "Include today’s date on the Journal name",
   "lazy-gm-prep.settings.includeDateInName.hint": "If enabled, the current date will be appended to the journal name (e.g., 'Session 3: 9/16/2025'). If disabled, only the prefix and number are used.",
-
   "lazy-gm-prep.settings.initialCharacterRows.name": "Default rows in “Review the Characters”",
   "lazy-gm-prep.settings.initialCharacterRows.hint": "Sets how many empty rows the Characters table starts with. You can still add/delete rows in the editor as needed.",
   "lazy-gm-prep.settings.initialNpcRows.name": "Default rows in “Important NPCs”",
   "lazy-gm-prep.settings.initialNpcRows.hint": "Sets how many empty rows the Important NPCs table starts with. Keep this lean; only primary NPCs belong here.",
-
   "lazy-gm-prep.settings.copy.review-characters.name": "Copy previous: 1. Review the Characters",
   "lazy-gm-prep.settings.copy.review-characters.hint": "If enabled, copy this page’s content from the previous session (when available).",
   "lazy-gm-prep.settings.copy.strong-start.name": "Copy previous: 2. Create a Strong Start",
@@ -40,7 +36,6 @@
   "lazy-gm-prep.settings.copy.magic-item-rewards.hint": "If enabled, copy this page’s content from the previous session (when available).",
   "lazy-gm-prep.settings.copy.other-notes.name": "Copy previous: Other Notes",
   "lazy-gm-prep.settings.copy.other-notes.hint": "If enabled, copy this page’s content from the previous session (when available).",
-
   "lazy-gm-prep.steps.review-characters.title": "1. Review the Characters",
   "lazy-gm-prep.steps.review-characters.description": "Refresh names, backgrounds, motivations, and player interests so the rest of your prep wraps around the PCs. Keep it short—this primes your brain for everything else.",
   "lazy-gm-prep.steps.strong-start.title": "2. Create a Strong Start",
@@ -60,7 +55,6 @@
   "lazy-gm-prep.steps.other-notes.title": "Other Notes",
   "lazy-gm-prep.steps.other-notes.description": "Scratch pad for reminders, marching order, pacing beats, or anything else you want at your fingertips.",
   "lazy-gm-prep.ui.add-notes-here": "Add your notes here.",
-
   "lazy-gm-prep.characters.table.header.pcName": "PC Name",
   "lazy-gm-prep.characters.table.header.player": "Player",
   "lazy-gm-prep.characters.table.header.conceptRole": "Concept/Role",
@@ -71,14 +65,12 @@
   "lazy-gm-prep.characters.prompts.unresolved": "Anyone have unresolved goals or secrets?",
   "lazy-gm-prep.characters.prompts.bonds": "Any PC bonds or rivalries to bring up this session?",
   "lazy-gm-prep.characters.prompts.reward": "Who is due for a magic item or cool reward?",
-
   "lazy-gm-prep.npcs.table.header.name": "Name",
   "lazy-gm-prep.npcs.table.header.connection": "Connection/Role",
   "lazy-gm-prep.npcs.table.header.archetype": "Archetype (Popular Fiction)",
   "lazy-gm-prep.npcs.table.header.goal": "Goal/Motivation",
   "lazy-gm-prep.npcs.table.header.relationship": "Relationship to PCs",
   "lazy-gm-prep.npcs.table.header.notes": "Notes",
-
   "lazy-gm-prep.getting-started.title": "Getting Started",
   "lazy-gm-prep.getting-started.quickstart.title": "Quick Start",
   "lazy-gm-prep.getting-started.know.title": "Things to Know",
