@@ -31,7 +31,7 @@ function gettingStartedBodyHTML({ prefix }) {
 </ul>
 
 <p>
-  <a href="#" class="lgmp-open-settings" data-lazy-open-settings="1">${openSettingsLabeldPage() {
+  <a href="#" class="lgmp-open-settings" data-lazy-open-settings="1">${openSettingsLabel}</ge() {
   const prefix = getSetting('journalPrefix', 'Session');
   const content = gettingStartedBodyHTML({ prefix });
 
