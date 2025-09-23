@@ -2,7 +2,7 @@
 import { getSetting } from '../../settings.js';
 
 function gettingStartedBodyHTML({ prefix }) {
-  // Build HTML using single-line, double-quoted JS strings to avoid line-break parse issues.
+  // Build HTML using single-line, double-quoted JS strings to avoid unescaped line-break issues.
   let html = "";
   html += "<p>Welcome! This module generates a lightweight prep journal that follows the \"Return of the Lazy Dungeon Master\" flow. ";
   html += "You're on " + prefix + " 0. From here on, you'll create a new journal per session.</p>";
@@ -30,11 +30,13 @@ function gettingStartedBodyHTML({ prefix }) {
   html += "  <li><strong>Drag &amp; Drop</strong>: Drop actors/items into the \"Review the Characters\" table for one-click access to sheets. Same for NPCs and other items.</li>";
   html += "</ul>";
 
-  // *** Actual clickable Settings button (gear icon + label) ***
-  // Your main.js binds [data-lazy-open-settings] to open the Settings sheet.
-  html += "<p>#";
-  html += "<i class='fa-solid fa-gear' aria-hidden='true'></i> Settings";
-  html += "</a></p>";
+  // --- Actual clickable Settings button (gear icon + label) ---
+  // NOTE: main.js's bindOpenSettings() looks for [data-lazy-open-settings] and opens the settings sheet.
+  html += "<p>";
+  html += "  <a href='#' class='lgmp-open-settings fa-gear fas fa-cog' aria-hidden='true'></i> Settings";
+  html += "  </a>";
+  html += "  <span class='hint' style='opacity:.8'> (Configure Settings &gt; Lazy GM Prep)</span>";
+  html += "</p>";
 
   return html + "\n";
 }
@@ -42,6 +44,7 @@ function gettingStartedBodyHTML({ prefix }) {
 export function createGettingStartedPage() {
   const prefix = getSetting('journalPrefix', 'Session');
   const content = gettingStartedBodyHTML({ prefix });
+
   return {
     name: game.i18n.localize("lazy-gm-prep.getting-started.title"),
     type: "text",
