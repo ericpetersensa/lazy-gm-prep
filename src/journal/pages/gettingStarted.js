@@ -3,31 +3,39 @@ import { getSetting } from '../../settings.js';
 
 function gettingStartedBodyHTML({ prefix }) {
   const openSettingsLabel = game.i18n.localize("lazy-gm-prep.getting-started.settings.title");
+
   return `
-Welcome! This module generates a lightweight prep journal that follows the “Return of the Lazy Dungeon Master” flow. You’re on ${prefix} 0. From here on, you’ll create a new journal per session.
+<p>Welcome! This module generates a lightweight prep journal that follows the “Return of the Lazy Dungeon Master” flow. You’re on <strong>${prefix} 0</strong>. From here on, you’ll create a new journal per session.</p>
 
-#### Other Journal Creation Options
-- Press Alt+P (GM only) to create the next prep journal.
-\`\`\`
-/prep
-\`\`\`
-Type in chat to generate a new prep journal.
+<h4>Other Journal Creation Options</h4>
+<ul>
+  <li>Press <strong>Alt+P</strong> (GM only) to create the next prep journal.</li>
+</ul>
+<pre><code>/prep</code></pre>
+<p>Type in chat to generate a new prep journal.</p>
 
-#### Module Settings
-- Separate Pages: Each step will have its own page. With it unchecked, all steps are combined into a single page. (Default – Enabled)
-- Folder Name: Type the folder name you want journals to be created under. (Default – Lazy GM Prep)
-- Journal Prefix: Type the journal name you want used. (Default – Session)
-- Include Date: Appends the date to the name of the journal (Default – Enabled)
-- Default rows in Characters and NPC pages: Allows you to start with a set number of rows. (Default – 5)
-- Copy Previous: Each step can copy prior content or be toggled off if you don't want that page copied to the next journal. (Default – Enabled)
+<h4>Module Settings</h4>
+<ul>
+  <li><strong>Separate Pages</strong>: Each step will have its own page. With it unchecked, all steps are combined into a single page. (Default – Enabled)</li>
+  <li><strong>Folder Name</strong>: The folder in which journals are created. (Default – Lazy GM Prep)</li>
+  <li><strong>Journal Prefix</strong>: The journal name prefix. (Default – Session)</li>
+  <li><strong>Include Date</strong>: Appends today’s date to the journal name. (Default – Enabled)</li>
+  <li><strong>Default rows</strong> in Characters and NPC pages: Start with a set number of rows. (Default – 5)</li>
+  <li><strong>Copy Previous</strong>: Each step can copy prior content into the next journal. (Default – Enabled)</li>
+</ul>
 
-#### Good to Know
-- Secrets & Clues carry forward: Only unchecked secrets from the prior session are brought forward and topped up to 10.
-- Editable Tables: Use the default Foundry table options on the Characters and NPC pages to add or remove rows or columns.
-- Actors, NPCs, and other items: Drag and drop them into the “Review the Characters” table for one‑click access to their character sheets. Same for NPCs and other items.
+<h4>Good to Know</h4>
+<ul>
+  <li><strong>Secrets &amp; Clues carry forward</strong>: Only unchecked secrets from the prior session are brought forward and topped up to 10.</li>
+  <li><strong>Editable Tables</strong>: Use Foundry’s table tools to add/remove rows or columns.</li>
+  <li><strong>Drag &amp; Drop</strong>: Drop actors/items into the “Review the Characters” table for one‑click access to sheets. Same for NPCs and other items.</li>
+</ul>
 
-<a href="#" class="lid fa-gear"></i> ${openSettingsLabel}
-</a>
+<p>
+  #
+    <i class="fa-solid fa-gear"></i> ${openSettingsLabel}
+  </a>
+</p>
 `.trim() + "\n";
 }
 
@@ -37,6 +45,6 @@ export function createGettingStartedPage() {
   return {
     name: game.i18n.localize("lazy-gm-prep.getting-started.title"),
     type: "text",
-    text: { format: 1, content }
+    text: { format: 1, content } // HTML
   };
 }
