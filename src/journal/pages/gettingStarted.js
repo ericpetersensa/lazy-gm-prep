@@ -31,12 +31,10 @@ function gettingStartedBodyHTML({ prefix }) {
 </ul>
 
 <p>
-  <a href="#" class="lgmp-open-settings" role="button"n";
-}
-
-export function createGettingStartedPage() {
+  <a href="#" class="lgmp-open-settings" data-lazy-open-settings="1">${openSettingsLabeldPage() {
   const prefix = getSetting('journalPrefix', 'Session');
   const content = gettingStartedBodyHTML({ prefix });
+
   return {
     name: game.i18n.localize("lazy-gm-prep.getting-started.title"),
     type: "text",
