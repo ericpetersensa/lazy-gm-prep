@@ -36,6 +36,7 @@ export function getPreviousSectionHTML(prevJournal, def) {
     // Separate-page lookup
     const separatePage = prevJournal.pages.find(p => (p.name ?? "") === wantedTitle);
     if (separatePage?.text?.content) return separatePage.text.content;
+
     // Combined-page extraction
     const combinedName = game.i18n.localize("lazy-gm-prep.module.name");
     const combinedHost =
@@ -53,9 +54,7 @@ function extractCombinedSection(pageHtml, sectionTitle) {
   try {
     const doc = new DOMParser().parseFromString(String(pageHtml ?? ""), "text/html");
     const headers = Array.from(doc.querySelectorAll("h2"));
-    const target = headers.find(
-      h => (h.textContent ?? "").trim() === String(sectionTitle ?? "").trim()
-    );
+    const target = headers.find(h => (h.textContent ?? "").trim() === String(sectionTitle ?? "").trim());
     if (!target) return null;
     const container = doc.createElement("div");
     let node = target.nextSibling;
@@ -70,10 +69,17 @@ function extractCombinedSection(pageHtml, sectionTitle) {
   }
 }
 
-// Section builders
+// ---------- Section UI helpers ----------
+
 export function sectionDescription(def) {
   const desc = game.i18n.localize(def.descKey);
   return `<p class="lgmp-step-desc">${escapeHtml(desc)}</p>\n<hr>\n`;
+}
+
+export function quickCheckHTML() {
+  const title = game.i18n.localize('lazy-gm-prep.characters.quickcheck.title');
+  const prompt = game.i18n.localize('lazy-gm-prep.characters.quickcheck.prompt');
+  return `<blockquote><strong>${escapeHtml(title)}</strong> ${escapeHtml(prompt)}</blockquote>\n`;
 }
 
 export function notesPlaceholder() {
@@ -81,20 +87,27 @@ export function notesPlaceholder() {
   return `<p class="lgmp-notes-hint">${escapeHtml(hint)}</p>\n`;
 }
 
-// Table generators (used by reviewCharacters and importantNpcs)
+// ---------- Table generators ----------
+/** Four-column Characters table: PC Name | Concept / Role | Goal / Hook | Recent Note */
 export function characterReviewTableHTML(rowCount = 5) {
   const headers = [
     game.i18n.localize("lazy-gm-prep.characters.table.header.pcName"),
-    game.i18n.localize("lazy-gm-prep.characters.table.header.player"),
     game.i18n.localize("lazy-gm-prep.characters.table.header.conceptRole"),
     game.i18n.localize("lazy-gm-prep.characters.table.header.goalHook"),
-    game.i18n.localize("lazy-gm-prep.characters.table.header.bondDrama"),
     game.i18n.localize("lazy-gm-prep.characters.table.header.recentNote")
   ].map(escapeHtml);
-  const cols = headers.length;
+
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
-  const bodyRows = Array.from({ length: rowCount }, () => `<tr>${" <td> </td>".repeat(cols)}</tr>`).join("\n");
-  return `<table class="lgmp-table lgmp-characters">\n${headerRow}\n${bodyRows}\n</table>\n`;
+  const bodyRows = Array.from({ length: rowCount }, () =>
+    `<tr>${"<td><p><br></p></td>".repeat(4)}</tr>`
+  ).join("\n");
+
+  return `<table class="lgmp-table lgmp-characters">
+  <thead>${headerRow}</thead>
+  <tbody>
+${bodyRows}
+  </tbody>
+</table>\n`;
 }
 
 export function gmReviewPromptsHTML() {
@@ -104,7 +117,9 @@ export function gmReviewPromptsHTML() {
     game.i18n.localize("lazy-gm-prep.characters.prompts.bonds"),
     game.i18n.localize("lazy-gm-prep.characters.prompts.reward")
   ].map(escapeHtml);
-  return `<ul class="lgmp-prompts">\n${lines.map(l => `<li>${l}</li>`).join("\n")}\n</ul>\n`;
+  return `<ul class="lgmp-prompts">
+${lines.map(l => `<li>${l}</li>`).join("\n")}
+</ul>\n`;
 }
 
 export function importantNpcsTableHTML(rowCount = 5) {
@@ -116,12 +131,18 @@ export function importantNpcsTableHTML(rowCount = 5) {
     game.i18n.localize("lazy-gm-prep.npcs.table.header.relationship"),
     game.i18n.localize("lazy-gm-prep.npcs.table.header.notes")
   ].map(escapeHtml);
-  const cols = headers.length;
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
-  const bodyRows = Array.from({ length: rowCount }, () => `<tr>${" <td> </td>".repeat(cols)}</tr>`).join("\n");
-  return `<table class="lgmp-table lgmp-npcs">\n${headerRow}\n${bodyRows}\n</table>\n`;
+  const bodyRows = Array.from({ length: rowCount }, () =>
+    `<tr>${"<td><p><br></p></td>".repeat(headers.length)}</tr>`
+  ).join("\n");
+  return `<table class="lgmp-table lgmp-npcs">
+${headerRow}
+${bodyRows}
+</table>\n`;
 }
 
 function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, m => ({ "&": "&", "<": "<", ">": ">", '"': "\"", "'": "&#39;" }[m]));
+  return String(s ?? "").replace(/[&<>\"']/g, (m) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[m]));
 }
