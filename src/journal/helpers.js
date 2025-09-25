@@ -87,8 +87,9 @@ export function notesPlaceholder() {
   return `<p class="lgmp-notes-hint">${escapeHtml(hint)}</p>\n`;
 }
 
-// ---------- Table generators ----------
-/** Four-column Characters table: PC Name | Concept / Role | Goal / Hook | Recent Note */
+// ---------- Table generators (simple Foundry-friendly) ----------
+
+/** Simple 4-column Characters table (easy to add/remove rows/columns in the editor). */
 export function characterReviewTableHTML(rowCount = 5) {
   const headers = [
     game.i18n.localize("lazy-gm-prep.characters.table.header.pcName"),
@@ -99,14 +100,34 @@ export function characterReviewTableHTML(rowCount = 5) {
 
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
   const bodyRows = Array.from({ length: rowCount }, () =>
-    `<tr>${"<td><p><br></p></td>".repeat(4)}</tr>`
+    `<tr>${" <td> </td>".repeat(headers.length)}</tr>`
   ).join("\n");
 
   return `<table class="lgmp-table lgmp-characters">
-  <thead>${headerRow}</thead>
-  <tbody>
+${headerRow}
 ${bodyRows}
-  </tbody>
+</table>\n`;
+}
+
+/** Simple Important NPCs table (kept consistent with the Characters table). */
+export function importantNpcsTableHTML(rowCount = 5) {
+  const headers = [
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.name"),
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.connection"),
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.archetype"),
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.goal"),
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.relationship"),
+    game.i18n.localize("lazy-gm-prep.npcs.table.header.notes")
+  ].map(escapeHtml);
+
+  const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
+  const bodyRows = Array.from({ length: rowCount }, () =>
+    `<tr>${" <td> </td>".repeat(headers.length)}</tr>`
+  ).join("\n");
+
+  return `<table class="lgmp-table lgmp-npcs">
+${headerRow}
+${bodyRows}
 </table>\n`;
 }
 
@@ -120,25 +141,6 @@ export function gmReviewPromptsHTML() {
   return `<ul class="lgmp-prompts">
 ${lines.map(l => `<li>${l}</li>`).join("\n")}
 </ul>\n`;
-}
-
-export function importantNpcsTableHTML(rowCount = 5) {
-  const headers = [
-    game.i18n.localize("lazy-gm-prep.npcs.table.header.name"),
-    game.i18n.localize("lazy-gm-prep.npcs.table.header.connection"),
-    game.i18n.localize("lazy-gm-prep.npcs.table.header.archetype"),
-    game.i18n.localize("lazy-gm-prep.npcs.table.header.goal"),
-    game.i18n.localize("lazy-gm-prep.npcs.table.header.relationship"),
-    game.i18n.localize("lazy-gm-prep.npcs.table.header.notes")
-  ].map(escapeHtml);
-  const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
-  const bodyRows = Array.from({ length: rowCount }, () =>
-    `<tr>${"<td><p><br></p></td>".repeat(headers.length)}</tr>`
-  ).join("\n");
-  return `<table class="lgmp-table lgmp-npcs">
-${headerRow}
-${bodyRows}
-</table>\n`;
 }
 
 function escapeHtml(s) {
