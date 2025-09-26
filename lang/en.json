@@ -1,11 +1,35 @@
 {
   "lazy-gm-prep.module.name": "Lazy GM Prep",
+
   "lazy-gm-prep.header.button": "Create GM Prep",
   "lazy-gm-prep.header.buttonTooltip": "Create a new prep journal for your next session",
+
   "lazy-gm-prep.notifications.created": "Created: {name}",
+
   "lazy-gm-prep.keybindings.createPrep.name": "Create GM Prep",
   "lazy-gm-prep.keybindings.createPrep.hint": "Create a new prep journal (GM only). Default: Alt+P",
+
+  "lazy-gm-prep.getting-started.title": "Getting Started",
+
+  "lazy-gm-prep.getting-started.welcome": "Welcome! This module generates a lightweight prep journal that follows the \"Return of the Lazy Dungeon Master\" flow. You're on Session 0. From here on, you'll create a new journal per session.",
+
+  "lazy-gm-prep.getting-started.other-options.title": "Other Journal Creation Options",
+  "lazy-gm-prep.getting-started.other-options.altp": "Press Alt+P (GM only) to create the next prep journal.",
+  "lazy-gm-prep.getting-started.other-options.chatprep": "Type /prep in chat to generate a new prep journal.",
+
   "lazy-gm-prep.getting-started.settings.title": "Settings (Configure Settings > Lazy GM Prep)",
+  "lazy-gm-prep.getting-started.settings.title-simple": "Module Settings",
+  "lazy-gm-prep.getting-started.settings.separatePages": "Separate Pages: Each step will have its own page. With it unchecked, all steps are combined into a single page. (Default – Enabled)",
+  "lazy-gm-prep.getting-started.settings.folderName": "Folder Name: The folder in which journals are created. (Default – Lazy GM Prep)",
+  "lazy-gm-prep.getting-started.settings.journalPrefix": "Journal Prefix: The journal name prefix. (Default – Session)",
+  "lazy-gm-prep.getting-started.settings.includeDate": "Include Date: Appends today's date to the journal name. (Default – Enabled)",
+  "lazy-gm-prep.getting-started.settings.defaultRows": "Default rows in Characters and NPC pages: Start with a set number of rows. (Default – 5)",
+  "lazy-gm-prep.getting-started.settings.copyPrevious": "Copy Previous: Each step can copy prior content into the next journal. (Default – Enabled)",
+
+  "lazy-gm-prep.getting-started.good.title": "Good to Know",
+  "lazy-gm-prep.getting-started.good.secretsCarry": "Secrets & Clues carry forward: Only unchecked secrets from the prior session are brought forward and topped up to 10.",
+  "lazy-gm-prep.getting-started.good.editableTables": "Editable Tables: Use Foundry's table tools to add/remove rows or columns.",
+  "lazy-gm-prep.getting-started.good.dragDrop": "Drag & Drop: Drop actors/items into the \"Review the Characters\" table for one-click access to sheets. Same for NPCs and other items.",
 
   "lazy-gm-prep.settings.separatePages.name": "Separate Pages for Each Step",
   "lazy-gm-prep.settings.separatePages.hint": "If enabled, create one page per step; otherwise combine all steps into one page.",
@@ -59,7 +83,6 @@
   "lazy-gm-prep.steps.other-notes.description": "Scratch pad for reminders, marching order, pacing beats, or anything else you want at your fingertips.",
 
   "lazy-gm-prep.ui.add-notes-here": "Add your notes here.",
-
   "lazy-gm-prep.characters.table.header.pcName": "PC Name",
   "lazy-gm-prep.characters.table.header.conceptRole": "Concept / Role",
   "lazy-gm-prep.characters.table.header.goalHook": "Goal / Hook",
@@ -69,7 +92,6 @@
 
   "lazy-gm-prep.characters.quickcheck.title": "Quick Check:",
   "lazy-gm-prep.characters.quickcheck.prompt": "Can you name every character at the table, and recall one thing about each?",
-
   "lazy-gm-prep.characters.prompts.spotlight": "Who hasn’t had a spotlight moment lately?",
   "lazy-gm-prep.characters.prompts.unresolved": "Does any character have an unresolved goal, secret, or personal hook to bring forward?",
   "lazy-gm-prep.characters.prompts.bonds": "Any PC bonds or rivalries to highlight this session?",
@@ -82,20 +104,10 @@
   "lazy-gm-prep.npcs.table.header.relationship": "Relationship to PCs",
   "lazy-gm-prep.npcs.table.header.notes": "Notes",
 
-  "lazy-gm-prep.getting-started.title": "Getting Started",
-  "lazy-gm-prep.getting-started.quickstart.title": "Quick Start",
-  "lazy-gm-prep.getting-started.quickstart.body": "Click the Create GM Prep button (or press Alt+P) to generate your next prep journal. Configure defaults in Configure Settings → Lazy GM Prep.",
-  "lazy-gm-prep.getting-started.workflow.title": "Suggested Workflow",
-  "lazy-gm-prep.getting-started.workflow.body": "Work top‑down or jump straight to the step you need most. Keep entries short—prefer bullets over prose. Enable copy‑forward in Settings if you want to reuse content from the last session.",
-  "lazy-gm-prep.getting-started.know.title": "Things to Know",
-  "lazy-gm-prep.getting-started.know.body": "These pages are simple journal text. Tables are intentionally basic so you can add or remove rows and columns freely. Everything is editable.",
-
   "lazy-gm-prep.getting-started.sections.heading": "Page Help",
   "lazy-gm-prep.getting-started.sections.subheading.columnExplanations": "Column Explanations",
   "lazy-gm-prep.getting-started.sections.review-characters.pcName": "The character’s name.",
   "lazy-gm-prep.getting-started.sections.review-characters.conceptRole": "A 2–5 word summary (e.g., “Cynical Elf Wizard,” “Brash Human Fighter”).",
   "lazy-gm-prep.getting-started.sections.review-characters.goalHook": "What does this character want? (e.g., “Find lost sister,” “Prove self to mentor,” “Get rich or die trying”).",
-  "lazy-gm-prep.getting-started.sections.review-characters.recentNote": "Last session’s drama, a secret, a relationship, or a “to-do” for next session.",
-
-  "lazy-gm-prep.getting-started.open-settings.button": "Open Lazy GM Prep Settings"
+  "lazy-gm-prep.getting-started.sections.review-characters.recentNote": "Last session’s drama, a secret, a relationship, or a “to-do” for next session."
 }
