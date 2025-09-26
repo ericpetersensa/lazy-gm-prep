@@ -44,11 +44,10 @@ function buildPageHelpHTML() {
 }
 
 /**
- * Create the Getting Started page (restored original copy).
- * We include an in-body <h1> to match your previous page content.
+ * Create the Getting Started page (restore original content without an in-body <h1>).
+ * The sheet chrome already shows the page title, so we render only sections below.
  */
 export function createGettingStartedPage() {
-  const h1 = game.i18n.localize("lazy-gm-prep.getting-started.title");
   const welcome = game.i18n.localize("lazy-gm-prep.getting-started.welcome");
 
   const otherTitle = game.i18n.localize("lazy-gm-prep.getting-started.other-options.title");
@@ -74,8 +73,8 @@ export function createGettingStartedPage() {
     game.i18n.localize("lazy-gm-prep.getting-started.good.dragDrop")
   ].map(s => `<li>${s}</li>`).join("\n");
 
+  // NOTE: No <h1> here—prevents duplicate "Getting Started"
   const base = `
-    <h1>${h1}</h1>
     <p>${welcome}</p>
 
     <h2>${otherTitle}</h2>
