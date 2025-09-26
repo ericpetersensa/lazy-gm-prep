@@ -1,52 +1,77 @@
 // src/journal/pages/gettingStarted.js
-import { getSetting } from '../../settings.js';
 
-function gettingStartedBodyHTML({ prefix }) {
-  // Build HTML using single-line, double-quoted JS strings to avoid unescaped line breaks.
-  let html = "";
-  html += "<p>Welcome! This module generates a lightweight prep journal that follows the \"Return of the Lazy Dungeon Master\" flow. ";
-  html += "You're on " + prefix + " 0. From here on, you'll create a new journal per session.</p>";
+import { PAGE_ORDER } from "../../settings.js";
 
-  html += "<h5>Other Journal Creation Options</h5>";
-  html += "<ul>";
-  html += "  <li>Press <strong>Alt+P</strong> (GM only) to create the next prep journal.</li>";
-  html += "  <li>Type <strong>/prep</strong> in chat to generate a new prep journal.</li>";
-  html += "</ul>";
+/**
+ * Build one <details> block per step (e.g., Review the Characters, Strong Start, etc.).
+ * Each block is collapsed by default and contains step-specific onboarding tips.
+ */
+function buildPerStepHelpHTML() {
+  const heading = game.i18n.localize("lazy-gm-prep.getting-started.sections.heading");
 
-  html += "<h5>Module Settings</h5>";
-  html += "<ul>";
-  html += "  <li><strong>Separate Pages</strong>: Each step will have its own page. With it unchecked, all steps are combined into a single page. (Default – Enabled)</li>";
-  html += "  <li><strong>Folder Name</strong>: The folder in which journals are created. (Default – Lazy GM Prep)</li>";
-  html += "  <li><strong>Journal Prefix</strong>: The journal name prefix. (Default – Session)</li>";
-  html += "  <li><strong>Include Date</strong>: Appends today's date to the journal name. (Default – Enabled)</li>";
-  html += "  <li><strong>Default rows in Characters and NPC pages</strong>: Start with a set number of rows. (Default – 5)</li>";
-  html += "  <li><strong>Copy Previous</strong>: Each step can copy prior content into the next journal. (Default – Enabled)</li>";
-  html += "</ul>";
+  // Map each step key -> HTML content (keep it short and practical).
+  const stepHelp = {
+    "review-characters": `
+      <p><em>${game.i18n.localize("lazy-gm-prep.steps.review-characters.description")}</em></p>
+      <details>
+        <summary><strong>${game.i18n.localize("lazy-gm-prep.getting-started.sections.review-characters.title")}</strong></summary>
+        <ul>
+          <li><strong>PC Name:</strong> ${game.i18n.localize("lazy-gm-prep.getting-started.sections.review-characters.pcName")}</li>
+          <li><strong>Concept/Role:</strong> ${game.i18n.localize("lazy-gm-prep.getting-started.sections.review-characters.conceptRole")}</li>
+          <li><strong>Goal/Hook:</strong> ${game.i18n.localize("lazy-gm-prep.getting-started.sections.review-characters.goalHook")}</li>
+          <li><strong>Recent Note:</strong> ${game.i18n.localize("lazy-gm-prep.getting-started.sections.review-characters.recentNote")}</li>
+        </ul>
+      </details>
+    `,
+    // Add more steps here as you expand your onboarding help!
+    // "strong-start": `<details>...</details>`,
+    // "secrets-clues": `<details>...</details>`,
+    // etc.
+  };
 
-  html += "<h5>Good to Know</h5>";
-  html += "<ul>";
-  html += "  <li><strong>Secrets &amp; Clues carry forward</strong>: Only unchecked secrets from the prior session are brought forward and topped up to 10.</li>";
-  html += "  <li><strong>Editable Tables</strong>: Use Foundry's table tools to add/remove rows or columns.</li>";
-  html += "  <li><strong>Drag &amp; Drop</strong>: Drop actors/items into the \"Review the Characters\" table for one-click access to sheets. Same for NPCs and other items.</li>";
-  html += "</ul>";
+  // Render one block per step that has help content defined.
+  const blocks = PAGE_ORDER
+    .filter(def => stepHelp[def.key])
+    .map(def => {
+      const title = game.i18n.localize(def.titleKey);
+      const inner = stepHelp[def.key];
+      return `
+        <section class="lgmp-step-help">
+          <h3>${title}</h3>
+          ${inner}
+        </section>`;
+    })
+    .join("\n");
 
-  // --- Actual clickable Settings BUTTON (not a link), wired by main.js bindOpenSettings ---
-  html += "<p>";
-  html += "  <button type='button' class='lgmp-open-settings' data-lazy-open-settings='1'>";
-  html += "    <i class='fa-solid fa-gear fas fa-cog' aria-hidden='true'></i> Settings";
-  html += "  </button>";
-  html += "</p>";
+  if (!blocks) return ""; // nothing to show
 
-  return html + "\n";
+  return `
+    <hr>
+    <h2>${heading}</h2>
+    <p class="lgmp-step-help-intro">${game.i18n.localize("lazy-gm-prep.getting-started.sections.intro")}</p>
+    ${blocks}
+  `;
 }
 
+/**
+ * Create the Getting Started page.
+ * If you already had base content here, keep it and append the per-step help.
+ */
 export function createGettingStartedPage() {
-  const prefix = getSetting('journalPrefix', 'Session');
-  const content = gettingStartedBodyHTML({ prefix });
+  // You can keep or expand this base header. (We use existing i18n keys already in your en.json.)
+  const base = `
+    <h1>${game.i18n.localize("lazy-gm-prep.getting-started.title")}</h1>
+    <h3>${game.i18n.localize("lazy-gm-prep.getting-started.quickstart.title")}</h3>
+    <p>${game.i18n.localize("lazy-gm-prep.getting-started.workflow.title")}</p>
+    <h3>${game.i18n.localize("lazy-gm-prep.getting-started.know.title")}</h3>
+  `;
+
+  const perStep = buildPerStepHelpHTML();
+  const content = `${base}\n${perStep}`;
 
   return {
     name: game.i18n.localize("lazy-gm-prep.getting-started.title"),
     type: "text",
-    text: { format: 1, content } // HTML
+    text: { format: 1, content }
   };
 }
