@@ -34,7 +34,6 @@ function buildPageHelpHTML() {
     `;
   })();
 
-  // If you add more pages later, concatenate them here
   const blocks = [reviewCharactersHelp].join("\n");
 
   return `
@@ -45,33 +44,58 @@ function buildPageHelpHTML() {
 }
 
 /**
- * Create the Getting Started page.
- * NOTE: We do NOT include an in-body <h1> "Getting Started" to avoid duplicating the page name
- * shown by the journal sheet chrome. We only render the H2 section headings below.
+ * Create the Getting Started page (restored original copy).
+ * We include an in-body <h1> to match your previous page content.
  */
 export function createGettingStartedPage() {
-  const quickStartTitle = game.i18n.localize("lazy-gm-prep.getting-started.quickstart.title");
-  const quickStartBody  = game.i18n.localize("lazy-gm-prep.getting-started.quickstart.body");
+  const h1 = game.i18n.localize("lazy-gm-prep.getting-started.title");
+  const welcome = game.i18n.localize("lazy-gm-prep.getting-started.welcome");
 
-  const workflowTitle = game.i18n.localize("lazy-gm-prep.getting-started.workflow.title");
-  const workflowBody  = game.i18n.localize("lazy-gm-prep.getting-started.workflow.body");
+  const otherTitle = game.i18n.localize("lazy-gm-prep.getting-started.other-options.title");
+  const otherItems = [
+    game.i18n.localize("lazy-gm-prep.getting-started.other-options.altp"),
+    game.i18n.localize("lazy-gm-prep.getting-started.other-options.chatprep")
+  ].map(s => `<li>${s}</li>`).join("\n");
 
-  const knowTitle = game.i18n.localize("lazy-gm-prep.getting-started.know.title");
-  const knowBody  = game.i18n.localize("lazy-gm-prep.getting-started.know.body");
+  const settingsTitle = game.i18n.localize("lazy-gm-prep.getting-started.settings.title-simple");
+  const settingsItems = [
+    game.i18n.localize("lazy-gm-prep.getting-started.settings.separatePages"),
+    game.i18n.localize("lazy-gm-prep.getting-started.settings.folderName"),
+    game.i18n.localize("lazy-gm-prep.getting-started.settings.journalPrefix"),
+    game.i18n.localize("lazy-gm-prep.getting-started.settings.includeDate"),
+    game.i18n.localize("lazy-gm-prep.getting-started.settings.defaultRows"),
+    game.i18n.localize("lazy-gm-prep.getting-started.settings.copyPrevious")
+  ].map(s => `<li>${s}</li>`).join("\n");
+
+  const goodTitle = game.i18n.localize("lazy-gm-prep.getting-started.good.title");
+  const goodItems = [
+    game.i18n.localize("lazy-gm-prep.getting-started.good.secretsCarry"),
+    game.i18n.localize("lazy-gm-prep.getting-started.good.editableTables"),
+    game.i18n.localize("lazy-gm-prep.getting-started.good.dragDrop")
+  ].map(s => `<li>${s}</li>`).join("\n");
 
   const base = `
-    <h2>${quickStartTitle}</h2>
-    <p>${quickStartBody}</p>
+    <h1>${h1}</h1>
+    <p>${welcome}</p>
 
-    <h2>${workflowTitle}</h2>
-    <p>${workflowBody}</p>
+    <h2>${otherTitle}</h2>
+    <ul>
+      ${otherItems}
+    </ul>
 
-    <h2>${knowTitle}</h2>
-    <p>${knowBody}</p>
+    <h2>${settingsTitle}</h2>
+    <ul>
+      ${settingsItems}
+    </ul>
+
+    <h2>${goodTitle}</h2>
+    <ul>
+      ${goodItems}
+    </ul>
   `;
 
   const pageHelp = buildPageHelpHTML();
-  const content  = `${base}\n${pageHelp}`;
+  const content = `${base}\n${pageHelp}`;
 
   return {
     name: game.i18n.localize("lazy-gm-prep.getting-started.title"),
