@@ -25,6 +25,7 @@
 
   "lazy-gm-prep.settings.initialCharacterRows.name": "Default rows in “Review the Characters”",
   "lazy-gm-prep.settings.initialCharacterRows.hint": "Sets how many empty rows the Characters table starts with. You can still add/delete rows in the editor as needed.",
+
   "lazy-gm-prep.settings.initialNpcRows.name": "Default rows in “Important NPCs”",
   "lazy-gm-prep.settings.initialNpcRows.hint": "Sets how many empty rows the Important NPCs table starts with. Keep this lean; only primary NPCs belong here.",
 
@@ -63,6 +64,7 @@
 
   "lazy-gm-prep.steps.outline-scenes.title": "3. Outline Potential Scenes",
   "lazy-gm-prep.steps.outline-scenes.description": "Jot a loose list of likely scenes—just a few words each—to gain confidence without overcommitting. Be ready to throw them away when play goes elsewhere.",
+
   "lazy-gm-prep.steps.secrets-clues.title": "4. Define Secrets & Clues",
   "lazy-gm-prep.steps.secrets-clues.description": "Write short, system‑agnostic facts the characters can discover anywhere during play. Aim for ~10.",
 
@@ -83,19 +85,27 @@
 
   "lazy-gm-prep.ui.add-notes-here": "Add your notes here.",
 
+  /* Characters: headers (final 4-column layout) */
   "lazy-gm-prep.characters.table.header.pcName": "PC Name",
   "lazy-gm-prep.characters.table.header.conceptRole": "Concept / Role",
   "lazy-gm-prep.characters.table.header.goalHook": "Goal / Hook",
   "lazy-gm-prep.characters.table.header.recentNote": "Recent Note",
 
+  /* Back-compat headers (not used by the new table, but kept to avoid breaking older notes) */
+  "lazy-gm-prep.characters.table.header.player": "Player",
+  "lazy-gm-prep.characters.table.header.bondDrama": "Bond/Drama",
+
+  /* Quick Check */
   "lazy-gm-prep.characters.quickcheck.title": "Quick Check:",
   "lazy-gm-prep.characters.quickcheck.prompt": "Can you name every character at the table, and recall one thing about each?",
 
+  /* Characters: prompts */
   "lazy-gm-prep.characters.prompts.spotlight": "Who hasn’t had a spotlight moment lately?",
   "lazy-gm-prep.characters.prompts.unresolved": "Does any character have an unresolved goal, secret, or personal hook to bring forward?",
   "lazy-gm-prep.characters.prompts.bonds": "Any PC bonds or rivalries to highlight this session?",
   "lazy-gm-prep.characters.prompts.reward": "Who is due for a magic item or story reward?",
 
+  /* NPCs: headers */
   "lazy-gm-prep.npcs.table.header.name": "Name",
   "lazy-gm-prep.npcs.table.header.connection": "Connection/Role",
   "lazy-gm-prep.npcs.table.header.archetype": "Archetype (Popular Fiction)",
@@ -103,8 +113,19 @@
   "lazy-gm-prep.npcs.table.header.relationship": "Relationship to PCs",
   "lazy-gm-prep.npcs.table.header.notes": "Notes",
 
+  /* Getting Started base sections */
   "lazy-gm-prep.getting-started.title": "Getting Started",
   "lazy-gm-prep.getting-started.quickstart.title": "Quick Start",
   "lazy-gm-prep.getting-started.know.title": "Things to Know",
-  "lazy-gm-prep.getting-started.workflow.title": "Suggested Workflow"
+  "lazy-gm-prep.getting-started.workflow.title": "Suggested Workflow",
+
+  /* Getting Started: Step-by-Step Help (new) */
+  "lazy-gm-prep.getting-started.sections.heading": "Step-by-Step Help",
+  "lazy-gm-prep.getting-started.sections.intro": "These short, optional tips explain what to write in each prep step. They appear only on your first journal to keep later sessions lean.",
+
+  "lazy-gm-prep.getting-started.sections.review-characters.title": "Column Explanations",
+  "lazy-gm-prep.getting-started.sections.review-characters.pcName": "The character’s name.",
+  "lazy-gm-prep.getting-started.sections.review-characters.conceptRole": "A 2–5 word summary (e.g., “Cynical Elf Wizard,” “Brash Human Fighter”).",
+  "lazy-gm-prep.getting-started.sections.review-characters.goalHook": "What does this character want? (e.g., “Find lost sister,” “Prove self to mentor,” “Get rich or die trying”).",
+  "lazy-gm-prep.getting-started.sections.review-characters.recentNote": "Last session’s drama, a secret, a relationship, or a “to-do” for next session."
 }
