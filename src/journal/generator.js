@@ -4,6 +4,7 @@ import { createSecretsCluesPage } from './pages/secretsClues.js';
 import { createReviewCharactersPage } from './pages/reviewCharacters.js';
 import { createImportantNpcsPage } from './pages/importantNpcs.js';
 import { createDefaultSectionPage } from './pages/defaultSection.js';
+import { createStrongStartPage } from './pages/strongStart.js';
 
 import {
   ensureFolder,
@@ -55,6 +56,10 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst, { 
       case 'secrets-clues':
         pages.push(createSecretsCluesPage(def, prevContent));
         break;
+      
+      case 'strong-start':
+      pages.push(createStrongStartPage(def, prevContent));
+      break;
 
       case 'review-characters':
         pages.push(createReviewCharactersPage(def, prevContent, charRows));
@@ -93,6 +98,10 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst, { c
       case 'secrets-clues':
         pageLike = createSecretsCluesPage(def, prevContent);
         break;
+      
+      case 'strong-start':
+      pageLike = createStrongStartPage(def, prevContent);
+      break;
 
       case 'review-characters':
         pageLike = createReviewCharactersPage(def, prevContent, charRows);
