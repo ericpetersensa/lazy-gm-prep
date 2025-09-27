@@ -4,11 +4,11 @@ import { sectionDescription } from '../helpers.js';
 export function createStrongStartPage(def, prevContent) {
   const title = game.i18n.localize(def.titleKey);
   let html = '';
-  html += sectionDescription(def);           // standardized per-section intro rule
-  html += introHTML();                       // short description + attribution
-  html += promptsHTML();                     // thought-provoking prompts
-  html += d20TableHTML();                    // d20 table + inline roller
-  // If “Copy previous” is enabled and content exists, append it at the end.
+  html += sectionDescription(def);
+  html += introHTML();
+  html += promptsHTML();
+  html += d20TableHTML();
+
   if (prevContent && String(prevContent).trim()) {
     const prevHeading = game.i18n.localize('lazy-gm-prep.ui.previous-section.heading') || 'Previous Notes';
     html += `\n<hr>\n<h3>${escapeHtml(prevHeading)}</h3>\n${prevContent}`;
@@ -61,7 +61,7 @@ function d20TableHTML() {
 
   return `
 <h3>${escapeHtml(heading)}</h3>
-<p><strong>${escapeHtml(rollLabel)}:</strong> [[1d20]]</p>
+<p><strong>${escapeHtml(rollLabel)}:</strong> <span class="lgmp-ss-roller">[[1d20]]</span></p>
 <table class="lgmp-table lgmp-strong-start">
   <thead><tr><th>d20</th><th>${escapeHtml(heading)}</th></tr></thead>
   <tbody>
