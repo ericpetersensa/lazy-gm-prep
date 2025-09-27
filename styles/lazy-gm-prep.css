@@ -1,10 +1,8 @@
 /* lazy-gm-prep/styles/lazy-gm-prep.css
- * Additions:
- * - .lgmp-quote-source (attribution line under Strong Start intro)
- * - .lgmp-table base styling for module tables
- * - Strong Start highlight styles: table.lgmp-strong-start tr.is-highlighted
- * Kept:
- * - Header button, sections, legacy actor styles, checklist, Secrets overlay, open-settings pill
+ * Changes:
+ * - Removed .lgmp-quote-source (since the quote is gone)
+ * - Kept base table + Strong Start highlight styles
+ * - Kept header button, sections, legacy actor styles, checklist, Secrets overlay, open-settings pill
  */
 
 @layer modules {
@@ -20,13 +18,6 @@
   /* General sections */
   .lgmp-section { margin-block: 0.75rem 1rem; }
   .lgmp-step-desc { margin: 0.25rem 0 0.5rem; opacity: 0.95; }
-
-  /* NEW: Subtle attribution under the Strong Start blurb */
-  .lgmp-quote-source {
-    opacity: 0.9;
-    font-size: 0.95em;
-    margin-top: 0.25rem;
-  }
 
   /* Base table styles used by generated pages (characters, npcs, strong start) */
   .lgmp-table {
