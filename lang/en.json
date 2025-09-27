@@ -109,5 +109,42 @@
   "lazy-gm-prep.getting-started.sections.review-characters.pcName": "The character’s name.",
   "lazy-gm-prep.getting-started.sections.review-characters.conceptRole": "A 2–5 word summary (e.g., “Cynical Elf Wizard,” “Brash Human Fighter”).",
   "lazy-gm-prep.getting-started.sections.review-characters.goalHook": "What does this character want? (e.g., “Find lost sister,” “Prove self to mentor,” “Get rich or die trying”).",
-  "lazy-gm-prep.getting-started.sections.review-characters.recentNote": "Last session’s drama, a secret, a relationship, or a “to-do” for next session."
+  "lazy-gm-prep.getting-started.sections.review-characters.recentNote": "Last session’s drama, a secret, a relationship, or a “to-do” for next session.",
+
+  "lazy-gm-prep.ui.previous-section.heading": "Previous Session Content",
+
+  "lazy-gm-prep.strong-start.blurb": "A Strong Start is a vivid, immediate event that drops the characters near the action. Skip exposition—ignite decisions in the first minute and let the table’s reactions propel the rest of the session.",
+  "lazy-gm-prep.strong-start.attribution": "Inspired by Return of the Lazy Dungeon Master",
+
+  "lazy-gm-prep.strong-start.prompts.heading": "Thought-Provoking Prompts",
+  "lazy-gm-prep.strong-start.prompts.world": "What’s happening in the world right now, outside the PCs’ control?",
+  "lazy-gm-prep.strong-start.prompts.grab": "What would grab your players’ attention in the first 60 seconds?",
+  "lazy-gm-prep.strong-start.prompts.close": "How can you start close to the action—without a long briefing?",
+  "lazy-gm-prep.strong-start.prompts.twist": "What complication or twist could upend the party’s expectations?",
+  "lazy-gm-prep.strong-start.prompts.tie": "How can this opening tie to a PC’s background, goal, or unresolved thread?",
+  "lazy-gm-prep.strong-start.prompts.mood": "What mood do you want to set—chaos, mystery, danger, or wonder?",
+  "lazy-gm-prep.strong-start.prompts.player": "If you were a player, what opening would make you lean forward?",
+
+  "lazy-gm-prep.strong-start.table.heading": "Strong Start Encounters",
+  "lazy-gm-prep.strong-start.table.rollLabel": "Click to roll",
+  "lazy-gm-prep.strong-start.table.1": "A riot erupts in the marketplace, and the party is caught in the chaos.",
+  "lazy-gm-prep.strong-start.table.2": "A blood-curdling scream from a nearby alley—someone needs help.",
+  "lazy-gm-prep.strong-start.table.3": "The sky darkens as a magical storm sweeps in, warping reality.",
+  "lazy-gm-prep.strong-start.table.4": "A wounded messenger collapses at the party’s feet, clutching a sealed letter.",
+  "lazy-gm-prep.strong-start.table.5": "The ground shakes as something massive tunnels beneath the city.",
+  "lazy-gm-prep.strong-start.table.6": "A festival is interrupted by a rampaging beast or construct.",
+  "lazy-gm-prep.strong-start.table.7": "A mysterious stranger offers the party a dangerous wager.",
+  "lazy-gm-prep.strong-start.table.8": "The lord’s guards are searching for someone—one of the PCs fits the description.",
+  "lazy-gm-prep.strong-start.table.9": "An explosion rocks a nearby building—fire and panic spread.",
+  "lazy-gm-prep.strong-start.table.10": "A child begs for protection from unseen pursuers.",
+  "lazy-gm-prep.strong-start.table.11": "A public execution goes wrong—the condemned escapes.",
+  "lazy-gm-prep.strong-start.table.12": "An ancient artifact activates unexpectedly, drawing unwanted attention.",
+  "lazy-gm-prep.strong-start.table.13": "A rival adventuring group challenges the party to a public contest.",
+  "lazy-gm-prep.strong-start.table.14": "The dead rise from the graveyard as a blood moon ascends.",
+  "lazy-gm-prep.strong-start.table.15": "A rain of frogs, blood, or gold coins falls from the sky—an omen or a curse.",
+  "lazy-gm-prep.strong-start.table.16": "A trusted NPC betrays the party in front of a crowd.",
+  "lazy-gm-prep.strong-start.table.17": "A portal opens, disgorging a confused—or hostile—creature.",
+  "lazy-gm-prep.strong-start.table.18": "The party is accused of a crime they didn’t commit—guards close in.",
+  "lazy-gm-prep.strong-start.table.19": "A desperate merchant offers a fortune for immediate help.",
+  "lazy-gm-prep.strong-start.table.20": "The villain’s minions attack, targeting something (or someone) the party cares about."
 }
