@@ -1,7 +1,12 @@
 /* lazy-gm-prep/styles/lazy-gm-prep.css
- * Cleaned: removed unused .lgmp-char-table styles and related media queries.
- * Retained: header button, general sections, legacy actor styles, checklist, and Secrets overlay.
+ * Additions:
+ * - .lgmp-quote-source (attribution line under Strong Start intro)
+ * - .lgmp-table base styling for module tables
+ * - Strong Start highlight styles: table.lgmp-strong-start tr.is-highlighted
+ * Kept:
+ * - Header button, sections, legacy actor styles, checklist, Secrets overlay, open-settings pill
  */
+
 @layer modules {
   /* Header button in Journal Directory */
   .directory .directory-header .lazy-gm-prep-btn {
@@ -15,6 +20,41 @@
   /* General sections */
   .lgmp-section { margin-block: 0.75rem 1rem; }
   .lgmp-step-desc { margin: 0.25rem 0 0.5rem; opacity: 0.95; }
+
+  /* NEW: Subtle attribution under the Strong Start blurb */
+  .lgmp-quote-source {
+    opacity: 0.9;
+    font-size: 0.95em;
+    margin-top: 0.25rem;
+  }
+
+  /* Base table styles used by generated pages (characters, npcs, strong start) */
+  .lgmp-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.25rem 0 0.75rem;
+  }
+  .lgmp-table th,
+  .lgmp-table td {
+    border: 1px solid var(--color-border, rgba(255,255,255,0.12));
+    padding: 6px 8px;
+    vertical-align: top;
+  }
+  .lgmp-table thead th {
+    background: var(--color-bg-subtle, rgba(255,255,255,0.06));
+    text-align: left;
+  }
+
+  /* === Strong Start row highlight === */
+  table.lgmp-strong-start tr.is-highlighted > td {
+    background: var(--color-level-2, #2e4832);
+    color: var(--color-text-light-highlight, #fff);
+    font-weight: 600;
+    transition: background 200ms ease, color 200ms ease;
+  }
+  table.lgmp-strong-start tr.is-highlighted > td:first-child {
+    border-left: 3px solid var(--color-primary, #5ac18e);
+  }
 
   /* Legacy actor styles (kept for compatibility with older journals) */
   .lgmp-actor-list {
