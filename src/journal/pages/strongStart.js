@@ -5,7 +5,7 @@ export function createStrongStartPage(def, prevContent) {
   const title = game.i18n.localize(def.titleKey);
   let html = '';
   html += sectionDescription(def); // brief section description
-  html += introHTML();             // single-paragraph blurb (no quote)
+  // html += introHTML();           // REMOVED: no blurb after description
   html += promptsHTML();           // four prompts you selected
   html += notesPlaceholder();      // "Add your notes here." BEFORE the roll table
   html += d20TableHTML();          // d20 table with inline roller
@@ -23,12 +23,7 @@ export function createStrongStartPage(def, prevContent) {
   };
 }
 
-function introHTML() {
-  const blurb = game.i18n.localize('lazy-gm-prep.strong-start.blurb');
-  return `
-<p>${escapeHtml(blurb)}</p>
-`;
-}
+// REMOVED: introHTML()
 
 function promptsHTML() {
   const heading = game.i18n.localize('lazy-gm-prep.strong-start.prompts.heading');
