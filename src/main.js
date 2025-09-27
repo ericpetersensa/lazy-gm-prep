@@ -23,7 +23,6 @@ function ensureInlineHeaderButton(rootEl) {
     header.querySelector(".header-controls") ||
     header;
   if (container.querySelector('[data-action="lazy-gm-prep-inline"]')) return;
-
   const btn = document.createElement("button");
   btn.type = "button";
   btn.dataset.action = "lazy-gm-prep-inline";
@@ -64,7 +63,7 @@ function extractChecklist(html) {
   const LI_RE = /\<li[^\>]*\>([\s\S]*?)\<\/li\>/gi;
   let m;
   while ((m = LI_RE.exec(ulHtml))) {
-    const raw = m[1].replace(/\<\/?[^>]+\>/g, "").trim();
+    const raw = m[1].replace(/\<\/?\[^>\]+\>/g, "").trim();
     if (!raw) continue;
     const checked = /^\s*☑/.test(raw);
     const text = raw.replace(/^\s*[\u2610\u2611]\s*/, "");
@@ -79,7 +78,7 @@ function buildChecklist(items) {
   return `<ul class="lgmp-checklist">\n${lis}\n</ul>`;
 }
 function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>\"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  return String(s ?? "").replace(/[&<>\\"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
 }
 
 /* =======================================================================================
@@ -102,7 +101,6 @@ function injectSecretsPanel(app, sheetRoot) {
 
   const page = app?.page;
   if (!page) return;
-
   const saved = String(page.text?.content ?? "");
   const normalized = normalizeMarkers(saved);
   const { items, ulHtml } = extractChecklist(normalized);
@@ -124,11 +122,9 @@ function injectSecretsPanel(app, sheetRoot) {
   const panel = document.createElement("div");
   panel.className = "lgmp-secrets-panel";
   panel.setAttribute("hidden", "hidden");
-
   const header = document.createElement("div");
   header.className = "lgmp-secrets-panel__header";
   header.innerHTML = `<strong>Secrets & Clues</strong><button type="button" class="lgmp-secrets-close" title="Close">×</button>`;
-
   const list = document.createElement("ul");
   list.className = "lgmp-secrets-panel__list";
   items.forEach((it, idx) => {
@@ -137,7 +133,6 @@ function injectSecretsPanel(app, sheetRoot) {
     li.innerHTML = `<button type="button" class="lgmp-secret-toggle">${it.checked ? "☑" : "☐"}</button><span class="lgmp-secret-text">${escapeHtml(it.text)}</span>`;
     list.appendChild(li);
   });
-
   panel.appendChild(header);
   panel.appendChild(list);
   appEl.appendChild(fab);
@@ -155,12 +150,10 @@ function injectSecretsPanel(app, sheetRoot) {
     const btn = ev.target?.closest?.(".lgmp-secret-toggle");
     if (!btn) return;
     btn.textContent = (btn.textContent?.trim() === "☑") ? "☐" : "☑";
-
     const currentItems = Array.from(panel.querySelectorAll(".lgmp-secrets-panel__list > li")).map(li => ({
       text: li.querySelector(".lgmp-secret-text")?.textContent ?? "",
       checked: (li.querySelector(".lgmp-secret-toggle")?.textContent?.trim() === "☑")
     }));
-
     try {
       const oldContent = String(page.text?.content ?? "");
       const doc = new DOMParser().parseFromString(normalizeMarkers(oldContent), "text/html");
@@ -199,14 +192,11 @@ function bindDirectToggle(host) {
   // Skip edit mode
   if (host.querySelector(".editor,.tox-tinymce,[contenteditable='true']")) return;
   host.dataset.lgmpDirectToggleBound = "1";
-
   host.addEventListener("click", async (ev) => {
     const li = ev.target?.closest?.("ul.lgmp-checklist li");
     if (!li) return;
-
     const entry = entryFromHost(host);
     if (!entry) return ui.notifications?.warn(`[${MODULE_ID}] Could not resolve JournalEntry.`);
-
     // Resolve the correct page
     let page = null;
     const currentId = CURRENT_PAGE_BY_ENTRY.get(entry.id);
@@ -214,20 +204,17 @@ function bindDirectToggle(host) {
     if (!page) page = entry.pages?.contents?.find(p => looksLikeSecrets(p.name)) || null;
     if (!page) page = entry.pages?.contents?.find(p => hasChecklistHTML(p.text?.content)) || null;
     if (!page) return ui.notifications?.warn(`[${MODULE_ID}] Cannot find "${SECRETS_PAGE_NAME}" on "${entry.name}".`);
-
     // Map clicked DOM item -> saved HTML item
     const ulDom = li.closest("ul.lgmp-checklist");
     const allUlsDom = Array.from(host.querySelectorAll("ul.lgmp-checklist"));
     const ulIndex = Math.max(0, allUlsDom.indexOf(ulDom));
     const liIndex = Array.from(ulDom.querySelectorAll(":scope > li")).indexOf(li);
-
     try {
       const saved = normalizeMarkers(page.text?.content ?? "");
       const doc = new DOMParser().parseFromString(saved, "text/html");
       const allUlsSaved = doc.querySelectorAll("ul.lgmp-checklist");
       let ulSaved = allUlsSaved?.[ulIndex] || allUlsSaved?.[0] || null;
       if (!ulSaved) return ui.notifications?.warn(`[${MODULE_ID}] Saved HTML has no <ul class="lgmp-checklist">.`);
-
       let liSaved = ulSaved.querySelectorAll(":scope > li")?.[liIndex] || null;
       if (!liSaved) {
         const clickedText = (li.textContent || "").replace(/^\s*[\u2610\u2611]\s*/, "").trim();
@@ -235,10 +222,8 @@ function bindDirectToggle(host) {
           .find(x => ((x.textContent || "").replace(/^\s*[\u2610\u2611]\s*/, "").trim() === clickedText)) || null;
       }
       if (!liSaved) return ui.notifications?.warn(`[${MODULE_ID}] Could not locate matching list item in saved HTML.`);
-
       const raw = (liSaved.textContent || "").trim();
       liSaved.textContent = raw.startsWith("☑") ? raw.replace(/^☑/, "☐") : raw.replace(/^[\u2610]?/, "☑");
-
       await page.update({ "text.content": doc.body.innerHTML });
       page.parent?.sheet?.render?.(true);
     } catch (err) {
@@ -248,18 +233,86 @@ function bindDirectToggle(host) {
   }, true);
 }
 
+/* =======================================================================================
+ Strong Start inline-roll highlighter
+======================================================================================= */
+function bindStrongStartHighlight(host) {
+  if (!host) return;
+
+  // Scope to each Strong Start table on the sheet
+  const tables = host.querySelectorAll("table.lgmp-strong-start");
+  if (!tables.length) return;
+
+  // Extract numeric result from the inline roll near the table
+  function extractRollTotal(rollerEl) {
+    if (!rollerEl) return null;
+    try {
+      const json = rollerEl.dataset?.roll || rollerEl.getAttribute?.("data-roll");
+      if (json) {
+        const obj = typeof json === "string" ? JSON.parse(json) : json;
+        const total = Number(obj?.total);
+        if (Number.isFinite(total)) return total;
+      }
+    } catch (_) { /* ignore */ }
+    const txt = rollerEl.textContent || "";
+    const m = txt.match(/(-?\d+)/);
+    return m ? Number(m[1]) : null;
+  }
+
+  function highlightRow(table, n) {
+    if (!table || !Number.isFinite(n)) return;
+    const d = Math.max(1, Math.min(20, Math.round(n)));
+    table.querySelectorAll("tr.is-highlighted").forEach(tr => tr.classList.remove("is-highlighted"));
+    const rows = table.querySelectorAll("tbody > tr");
+    for (const tr of rows) {
+      const firstTd = tr.querySelector("td");
+      if (!firstTd) continue;
+      const val = Number((firstTd.textContent || "").trim());
+      if (val === d) {
+        tr.classList.add("is-highlighted");
+        break;
+      }
+    }
+  }
+
+  const ATTEMPTS = 4;
+  let tries = 0;
+
+  (function tryHighlight() {
+    let didWork = false;
+
+    tables.forEach(table => {
+      // Find the nearest inline roller for this section
+      // Simple approach: look for a preceding .lgmp-ss-roller in the same host
+      const rollerSpan = host.querySelector(".lgmp-ss-roller");
+      if (!rollerSpan) return;
+
+      const rollerAnchor = rollerSpan.querySelector(".inline-roll, a.inline-roll, a.inline-result");
+      if (!rollerAnchor) return;
+
+      const total = extractRollTotal(rollerAnchor);
+      if (Number.isFinite(total)) {
+        highlightRow(table, total);
+        didWork = true;
+      }
+    });
+
+    if (!didWork && tries++ < ATTEMPTS) {
+      setTimeout(tryHighlight, 60);
+    }
+  })();
+}
+
 /* === Updated: bind "Open Module Settings" links in pages/sections ============ */
 function bindOpenSettings(host) {
   if (!host) return;
   const links = host.querySelectorAll("[data-lazy-open-settings]");
   if (!links?.length) return;
-
   for (const link of links) {
     if (link.dataset.bound === "1") continue;
     link.dataset.bound = "1";
     link.addEventListener("click", (ev) => {
       ev.preventDefault();
-
       try {
         // Preferred: use existing settings sheet instance if provided by core
         if (game.settings?.sheet?.render) {
@@ -317,7 +370,8 @@ Hooks.once("ready", () => {
 Hooks.on("renderApplicationV2", (_app, el) => {
   if (el?.classList?.contains?.("journal-sheet")) {
     bindDirectToggle(el);
-    bindOpenSettings(el); // Updated: binds all Settings links + robust opening
+    bindOpenSettings(el);
+    bindStrongStartHighlight(el); // <-- NEW
   }
 });
 Hooks.on("chatMessage", (_chatLog, text) => {
