@@ -1,8 +1,7 @@
 /* lazy-gm-prep/styles/lazy-gm-prep.css
- * Changes:
- * - Removed .lgmp-quote-source (since the quote is gone)
- * - Kept base table + Strong Start highlight styles
- * - Kept header button, sections, legacy actor styles, checklist, Secrets overlay, open-settings pill
+ * No .lgmp-quote-source (since the quote is gone)
+ * Kept base table + Strong Start highlight styles
+ * Kept header button, sections, legacy actor styles, checklist, Secrets overlay, open-settings pill
  */
 
 @layer modules {
