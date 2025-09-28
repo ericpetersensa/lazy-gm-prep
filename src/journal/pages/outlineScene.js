@@ -1,16 +1,9 @@
 // src/journal/pages/outlineScene.js
 import { notesPlaceholder } from '../helpers.js';
 
-/**
- * Creates the "3. Outline Potential Scenes" page with:
- *  - Shortened description
- *  - "Tips for Scene Outlining" list
- *  - Three minimal scene templates (Title & Purpose on own lines, no "Scene" label)
- */
 export function createOutlineScenesPage(def, prevContent) {
   const title = game.i18n.localize(def.titleKey);
 
-  // If copying previous content, prefer it exactly as saved
   if (prevContent && String(prevContent).trim()) {
     return {
       name: title,
@@ -70,13 +63,19 @@ function templatesHTML() {
 }
 
 function sceneTemplateHTML() {
-  // Title and Purpose on their own lines, no "Scene" label
   return `
 <section class="lgmp-scene">
-  <p class="lgmp-field"><strong>Title:</strong> <em>(e.g., “Ambush at the Old Bridge”)</em></p>
-  <p class="lgmp-field"><strong>Purpose:</strong> <em>(What is this scene for? A challenge, a clue, a turning point?)</em></p>
+  <p class="lgmp-field">
+    <strong>Title:</strong><br>
+    <em>(e.g., “Ambush at the Old Bridge”)</em>
+  </p>
+  <p class="lgmp-field">
+    <strong>Purpose:</strong><br>
+    <em>(What is this scene for? A challenge, a clue, a turning point?)</em>
+  </p>
   <div class="lgmp-field">
-    <strong>Key Elements:</strong> <em>(1–3 things: location, NPC, monster, secret, or twist)</em>
+    <strong>Key Elements:</strong><br>
+    <em>(1–3 things: location, NPC, monster, secret, or twist)</em>
     <ul class="lgmp-keylist">
       <li>&nbsp;</li>
       <li>&nbsp;</li>
@@ -84,7 +83,8 @@ function sceneTemplateHTML() {
     </ul>
   </div>
   <div class="lgmp-field">
-    <strong>Loose Notes:</strong> <em>(How might it start? What’s the vibe? What could go wrong?)</em>
+    <strong>Loose Notes:</strong><br>
+    <em>(How might it start? What’s the vibe? What could go wrong?)</em>
     ${notesPlaceholder()}
   </div>
 </section>
