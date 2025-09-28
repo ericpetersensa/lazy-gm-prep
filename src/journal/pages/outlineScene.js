@@ -3,12 +3,9 @@ import { notesPlaceholder } from '../helpers.js';
 
 /**
  * Creates the "3. Outline Potential Scenes" page with:
- *  - Combined description (confidence without constraint)
+ *  - Shortened description
  *  - "Tips for Scene Outlining" list
- *  - Three minimal scene templates
- *
- * If prevContent is provided (Copy Previous enabled and content exists),
- * we return that content instead—consistent with your other page builders.
+ *  - Three minimal scene templates (Title & Purpose on own lines, no "Scene" label)
  */
 export function createOutlineScenesPage(def, prevContent) {
   const title = game.i18n.localize(def.titleKey);
@@ -35,12 +32,8 @@ export function createOutlineScenesPage(def, prevContent) {
 }
 
 function descriptionHTML() {
-  const desc = [
-    "Prepping just enough to feel confident, not constrained.",
-    "Use this page as your flexible, living roadmap—ready to adapt, improvise, and delight in the surprises your players bring.",
-    "Jot a loose list of likely scenes—just a few words each—to gain confidence without overcommitting. Be ready to throw them away when play goes elsewhere."
-  ].join(' ');
-
+  const desc =
+    "Use this page as your flexible, living roadmap—ready to adapt, improvise, and delight in the surprises your players bring. Prep just enough to feel confident, not constrained, and without overcommitting. Be ready to throw them away when play goes elsewhere.";
   return `
 <p class="lgmp-step-desc">${escapeHtml(desc)}</p>
 <hr>
@@ -68,7 +61,7 @@ ${lis}
 }
 
 function templatesHTML() {
-  const blocks = [1, 2, 3].map(n => sceneTemplateHTML(n)).join('\n');
+  const blocks = [1, 2, 3].map(() => sceneTemplateHTML()).join('\n');
   return `
 <div class="lgmp-scenes">
   ${blocks}
@@ -76,34 +69,22 @@ function templatesHTML() {
 `;
 }
 
-function sceneTemplateHTML(n) {
-  // Lightweight, fill-in-first approach. Keep structure minimal and editable.
-  const samples = {
-    title: "(e.g., “Ambush at the Old Bridge”)",
-    purpose: "(What is this scene for? A challenge, a clue, a turning point?)",
-    elements: "(1–3 things: location, NPC, monster, secret, or twist)",
-    notes: "(How might it start? What’s the vibe? What could go wrong?)"
-  };
-
+function sceneTemplateHTML() {
+  // Title and Purpose on their own lines, no "Scene" label
   return `
 <section class="lgmp-scene">
-  <h5>Scene ${n}</h5>
-
-  <p class="lgmp-field"><strong>Scene Title:</strong> <em>${escapeHtml(samples.title)}</em></p>
-
-  <p class="lgmp-field"><strong>Purpose:</strong> <em>${escapeHtml(samples.purpose)}</em></p>
-
+  <p class="lgmp-field"><strong>Title:</strong> <em>(e.g., “Ambush at the Old Bridge”)</em></p>
+  <p class="lgmp-field"><strong>Purpose:</strong> <em>(What is this scene for? A challenge, a clue, a turning point?)</em></p>
   <div class="lgmp-field">
-    <strong>Key Elements:</strong> <em>${escapeHtml(samples.elements)}</em>
+    <strong>Key Elements:</strong> <em>(1–3 things: location, NPC, monster, secret, or twist)</em>
     <ul class="lgmp-keylist">
       <li>&nbsp;</li>
       <li>&nbsp;</li>
       <li>&nbsp;</li>
     </ul>
   </div>
-
   <div class="lgmp-field">
-    <strong>Loose Notes:</strong> <em>${escapeHtml(samples.notes)}</em>
+    <strong>Loose Notes:</strong> <em>(How might it start? What’s the vibe? What could go wrong?)</em>
     ${notesPlaceholder()}
   </div>
 </section>
