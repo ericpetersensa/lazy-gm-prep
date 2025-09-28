@@ -3,7 +3,6 @@
  * Kept base table + Strong Start highlight styles
  * Kept header button, sections, legacy actor styles, checklist, Secrets overlay, open-settings pill
  */
-
 @layer modules {
   /* Header button in Journal Directory */
   .directory .directory-header .lazy-gm-prep-btn {
@@ -139,4 +138,37 @@
   }
   .lgmp-open-settings-btn:hover { filter: brightness(1.05); }
   .lgmp-open-settings-btn i { font-size: 0.9em; }
+
+  /* =========================
+     Outline Scenes templates
+     ========================= */
+  .lgmp-scenes {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .lgmp-scene {
+    padding: 10px;
+    border: 1px solid var(--color-border, rgba(255,255,255,0.12));
+    border-radius: 8px;
+    background: var(--color-bg-subtle, rgba(0,0,0,0.06));
+  }
+
+  .lgmp-scene > h5 {
+    margin: 0 0 0.35rem 0;
+    font-size: 1.05rem;
+  }
+
+  .lgmp-field {
+    margin: 0.35rem 0;
+  }
+
+  .lgmp-field > strong {
+    display: inline-block;
+    min-width: 8.5rem;
+  }
+
+  .lgmp-keylist {
+    margin: 0.25rem 0 0.25rem 1.25rem;
+  }
 }
