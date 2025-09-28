@@ -54,7 +54,7 @@ ${lis}
 }
 
 function templatesHTML() {
-  const blocks = [1, 2, 3].map(() => sceneTemplateHTML()).join('\n');
+  const blocks = [1, 2, 3].map(n => sceneTemplateHTML(n)).join('\n');
   return `
 <div class="lgmp-scenes">
   ${blocks}
@@ -62,9 +62,10 @@ function templatesHTML() {
 `;
 }
 
-function sceneTemplateHTML() {
+function sceneTemplateHTML(n) {
   return `
 <section class="lgmp-scene">
+  <h5>Scene ${n}</h5>
   <p class="lgmp-field">
     <strong>Title:</strong><br>
     <em>(e.g., “Ambush at the Old Bridge”)</em>
@@ -74,8 +75,7 @@ function sceneTemplateHTML() {
     <em>(What is this scene for? A challenge, a clue, a turning point?)</em>
   </p>
   <div class="lgmp-field">
-    <strong>Key Elements:</strong><br>
-    <em>(1–3 things: location, NPC, monster, secret, or twist)</em>
+    <strong>Key Elements:</strong> <em>(1–3 things: location, NPC, monster, secret, or twist)</em>
     <ul class="lgmp-keylist">
       <li>&nbsp;</li>
       <li>&nbsp;</li>
@@ -83,8 +83,7 @@ function sceneTemplateHTML() {
     </ul>
   </div>
   <div class="lgmp-field">
-    <strong>Loose Notes:</strong><br>
-    <em>(How might it start? What’s the vibe? What could go wrong?)</em>
+    <strong>Loose Notes:</strong> <em>(How might it start? What’s the vibe? What could go wrong?)</em>
     ${notesPlaceholder()}
   </div>
 </section>
