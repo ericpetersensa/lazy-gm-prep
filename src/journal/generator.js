@@ -5,14 +5,13 @@ import { createReviewCharactersPage } from './pages/reviewCharacters.js';
 import { createImportantNpcsPage } from './pages/importantNpcs.js';
 import { createDefaultSectionPage } from './pages/defaultSection.js';
 import { createStrongStartPage } from './pages/strongStart.js';
-
+import { createOutlineScenesPage } from './pages/outlineScene.js'; // <-- NEW
 import {
   ensureFolder,
   nextSequenceNumber,
   findPreviousSession,
   getPreviousSectionHTML
 } from './helpers.js';
-
 import { PAGE_ORDER, getSetting } from '../settings.js';
 
 export async function createPrepJournal() {
@@ -20,9 +19,8 @@ export async function createPrepJournal() {
   const folderName = getSetting('folderName', 'GM Prep');
   const prefix = getSetting('journalPrefix', 'Session');
   const includeDate = !!getSetting('includeDateInName', true);
-
   const charRows = Number(getSetting('initialCharacterRows', 5)) || 5;
-  const npcRows  = Number(getSetting('initialNpcRows', 5)) || 5;
+  const npcRows = Number(getSetting('initialNpcRows', 5)) || 5;
 
   const folderId = await ensureFolder(folderName);
   const seq = nextSequenceNumber(prefix);
@@ -43,7 +41,6 @@ export async function createPrepJournal() {
 
 async function createSeparatePages(entryName, folderId, prevJournal, isFirst, { charRows, npcRows }) {
   const pages = [];
-
   if (isFirst) {
     pages.push(createGettingStartedPage());
   }
@@ -56,19 +53,18 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst, { 
       case 'secrets-clues':
         pages.push(createSecretsCluesPage(def, prevContent));
         break;
-      
       case 'strong-start':
-      pages.push(createStrongStartPage(def, prevContent));
-      break;
-
+        pages.push(createStrongStartPage(def, prevContent));
+        break;
       case 'review-characters':
         pages.push(createReviewCharactersPage(def, prevContent, charRows));
         break;
-
       case 'important-npcs':
         pages.push(createImportantNpcsPage(def, prevContent, npcRows));
         break;
-
+      case 'outline-scenes': // <-- NEW
+        pages.push(createOutlineScenesPage(def, prevContent));
+        break;
       default:
         pages.push(createDefaultSectionPage(def, prevContent));
     }
@@ -87,30 +83,27 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst, { c
   const combinedPageName = game.i18n.localize("lazy-gm-prep.module.name");
 
   const sectionHtml = [];
-
   for (const def of PAGE_ORDER) {
     const copyOn = !!getSetting(`copy.${def.key}`, true);
     const prevContent = copyOn ? getPreviousSectionHTML(prevJournal, def) : null;
 
-    // Reuse the same per-section builders, then embed their HTML under an <h2> header.
     let pageLike;
     switch (def.key) {
       case 'secrets-clues':
         pageLike = createSecretsCluesPage(def, prevContent);
         break;
-      
       case 'strong-start':
-      pageLike = createStrongStartPage(def, prevContent);
-      break;
-
+        pageLike = createStrongStartPage(def, prevContent);
+        break;
       case 'review-characters':
         pageLike = createReviewCharactersPage(def, prevContent, charRows);
         break;
-
       case 'important-npcs':
         pageLike = createImportantNpcsPage(def, prevContent, npcRows);
         break;
-
+      case 'outline-scenes': // <-- NEW
+        pageLike = createOutlineScenesPage(def, prevContent);
+        break;
       default:
         pageLike = createDefaultSectionPage(def, prevContent);
     }
@@ -121,10 +114,8 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst, { c
   }
 
   const combinedContent = sectionHtml.join("\n<hr>\n");
-
   const pages = [];
 
-  // Include Getting Started for the first journal only (not a "step" so still fine in combined mode)
   if (isFirst) {
     pages.push(createGettingStartedPage());
   }
