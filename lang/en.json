@@ -11,7 +11,7 @@
 
   "lazy-gm-prep.getting-started.title": "Getting Started",
 
-  "lazy-gm-prep.getting-started.welcome": "Welcome! This module generates a lightweight prep journal that follows the \"Return of the Lazy Dungeon Master\" flow.  Using the Create GM Prep button again will create another journal.",
+  "lazy-gm-prep.getting-started.welcome": "Welcome! This module generates a lightweight prep journal that follows the \"Return of the Lazy Dungeon Master\" flow.  Using the Create GM Prep button again will create another journal.  Journal names start a 0 and increase as new ones are created.",
 
   "lazy-gm-prep.getting-started.other-options.title": "Other Journal Creation Options",
   "lazy-gm-prep.getting-started.other-options.altp": "Press Alt+P (GM only) to create the next prep journal.",
@@ -21,7 +21,7 @@
   "lazy-gm-prep.getting-started.settings.title-simple": "Module Settings",
   "lazy-gm-prep.getting-started.settings.separatePages": "A checkmark on this option will create a separate page for each step. With it unchecked, all steps are combined into a single page.",
   "lazy-gm-prep.getting-started.settings.folderName": "The text entered into this field will be used to create a folder where all new journals are created",
-  "lazy-gm-prep.getting-started.settings.journalPrefix": "The text entered into this field will be used for the journal name, followed by a number (starts at 0 and counts up).",
+  "lazy-gm-prep.getting-started.settings.journalPrefix": "The text entered into this field will be used for the journal name.",
   "lazy-gm-prep.getting-started.settings.includeDate": "A checkmark on this option appends today's date to the journal name.",
   "lazy-gm-prep.getting-started.settings.defaultRows": "The number entered in these fields is used for the number of rows on the Character and NPC pages",
   "lazy-gm-prep.getting-started.settings.copyPrevious": "A checkmark on this option will copy all prior content into the next journal. With it unchecked that page will be back to the default.)",
