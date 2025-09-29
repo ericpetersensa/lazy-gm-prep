@@ -11,7 +11,7 @@
 
   "lazy-gm-prep.getting-started.title": "Getting Started",
 
-  "lazy-gm-prep.getting-started.welcome": "Welcome! This module generates a lightweight prep journal that follows the \"Return of the Lazy Dungeon Master\" flow. You're on Session 0. From here on, you'll create a new journal per session.",
+  "lazy-gm-prep.getting-started.welcome": "Welcome! This module generates a lightweight prep journal that follows the \"Return of the Lazy Dungeon Master\" flow.  Using the Create GM Prep button again will create another journal.",
 
   "lazy-gm-prep.getting-started.other-options.title": "Other Journal Creation Options",
   "lazy-gm-prep.getting-started.other-options.altp": "Press Alt+P (GM only) to create the next prep journal.",
@@ -19,17 +19,17 @@
 
   "lazy-gm-prep.getting-started.settings.title": "Settings (Configure Settings > Lazy GM Prep)",
   "lazy-gm-prep.getting-started.settings.title-simple": "Module Settings",
-  "lazy-gm-prep.getting-started.settings.separatePages": "Separate Pages: Each step will have its own page. With it unchecked, all steps are combined into a single page. (Default – Enabled)",
-  "lazy-gm-prep.getting-started.settings.folderName": "Folder Name: The folder in which journals are created. (Default – Lazy GM Prep)",
-  "lazy-gm-prep.getting-started.settings.journalPrefix": "Journal Prefix: The journal name prefix. (Default – Session)",
-  "lazy-gm-prep.getting-started.settings.includeDate": "Include Date: Appends today's date to the journal name. (Default – Enabled)",
-  "lazy-gm-prep.getting-started.settings.defaultRows": "Default rows in Characters and NPC pages: Start with a set number of rows. (Default – 5)",
-  "lazy-gm-prep.getting-started.settings.copyPrevious": "Copy Previous: Each step can copy prior content into the next journal. (Default – Enabled)",
+  "lazy-gm-prep.getting-started.settings.separatePages": "A checkmark on this option will create a separate page for each step. With it unchecked, all steps are combined into a single page.",
+  "lazy-gm-prep.getting-started.settings.folderName": "The text entered into this field will be used to create a folder where all new journals are created",
+  "lazy-gm-prep.getting-started.settings.journalPrefix": "The text entered into this field will be used for the journal name, followed by a number (starts at 0 and counts up).",
+  "lazy-gm-prep.getting-started.settings.includeDate": "A checkmark on this option appends today's date to the journal name.",
+  "lazy-gm-prep.getting-started.settings.defaultRows": "The number entered in these fields is used for the number of rows on the Character and NPC pages",
+  "lazy-gm-prep.getting-started.settings.copyPrevious": "A checkmark on this option will copy all prior content into the next journal. With it unchecked that page will be back to the default.)",
 
   "lazy-gm-prep.getting-started.good.title": "Good to Know",
   "lazy-gm-prep.getting-started.good.secretsCarry": "Secrets & Clues carry forward: Only unchecked secrets from the prior session are brought forward and topped up to 10.",
   "lazy-gm-prep.getting-started.good.editableTables": "Editable Tables: Use Foundry's table tools to add/remove rows or columns.",
-  "lazy-gm-prep.getting-started.good.dragDrop": "Drag & Drop: Drop actors/items into the \"Review the Characters\" table for one-click access to sheets. Same for NPCs and other items.",
+  "lazy-gm-prep.getting-started.good.dragDrop": "Drag & Drop: Drop actors into the \"Review the Characters\" table for one-click access to sheets. This can be done ror NPCs and other items for any page.",
 
   "lazy-gm-prep.settings.separatePages.name": "Separate Pages for Each Step",
   "lazy-gm-prep.settings.separatePages.hint": "If enabled, create one page per step; otherwise combine all steps into one page.",
