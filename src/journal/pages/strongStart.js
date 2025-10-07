@@ -13,7 +13,7 @@ export function createStrongStartPage(def, prevContent) {
 
   let html = "";
   html += sectionDescription(def);
-  html += renderPromptsBlock(promptKeys, "lazy-gm-prep.strong-start.prompts.heading", true);
+  html += renderPromptsBlock(promptKeys, "lazy-gm-prep.strong-start.prompts.heading", false);
   html += notesPlaceholder();
   html += d20TableHTML();
 
@@ -21,9 +21,7 @@ export function createStrongStartPage(def, prevContent) {
   if (prevContent && String(prevContent).trim()) {
     const prevHeading = game.i18n.localize('lazy-gm-prep.ui.previous-section.heading') || 'Previous Notes';
     html += `
-
-#### ${escapeHtml(prevHeading)}
-
+<h4>${escapeHtml(prevHeading)}</h4>
 ${prevContent}`;
   }
 
@@ -45,9 +43,8 @@ function d20TableHTML() {
   }).join('\n');
 
   return `
-#### ${escapeHtml(heading)}
-
-<span class="lgmp-ss-roller">${escapeHtml(rollLabel)}: [[1d20]]</span>
+<h4>${escapeHtml(heading)}</h4>
+<p class="lgmp-ss-roller">${escapeHtml(rollLabel)}: [[1d20]]</p>
 <table class="lgmp-table lgmp-strong-start">
   <thead>
     <tr>
