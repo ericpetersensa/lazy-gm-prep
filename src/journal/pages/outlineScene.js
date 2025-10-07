@@ -6,7 +6,7 @@ export function createOutlineScenesPage(def, prevContent) {
 
   if (prevContent && String(prevContent).trim()) {
     return { name: title, type: 'text', text: { format: 1, content: String(prevContent) } };
-    }
+  }
 
   const promptKeys = [
     "lazy-gm-prep.outline-scenes.prompts.1",
@@ -17,7 +17,7 @@ export function createOutlineScenesPage(def, prevContent) {
 
   let html = '';
   html += descriptionHTML();
-  html += renderPromptsBlock(promptKeys, "lazy-gm-prep.prompts.heading", true);
+  html += renderPromptsBlock(promptKeys, "lazy-gm-prep.prompts.heading", false);
   html += templatesHTML();
 
   return { name: title, type: 'text', text: { format: 1, content: html } };
@@ -25,36 +25,39 @@ export function createOutlineScenesPage(def, prevContent) {
 
 function descriptionHTML() {
   const desc = "Use this page as your flexible, living roadmap—ready to adapt, improvise, and delight in the surprises your players bring. Prep just enough to feel confident, not constrained, and without overcommitting. Be ready to throw them away when play goes elsewhere.";
-  return `
-${escapeHtml(desc)}
-`;
+  return `<p>${escapeHtml(desc)}</p>`;
 }
 
 function templatesHTML() {
   const blocks = [1, 2, 3].map(n => sceneTemplateHTML(n)).join('\n');
-  return `
+  return `<div class="lgmp-scenes">
 ${blocks}
-`;
+</div>`;
 }
 
 function sceneTemplateHTML(n) {
   return `
-###### Scene ${n}
+<div class="lgmp-scene">
+  <h5>Scene ${n}</h5>
 
-Title:
-(e.g., “Ambush at the Old Bridge”)
+  <div class="lgmp-field"><strong>Title:</strong> <em>(e.g., “Ambush at the Old Bridge”)</em></div>
 
-Purpose:
-(What is this scene for? A challenge, a clue, a turning point?)
+  <div class="lgmp-field"><strong>Purpose:</strong> <em>(What is this scene for? A challenge, a clue, a turning point?)</em></div>
 
-Key Elements: (1–3 things: location, NPC, monster, secret, or twist)
-- 
-- 
-- 
+  <div class="lgmp-field">
+    <strong>Key Elements:</strong> <em>(1–3 things: location, NPC, monster, secret, or twist)</em>
+    <ul class="lgmp-keylist">
+      <li> </li>
+      <li> </li>
+      <li> </li>
+    </ul>
+  </div>
 
-Loose Notes: (How might it start? What’s the vibe? What could go wrong?)
-${notesPlaceholder()}
-`;
+  <div class="lgmp-field">
+    <strong>Loose Notes:</strong> <em>(How might it start? What’s the vibe? What could go wrong?)</em>
+    ${notesPlaceholder()}
+  </div>
+</div>`;
 }
 
 function escapeHtml(s) {
