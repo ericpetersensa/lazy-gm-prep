@@ -2,24 +2,25 @@
 
 export function normalizeMarkers(html) {
   let s = String(html ?? "");
-  // Convert checkbox <input> to unicode markers
-  s = s.replace(/\<input[^\>]*type=['"]checkbox['"][^\>]*checked[^\>]*\>/gi, "☑");
-  s = s.replace(/\<input[^\>]*type=['"]checkbox['"][^\>]*\>/gi, "☐");
+  // Convert checkbox inputs to unicode markers
+  s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*checked[^>]*>/gi, "☑");
+  s = s.replace(/<input[^>]*type=['"]checkbox['"][^>]*>/gi, "☐");
   // Convert [ ] and [x] to unicode markers
   s = s.replace(/\[\s*\]/g, "☐");
   s = s.replace(/\[\s*[xX]\s*\]/g, "☑");
   // Strip labels around inputs
-  s = s.replace(/\<label[^\>]*\>/gi, "").replace(/\<\/label\>/gi, "");
+  s = s.replace(/<label[^>]*>/gi, "").replace(/<\/label>/gi, "");
   return s;
 }
 
 /**
- * Extract the first checklist if present.
- * Returns { bodyWithoutChecklist, items: [{text, checked}] }
+ * Extract the checklist from a Secrets & Clues section.
+ * Only treats <ul class="lgmp-checklist"> as the checklist (no generic <ul> fallback).
+ * Returns: { bodyWithoutChecklist, items: [{text, checked}] }
  */
 export function extractModuleChecklist(html) {
   const doc = new DOMParser().parseFromString(String(html ?? ""), "text/html");
-  const ul = doc.querySelector("ul.lgmp-checklist") || doc.querySelector("ul");
+  const ul = doc.querySelector("ul.lgmp-checklist");
   if (!ul) return { bodyWithoutChecklist: html, items: [] };
 
   const items = [];
@@ -35,8 +36,7 @@ export function extractModuleChecklist(html) {
 }
 
 /**
- * Render a new HTML checklist with all items unchecked.
- * This is used when creating a fresh “Secrets & Clues” page.
+ * Render a new HTML checklist (all items initially unchecked unless text begins with ☑).
  */
 export function renderChecklist(texts) {
   const lis = texts
@@ -53,16 +53,24 @@ export function topUpToTen(texts, label = "Clue") {
 
 // Utilities
 function stripTags(s) {
-  return String(s ?? "").replace(/\<[^>]+\>/g, "");
+  return String(s ?? "").replace(/<[^>]+>/g, "");
 }
+
 function splitMarker(line) {
   const trimmed = String(line ?? "").trim();
   if (/^☑\s*/.test(trimmed)) return { marker: "☑", text: trimmed.replace(/^☑\s*/, "") };
   if (/^☐\s*/.test(trimmed)) return { marker: "☐", text: trimmed.replace(/^☐\s*/, "") };
-  if (/^\[\s*[xX]\s*\]\s*/.test(trimmed)) return { marker: "☑", text: trimmed.replace(/^\[\s*[xX]\s*\]\s*/, "") };
-  if (/^\[\s*\]\s*/.test(trimmed)) return { marker: "☐", text: trimmed.replace(/^\[\s*\]\s*/, "") };
+  if (/^\[\s*[xX]\s*]\s*/.test(trimmed)) return { marker: "☑", text: trimmed.replace(/^\[\s*[xX]\s*]\s*/, "") };
+  if (/^\[\s*]\s*/.test(trimmed)) return { marker: "☐", text: trimmed.replace(/^\[\s*]\s*/, "") };
   return { marker: "", text: trimmed };
 }
+
 function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;", '"':"&quot;","'":"&#39;" }[m]));
+  return String(s ?? "").replace(/[&<>"']/g, (m) => ({
+    "&": "&",
+    "<": "<",
+    ">": ">",
+    '"': "\"",
+    "'": "'"
+  }[m]));
 }
