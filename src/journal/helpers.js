@@ -87,8 +87,7 @@ export function notesPlaceholder() {
   return `<p class="lgmp-notes-hint">${escapeHtml(hint)}</p>\n`;
 }
 
-// ---------- Table generators (simple Foundry-friendly) ----------
-/** Simple 4-column Characters table (easy to add/remove rows/columns in the editor). */
+// ---------- Table generators ----------
 export function characterReviewTableHTML(rowCount = 5) {
   const headers = [
     game.i18n.localize("lazy-gm-prep.characters.table.header.pcName"),
@@ -106,7 +105,6 @@ ${bodyRows}
 </table>\n`;
 }
 
-/** Simple Important NPCs table (kept consistent with the Characters table). */
 export function importantNpcsTableHTML(rowCount = 5) {
   const headers = [
     game.i18n.localize("lazy-gm-prep.npcs.table.header.name"),
@@ -126,7 +124,7 @@ ${bodyRows}
 </table>\n`;
 }
 
-/** Legacy (kept): characters review bullet prompts list */
+/** Legacy (kept) */
 export function gmReviewPromptsHTML() {
   const lines = [
     game.i18n.localize("lazy-gm-prep.characters.prompts.spotlight"),
@@ -140,12 +138,13 @@ ${lines.map(l => `<li>${l}</li>`).join("\n")}
 }
 
 /**
- * NEW: Generic collapsible Prompts block used by all pages.
- * @param {string[]} promptKeys - Array of i18n keys for the list items.
+ * Generic collapsible Prompts block used by all pages.
+ * Defaults to collapsed.
+ * @param {string[]} promptKeys - i18n keys for the list items.
  * @param {string} [headingKey="lazy-gm-prep.prompts.heading"] - i18n key for the summary label.
- * @param {boolean} [open=true] - Whether the details is open by default.
+ * @param {boolean} [open=false] - open state.
  */
-export function renderPromptsBlock(promptKeys, headingKey = "lazy-gm-prep.prompts.heading", open = true) {
+export function renderPromptsBlock(promptKeys, headingKey = "lazy-gm-prep.prompts.heading", open = false) {
   const t = (k) => game.i18n.localize(k);
   const heading = t(headingKey);
   const items = promptKeys.map(t).map(escapeHtml);
@@ -160,7 +159,7 @@ export function renderPromptsBlock(promptKeys, headingKey = "lazy-gm-prep.prompt
 `;
 }
 
-/** Compatibility wrapper for Secrets & Clues page */
+/** Compatibility wrapper for Secrets & Clues */
 export function secretsPromptsHTML() {
   const keys = [
     "lazy-gm-prep.secrets-clues.prompts.rumor",
@@ -168,7 +167,7 @@ export function secretsPromptsHTML() {
     "lazy-gm-prep.secrets-clues.prompts.artifact",
     "lazy-gm-prep.secrets-clues.prompts.mystery"
   ];
-  return renderPromptsBlock(keys, "lazy-gm-prep.secrets-clues.prompts.heading", true);
+  return renderPromptsBlock(keys, "lazy-gm-prep.secrets-clues.prompts.heading", false);
 }
 
 function escapeHtml(s) {
