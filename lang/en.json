@@ -1,22 +1,16 @@
 {
   "lazy-gm-prep.module.name": "Lazy GM Prep",
-
   "lazy-gm-prep.header.button": "Create GM Prep",
   "lazy-gm-prep.header.buttonTooltip": "Create a new prep journal for your next session",
-
   "lazy-gm-prep.notifications.created": "Created: {name}",
-
   "lazy-gm-prep.keybindings.createPrep.name": "Create GM Prep",
   "lazy-gm-prep.keybindings.createPrep.hint": "Create a new prep journal (GM only).",
 
   "lazy-gm-prep.getting-started.title": "Getting Started",
-
-  "lazy-gm-prep.getting-started.welcome": "Welcome! This module generates a lightweight prep journal that follows the \"Return of the Lazy Dungeon Master\" flow.  Using the Create GM Prep button again will create another journal.  Journal names start a 0 and increase as new ones are created.",
-
+  "lazy-gm-prep.getting-started.welcome": "Welcome! This module generates a lightweight prep journal that follows the \"Return of the Lazy Dungeon Master\" flow. Using the Create GM Prep button again will create another journal. Journal names start a 0 and increase as new ones are created.",
   "lazy-gm-prep.getting-started.other-options.title": "Other Journal Creation Options",
   "lazy-gm-prep.getting-started.other-options.altp": "Press Alt+P (GM only) to create the next prep journal.",
   "lazy-gm-prep.getting-started.other-options.chatprep": "Type /prep in chat to generate the next prep journal.",
-
   "lazy-gm-prep.getting-started.settings.title": "Settings (Configure Settings > Lazy GM Prep)",
   "lazy-gm-prep.getting-started.settings.title-simple": "Module Settings",
   "lazy-gm-prep.getting-started.settings.separatePages": "A checkmark on this option will create a separate page for each step. With it unchecked, all steps are combined into a single page.",
@@ -25,12 +19,10 @@
   "lazy-gm-prep.getting-started.settings.includeDate": "A checkmark on this option appends today's date to the journal name.",
   "lazy-gm-prep.getting-started.settings.defaultRows": "The number entered in these fields is used for the number of rows on the Character and NPC pages",
   "lazy-gm-prep.getting-started.settings.copyPrevious": "A checkmark on this option will copy all prior content into the next journal. With it unchecked that page will be back to the default.)",
-
   "lazy-gm-prep.getting-started.good.title": "Good to Know",
   "lazy-gm-prep.getting-started.good.secretsCarry": "Secrets & Clues carry forward: Only unchecked clues from the prior session are brought forward and topped up to 10.",
   "lazy-gm-prep.getting-started.good.editableTables": "Editable Tables: Use Foundry's table tools to add/remove rows or columns.",
   "lazy-gm-prep.getting-started.good.dragDrop": "Drag & Drop: Drop actors into the \"Review the Characters\" table for one-click access to sheets. This can be done ror NPCs and other items for any page.",
-
   "lazy-gm-prep.settings.separatePages.name": "Separate Pages for Each Step",
   "lazy-gm-prep.settings.separatePages.hint": "If enabled, create one page per step; otherwise combine all steps into one page.",
   "lazy-gm-prep.settings.folderName.name": "Folder Name for Prep Journals",
@@ -43,7 +35,6 @@
   "lazy-gm-prep.settings.initialCharacterRows.hint": "Sets how many empty rows the Characters table starts with. You can still add/delete rows in the editor as needed.",
   "lazy-gm-prep.settings.initialNpcRows.name": "Default rows in “Important NPCs”",
   "lazy-gm-prep.settings.initialNpcRows.hint": "Sets how many empty rows the Important NPCs table starts with. Keep this lean; only primary NPCs belong here.",
-
   "lazy-gm-prep.settings.copy.review-characters.name": "Copy previous: 1. Review the Characters",
   "lazy-gm-prep.settings.copy.review-characters.hint": "If enabled, copy this page’s content from the previous session (when available).",
   "lazy-gm-prep.settings.copy.strong-start.name": "Copy previous: 2. Create a Strong Start",
@@ -83,13 +74,13 @@
   "lazy-gm-prep.steps.other-notes.description": "Scratch pad for reminders, marching order, pacing beats, or anything else you want at your fingertips.",
 
   "lazy-gm-prep.ui.add-notes-here": "Add your notes here.",
+
   "lazy-gm-prep.characters.table.header.pcName": "PC Name",
   "lazy-gm-prep.characters.table.header.conceptRole": "Concept / Role",
   "lazy-gm-prep.characters.table.header.goalHook": "Goal / Hook",
   "lazy-gm-prep.characters.table.header.recentNote": "Recent Note",
   "lazy-gm-prep.characters.table.header.player": "Player",
   "lazy-gm-prep.characters.table.header.bondDrama": "Bond/Drama",
-
   "lazy-gm-prep.characters.quickcheck.title": "Quick Check:",
   "lazy-gm-prep.characters.quickcheck.prompt": "Can you name every character at the table, and recall one thing about each?",
   "lazy-gm-prep.characters.prompts.spotlight": "Who hasn’t had a spotlight moment lately?",
@@ -143,5 +134,11 @@
   "lazy-gm-prep.strong-start.table.17": "A portal opens, disgorging a confused—or hostile—creature.",
   "lazy-gm-prep.strong-start.table.18": "The party is accused of a crime they didn’t commit—guards close in.",
   "lazy-gm-prep.strong-start.table.19": "A desperate merchant offers a fortune for immediate help.",
-  "lazy-gm-prep.strong-start.table.20": "The villain’s minions attack, targeting something (or someone) the party cares about."
+  "lazy-gm-prep.strong-start.table.20": "The villain’s minions attack, targeting something (or someone) the party cares about.",
+
+  "lazy-gm-prep.secrets-clues.prompts.heading": "Prompts",
+  "lazy-gm-prep.secrets-clues.prompts.rumor": "What rumor could change the party’s understanding of the world or reveal some of the villain's plan?",
+  "lazy-gm-prep.secrets-clues.prompts.secretPast": "What secret from a character’s past or connection with an NPC might resurface?",
+  "lazy-gm-prep.secrets-clues.prompts.artifact": "What evidence or artifact could point the party toward a new location or objective?",
+  "lazy-gm-prep.secrets-clues.prompts.mystery": "What is a mystery about the dungeon, town, or region that could be revealed?"
 }
