@@ -7,7 +7,7 @@
   "lazy-gm-prep.notifications.created": "Created: {name}",
 
   "lazy-gm-prep.keybindings.createPrep.name": "Create GM Prep",
-  "lazy-gm-prep.keybindings.createPrep.hint": "Create a new prep journal (GM only). Default: Alt+P",
+  "lazy-gm-prep.keybindings.createPrep.hint": "Create a new prep journal (GM only).",
 
   "lazy-gm-prep.getting-started.title": "Getting Started",
 
@@ -27,7 +27,7 @@
   "lazy-gm-prep.getting-started.settings.copyPrevious": "A checkmark on this option will copy all prior content into the next journal. With it unchecked that page will be back to the default.)",
 
   "lazy-gm-prep.getting-started.good.title": "Good to Know",
-  "lazy-gm-prep.getting-started.good.secretsCarry": "Secrets & Clues carry forward: Only unchecked secrets from the prior session are brought forward and topped up to 10.",
+  "lazy-gm-prep.getting-started.good.secretsCarry": "Secrets & Clues carry forward: Only unchecked clues from the prior session are brought forward and topped up to 10.",
   "lazy-gm-prep.getting-started.good.editableTables": "Editable Tables: Use Foundry's table tools to add/remove rows or columns.",
   "lazy-gm-prep.getting-started.good.dragDrop": "Drag & Drop: Drop actors into the \"Review the Characters\" table for one-click access to sheets. This can be done ror NPCs and other items for any page.",
 
@@ -70,7 +70,7 @@
   "lazy-gm-prep.steps.outline-scenes.title": "3. Outline Potential Scenes",
   "lazy-gm-prep.steps.outline-scenes.description": "Jot a loose list of likely scenes—just a few words each—to gain confidence without overcommitting. Be ready to throw them away when play goes elsewhere.",
   "lazy-gm-prep.steps.secrets-clues.title": "4. Define Secrets & Clues",
-  "lazy-gm-prep.steps.secrets-clues.description": "Write short, system‑agnostic facts the characters can discover anywhere during play. Aim for ~10.",
+  "lazy-gm-prep.steps.secrets-clues.description": "Secrets and clues are the connective tissue of your adventure—short, evocative facts, revelations, or mysteries that the characters might uncover as they explore. Each secret or clue is a single sentence, not tied to a specific location or NPC, allowing you to reveal them wherever it makes sense in play.",
   "lazy-gm-prep.steps.fantastic-locations.title": "5. Develop Fantastic Locations",
   "lazy-gm-prep.steps.fantastic-locations.description": "Name evocative places and list a few striking aspects (scale, age, weirdness). These become memorable backdrops you can drop in as needed.",
   "lazy-gm-prep.steps.important-npcs.title": "6. Outline Important NPCs",
