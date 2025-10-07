@@ -18,17 +18,15 @@ export function createSecretsCluesPage(def, prevContent) {
     const toRender = topUpToTen(uncheckedTexts, 'Clue');
     const bodyCore = bodyWithoutChecklist?.trim() ? `${bodyWithoutChecklist.trim()}\n` : '';
     content = `${bodyCore}${renderChecklist(toRender)}`;
-    // If the previous entry had no non-checklist body, add description + Prompts + notes now.
     if (!bodyCore) {
       content = sectionDescription(def)
-        + renderPromptsBlock(promptKeys, "lazy-gm-prep.secrets-clues.prompts.heading", true)
+        + renderPromptsBlock(promptKeys, "lazy-gm-prep.secrets-clues.prompts.heading", false)
         + notesPlaceholder()
         + content;
     }
   } else {
-    // New page: description + Prompts + notes + empty checklist (10 placeholders)
     content = sectionDescription(def)
-      + renderPromptsBlock(promptKeys, "lazy-gm-prep.secrets-clues.prompts.heading", true)
+      + renderPromptsBlock(promptKeys, "lazy-gm-prep.secrets-clues.prompts.heading", false)
       + notesPlaceholder()
       + renderChecklist(topUpToTen([], 'Clue'));
   }
