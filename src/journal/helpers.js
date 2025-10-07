@@ -126,6 +126,7 @@ ${bodyRows}
 </table>\n`;
 }
 
+/** Legacy (kept): characters review bullet prompts list */
 export function gmReviewPromptsHTML() {
   const lines = [
     game.i18n.localize("lazy-gm-prep.characters.prompts.spotlight"),
@@ -138,25 +139,36 @@ ${lines.map(l => `<li>${l}</li>`).join("\n")}
 </ul>\n`;
 }
 
-/** NEW: Collapsible "Prompts" block for Secrets & Clues */
-export function secretsPromptsHTML() {
+/**
+ * NEW: Generic collapsible Prompts block used by all pages.
+ * @param {string[]} promptKeys - Array of i18n keys for the list items.
+ * @param {string} [headingKey="lazy-gm-prep.prompts.heading"] - i18n key for the summary label.
+ * @param {boolean} [open=true] - Whether the details is open by default.
+ */
+export function renderPromptsBlock(promptKeys, headingKey = "lazy-gm-prep.prompts.heading", open = true) {
   const t = (k) => game.i18n.localize(k);
-  const heading = t("lazy-gm-prep.secrets-clues.prompts.heading");
-  const items = [
-    t("lazy-gm-prep.secrets-clues.prompts.rumor"),
-    t("lazy-gm-prep.secrets-clues.prompts.secretPast"),
-    t("lazy-gm-prep.secrets-clues.prompts.artifact"),
-    t("lazy-gm-prep.secrets-clues.prompts.mystery")
-  ].map(escapeHtml);
+  const heading = t(headingKey);
+  const items = promptKeys.map(t).map(escapeHtml);
 
   return `
-<details class="lgmp-prompts">
+<details class="lgmp-prompts"${open ? " open" : ""}>
   <summary>${escapeHtml(heading)}</summary>
   <ul class="lgmp-prompts">
     ${items.map((l) => `<li>${l}</li>`).join("\n")}
   </ul>
 </details>
 `;
+}
+
+/** Compatibility wrapper for Secrets & Clues page */
+export function secretsPromptsHTML() {
+  const keys = [
+    "lazy-gm-prep.secrets-clues.prompts.rumor",
+    "lazy-gm-prep.secrets-clues.prompts.secretPast",
+    "lazy-gm-prep.secrets-clues.prompts.artifact",
+    "lazy-gm-prep.secrets-clues.prompts.mystery"
+  ];
+  return renderPromptsBlock(keys, "lazy-gm-prep.secrets-clues.prompts.heading", true);
 }
 
 function escapeHtml(s) {
