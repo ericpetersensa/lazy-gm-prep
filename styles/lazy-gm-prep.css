@@ -1,7 +1,6 @@
 /* lazy-gm-prep/styles/lazy-gm-prep.css
- * No .lgmp-quote-source (since the quote is gone)
- * Kept base table + Strong Start highlight styles
- * Kept header button, sections, legacy actor styles, checklist, Secrets overlay, open-settings pill
+ * Base tables, Strong Start highlight, header button, sections, legacy actor styles,
+ * checklist, Secrets overlay, open-settings pill, Outline Scenes cards, Prompts block
  */
 @layer modules {
   /* Header button in Journal Directory */
@@ -156,24 +155,17 @@
     margin: 0 0 0.35rem 0;
     font-size: 1.05rem;
   }
-  .lgmp-field {
-    margin: 0.35rem 0;
-  }
-  .lgmp-field > strong {
-    display: inline-block;
-    min-width: 8.5rem;
-  }
-  .lgmp-keylist {
-    margin: 0.25rem 0 0.25rem 1.25rem;
-  }
+  .lgmp-field { margin: 0.35rem 0; }
+  .lgmp-field > strong { display: inline-block; min-width: 8.5rem; }
+  .lgmp-keylist { margin: 0.25rem 0 0.25rem 1.25rem; }
 
-  /* === NEW: Collapsible Prompts block (Secrets & Clues) === */
+  /* === Prompts (collapsible) === */
   details.lgmp-prompts { margin: 0.25rem 0 0.5rem; }
+  /* IMPORTANT: Keep the default triangle marker visible. Do NOT remove list-style. */
   details.lgmp-prompts > summary {
     cursor: pointer;
     font-weight: 600;
     opacity: 0.95;
-    list-style: none;
   }
   ul.lgmp-prompts { margin: 0.25rem 0 0.25rem 1.25rem; }
 }
