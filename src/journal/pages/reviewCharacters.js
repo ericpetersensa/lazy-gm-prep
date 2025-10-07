@@ -1,23 +1,34 @@
 // src/journal/pages/reviewCharacters.js
-
 import {
   sectionDescription,
   quickCheckHTML,
   notesPlaceholder,
   characterReviewTableHTML,
-  gmReviewPromptsHTML
+  renderPromptsBlock
 } from '../helpers.js';
 
 export function createReviewCharactersPage(def, prevContent, initialRows = 5) {
-  // Build the page with your exact flow: Description -> Quick Check -> Table -> Prompts -> Notes
-  const template =
+  if (prevContent && prevContent.trim()) {
+    return {
+      name: game.i18n.localize(def.titleKey),
+      type: 'text',
+      text: { format: 1, content: prevContent }
+    };
+  }
+
+  const promptKeys = [
+    "lazy-gm-prep.characters.prompts.spotlight",
+    "lazy-gm-prep.characters.prompts.unresolved",
+    "lazy-gm-prep.characters.prompts.bonds",
+    "lazy-gm-prep.characters.prompts.reward"
+  ];
+
+  const content =
     sectionDescription(def) +
+    renderPromptsBlock(promptKeys) +
     quickCheckHTML() +
     characterReviewTableHTML(initialRows) +
-    gmReviewPromptsHTML() +
     notesPlaceholder();
-
-  const content = (prevContent && prevContent.trim()) ? prevContent : template;
 
   return {
     name: game.i18n.localize(def.titleKey),
