@@ -23,6 +23,7 @@
   "lazy-gm-prep.getting-started.good.secretsCarry": "Secrets & Clues carry forward: Only unchecked clues from the prior session are brought forward and topped up to 10.",
   "lazy-gm-prep.getting-started.good.editableTables": "Editable Tables: Use Foundry's table tools to add/remove rows or columns.",
   "lazy-gm-prep.getting-started.good.dragDrop": "Drag & Drop: Drop actors into the \"Review the Characters\" table for one-click access to sheets. This can be done ror NPCs and other items for any page.",
+
   "lazy-gm-prep.settings.separatePages.name": "Separate Pages for Each Step",
   "lazy-gm-prep.settings.separatePages.hint": "If enabled, create one page per step; otherwise combine all steps into one page.",
   "lazy-gm-prep.settings.folderName.name": "Folder Name for Prep Journals",
@@ -74,6 +75,9 @@
   "lazy-gm-prep.steps.other-notes.description": "Scratch pad for reminders, marching order, pacing beats, or anything else you want at your fingertips.",
 
   "lazy-gm-prep.ui.add-notes-here": "Add your notes here.",
+  "lazy-gm-prep.ui.previous-section.heading": "Previous Session Content",
+
+  "lazy-gm-prep.prompts.heading": "Prompts",
 
   "lazy-gm-prep.characters.table.header.pcName": "PC Name",
   "lazy-gm-prep.characters.table.header.conceptRole": "Concept / Role",
@@ -101,8 +105,6 @@
   "lazy-gm-prep.getting-started.sections.review-characters.conceptRole": "A 2–5 word summary (e.g., “Cynical Elf Wizard,” “Brash Human Fighter”).",
   "lazy-gm-prep.getting-started.sections.review-characters.goalHook": "What does this character want? (e.g., “Find lost sister,” “Prove self to mentor,” “Get rich or die trying”).",
   "lazy-gm-prep.getting-started.sections.review-characters.recentNote": "Last session’s drama, a secret, a relationship, or a “to-do” for next session.",
-
-  "lazy-gm-prep.ui.previous-section.heading": "Previous Session Content",
 
   "lazy-gm-prep.strong-start.prompts.heading": "Prompts",
   "lazy-gm-prep.strong-start.prompts.world": "What’s happening in the world right now, outside the PCs’ control?",
@@ -140,5 +142,10 @@
   "lazy-gm-prep.secrets-clues.prompts.rumor": "What rumor could change the party’s understanding of the world or reveal some of the villain's plan?",
   "lazy-gm-prep.secrets-clues.prompts.secretPast": "What secret from a character’s past or connection with an NPC might resurface?",
   "lazy-gm-prep.secrets-clues.prompts.artifact": "What evidence or artifact could point the party toward a new location or objective?",
-  "lazy-gm-prep.secrets-clues.prompts.mystery": "What is a mystery about the dungeon, town, or region that could be revealed?"
+  "lazy-gm-prep.secrets-clues.prompts.mystery": "What is a mystery about the dungeon, town, or region that could be revealed?",
+
+  "lazy-gm-prep.outline-scenes.prompts.1": "Aim for 1–2 scenes per hour of play.",
+  "lazy-gm-prep.outline-scenes.prompts.2": "Mix scene types: include social, exploration, and combat.",
+  "lazy-gm-prep.outline-scenes.prompts.3": "Don’t overcommit—three scenes are enough to feel ready.",
+  "lazy-gm-prep.outline-scenes.prompts.4": "Be ready to skip or swap scenes as play evolves."
 }
