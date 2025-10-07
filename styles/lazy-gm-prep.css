@@ -146,29 +146,34 @@
     display: grid;
     gap: 0.75rem;
   }
-
   .lgmp-scene {
     padding: 10px;
     border: 1px solid var(--color-border, rgba(255,255,255,0.12));
     border-radius: 8px;
     background: var(--color-bg-subtle, rgba(0,0,0,0.06));
   }
-
   .lgmp-scene > h5 {
     margin: 0 0 0.35rem 0;
     font-size: 1.05rem;
   }
-
   .lgmp-field {
     margin: 0.35rem 0;
   }
-
   .lgmp-field > strong {
     display: inline-block;
     min-width: 8.5rem;
   }
-
   .lgmp-keylist {
     margin: 0.25rem 0 0.25rem 1.25rem;
   }
+
+  /* === NEW: Collapsible Prompts block (Secrets & Clues) === */
+  details.lgmp-prompts { margin: 0.25rem 0 0.5rem; }
+  details.lgmp-prompts > summary {
+    cursor: pointer;
+    font-weight: 600;
+    opacity: 0.95;
+    list-style: none;
+  }
+  ul.lgmp-prompts { margin: 0.25rem 0 0.25rem 1.25rem; }
 }
