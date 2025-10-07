@@ -36,7 +36,6 @@ export function getPreviousSectionHTML(prevJournal, def) {
     // Separate-page lookup
     const separatePage = prevJournal.pages.find(p => (p.name ?? "") === wantedTitle);
     if (separatePage?.text?.content) return separatePage.text.content;
-
     // Combined-page extraction
     const combinedName = game.i18n.localize("lazy-gm-prep.module.name");
     const combinedHost =
@@ -54,7 +53,9 @@ function extractCombinedSection(pageHtml, sectionTitle) {
   try {
     const doc = new DOMParser().parseFromString(String(pageHtml ?? ""), "text/html");
     const headers = Array.from(doc.querySelectorAll("h2"));
-    const target = headers.find(h => (h.textContent ?? "").trim() === String(sectionTitle ?? "").trim());
+    const target = headers.find(
+      h => (h.textContent ?? "").trim() === String(sectionTitle ?? "").trim()
+    );
     if (!target) return null;
     const container = doc.createElement("div");
     let node = target.nextSibling;
@@ -70,7 +71,6 @@ function extractCombinedSection(pageHtml, sectionTitle) {
 }
 
 // ---------- Section UI helpers ----------
-
 export function sectionDescription(def) {
   const desc = game.i18n.localize(def.descKey);
   return `<p class="lgmp-step-desc">${escapeHtml(desc)}</p>\n<hr>\n`;
@@ -88,7 +88,6 @@ export function notesPlaceholder() {
 }
 
 // ---------- Table generators (simple Foundry-friendly) ----------
-
 /** Simple 4-column Characters table (easy to add/remove rows/columns in the editor). */
 export function characterReviewTableHTML(rowCount = 5) {
   const headers = [
@@ -97,12 +96,10 @@ export function characterReviewTableHTML(rowCount = 5) {
     game.i18n.localize("lazy-gm-prep.characters.table.header.goalHook"),
     game.i18n.localize("lazy-gm-prep.characters.table.header.recentNote")
   ].map(escapeHtml);
-
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
   const bodyRows = Array.from({ length: rowCount }, () =>
     `<tr>${" <td> </td>".repeat(headers.length)}</tr>`
   ).join("\n");
-
   return `<table class="lgmp-table lgmp-characters">
 ${headerRow}
 ${bodyRows}
@@ -119,12 +116,10 @@ export function importantNpcsTableHTML(rowCount = 5) {
     game.i18n.localize("lazy-gm-prep.npcs.table.header.relationship"),
     game.i18n.localize("lazy-gm-prep.npcs.table.header.notes")
   ].map(escapeHtml);
-
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
   const bodyRows = Array.from({ length: rowCount }, () =>
     `<tr>${" <td> </td>".repeat(headers.length)}</tr>`
   ).join("\n");
-
   return `<table class="lgmp-table lgmp-npcs">
 ${headerRow}
 ${bodyRows}
@@ -143,8 +138,33 @@ ${lines.map(l => `<li>${l}</li>`).join("\n")}
 </ul>\n`;
 }
 
+/** NEW: Collapsible "Prompts" block for Secrets & Clues */
+export function secretsPromptsHTML() {
+  const t = (k) => game.i18n.localize(k);
+  const heading = t("lazy-gm-prep.secrets-clues.prompts.heading");
+  const items = [
+    t("lazy-gm-prep.secrets-clues.prompts.rumor"),
+    t("lazy-gm-prep.secrets-clues.prompts.secretPast"),
+    t("lazy-gm-prep.secrets-clues.prompts.artifact"),
+    t("lazy-gm-prep.secrets-clues.prompts.mystery")
+  ].map(escapeHtml);
+
+  return `
+<details class="lgmp-prompts">
+  <summary>${escapeHtml(heading)}</summary>
+  <ul class="lgmp-prompts">
+    ${items.map((l) => `<li>${l}</li>`).join("\n")}
+  </ul>
+</details>
+`;
+}
+
 function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>\"']/g, (m) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  return String(s ?? "").replace(/[&<>"']/g, (m) => ({
+    "&": "&",
+    "<": "<",
+    ">": ">",
+    '"': "\"",
+    "'": "&#39;"
   }[m]));
 }
