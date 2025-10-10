@@ -1,5 +1,5 @@
 // src/journal/pages/fantasticLocations.js
-import { renderPromptsBlock } from '../helpers.js';
+import { renderPromptsBlock, sectionDescription } from '../helpers.js';
 
 export function createFantasticLocationsPage(def, prevContent) {
   const title = game.i18n.localize(def.titleKey);
@@ -23,8 +23,16 @@ export function createFantasticLocationsPage(def, prevContent) {
   ];
 
   let html = '';
-  html += descriptionHTML();
+  // ✅ Localized page description from lang/en.json via def.descKey
+  html += sectionDescription(def);
+
+  // Optional tip (not localized unless you want a key for it)
+  html += tipHTML();
+
+  // Shared Prompts block
   html += renderPromptsBlock(promptKeys, "lazy-gm-prep.prompts.heading", false);
+
+  // Three template blocks (like Outline Scenes)
   html += templatesHTML();
 
   return {
@@ -34,12 +42,10 @@ export function createFantasticLocationsPage(def, prevContent) {
   };
 }
 
-function descriptionHTML() {
-  const desc =
-    "Give each place a bold, evocative name and jot down a few striking features—think scale, age, or weirdness. These become memorable backdrops you can drop in anytime. Focus on what makes each location unique, what’s happening there now, and how it might connect to your PCs. That’s it—keep it simple, keep it fantastic.\n\n" +
-    "Tip: Don’t overthink it. One sentence per field is enough. If you need inspiration, roll on a random table or borrow from your favorite adventure.";
+function tipHTML() {
+  const tip = "Don’t overthink it. One sentence per field is enough. If you need inspiration, roll on a random table or borrow from your favorite adventure.";
   return `
-${escapeHtml(desc)}
+<p><em>${escapeHtml(tip)}</em></p>
 `;
 }
 
