@@ -5,6 +5,7 @@
   "lazy-gm-prep.notifications.created": "Created: {name}",
   "lazy-gm-prep.keybindings.createPrep.name": "Create GM Prep",
   "lazy-gm-prep.keybindings.createPrep.hint": "Create a new prep journal (GM only).",
+
   "lazy-gm-prep.getting-started.title": "Getting Started",
   "lazy-gm-prep.getting-started.welcome": "Welcome! This module generates a lightweight prep journal that follows the \"Return of the Lazy Dungeon Master\" flow. Using the Create GM Prep button again will create another journal. Journal names start a 0 and increase as new ones are created.",
   "lazy-gm-prep.getting-started.other-options.title": "Other Journal Creation Options",
@@ -22,6 +23,7 @@
   "lazy-gm-prep.getting-started.good.secretsCarry": "Secrets & Clues carry forward: Only unchecked clues from the prior session are brought forward and topped up to 10.",
   "lazy-gm-prep.getting-started.good.editableTables": "Editable Tables: Use Foundry's table tools to add/remove rows or columns.",
   "lazy-gm-prep.getting-started.good.dragDrop": "Drag & Drop: Drop actors into the \"Review the Characters\" table for one-click access to sheets. This can be done ror NPCs and other items for any page.",
+
   "lazy-gm-prep.settings.separatePages.name": "Separate Pages for Each Step",
   "lazy-gm-prep.settings.separatePages.hint": "If enabled, create one page per step; otherwise combine all steps into one page.",
   "lazy-gm-prep.settings.folderName.name": "Folder Name for Prep Journals",
@@ -52,6 +54,7 @@
   "lazy-gm-prep.settings.copy.magic-item-rewards.hint": "If enabled, copy this page’s content from the previous session (when available).",
   "lazy-gm-prep.settings.copy.other-notes.name": "Copy previous: Other Notes",
   "lazy-gm-prep.settings.copy.other-notes.hint": "If enabled, copy this page’s content from the previous session (when available).",
+
   "lazy-gm-prep.steps.review-characters.title": "1. Review the Characters",
   "lazy-gm-prep.steps.review-characters.description": "Before you prep anything else, take a moment to refresh yourself on the names, backgrounds, motivations, and player interests for every PC. This primes your brain so the rest of your prep wraps naturally around the characters—keep it short and focused.",
   "lazy-gm-prep.steps.strong-start.title": "2. Create a Strong Start",
@@ -61,7 +64,7 @@
   "lazy-gm-prep.steps.secrets-clues.title": "4. Define Secrets & Clues",
   "lazy-gm-prep.steps.secrets-clues.description": "Secrets and clues are the connective tissue of your adventure—short, evocative facts, revelations, or mysteries that the characters might uncover as they explore. Each secret or clue is a single sentence, not tied to a specific location or NPC, allowing you to reveal them wherever it makes sense in play.",
   "lazy-gm-prep.steps.fantastic-locations.title": "5. Develop Fantastic Locations",
-  "lazy-gm-prep.steps.fantastic-locations.description": "Give each place a bold, evocative name and jot down a few striking features—think scale, age, or weirdness. These become memorable backdrops you can drop in anytime. Focus on what makes each location unique, what’s happening there now, and how it might connect to your PCs.",
+  "lazy-gm-prep.steps.fantastic-locations.description": "Name evocative places and list a few striking aspects (scale, age, weirdness). These become memorable backdrops you can drop in as needed.",
   "lazy-gm-prep.steps.important-npcs.title": "6. Outline Important NPCs",
   "lazy-gm-prep.steps.important-npcs.description": "Note only the NPCs that drive this session. Capture just the essentials you need to run them at the table.",
   "lazy-gm-prep.steps.choose-monsters.title": "7. Choose Relevant Monsters",
@@ -70,9 +73,12 @@
   "lazy-gm-prep.steps.magic-item-rewards.description": "Drop items that excite the players and tie into the story. Items can anchor secrets and become tangible hooks.",
   "lazy-gm-prep.steps.other-notes.title": "Other Notes",
   "lazy-gm-prep.steps.other-notes.description": "Scratch pad for reminders, marching order, pacing beats, or anything else you want at your fingertips.",
+
   "lazy-gm-prep.ui.add-notes-here": "Add your notes here.",
   "lazy-gm-prep.ui.previous-section.heading": "Previous Session Content",
+
   "lazy-gm-prep.prompts.heading": "Prompts",
+
   "lazy-gm-prep.characters.table.header.pcName": "PC Name",
   "lazy-gm-prep.characters.table.header.conceptRole": "Concept / Role",
   "lazy-gm-prep.characters.table.header.goalHook": "Goal / Hook",
@@ -85,18 +91,21 @@
   "lazy-gm-prep.characters.prompts.unresolved": "Does any character have an unresolved goal, secret, or personal hook to bring forward?",
   "lazy-gm-prep.characters.prompts.bonds": "Any PC bonds or rivalries to highlight this session?",
   "lazy-gm-prep.characters.prompts.reward": "Who is due for a magic item or story reward?",
+
   "lazy-gm-prep.npcs.table.header.name": "Name",
   "lazy-gm-prep.npcs.table.header.connection": "Connection/Role",
   "lazy-gm-prep.npcs.table.header.archetype": "Archetype (Popular Fiction)",
   "lazy-gm-prep.npcs.table.header.goal": "Goal/Motivation",
   "lazy-gm-prep.npcs.table.header.relationship": "Relationship to PCs",
   "lazy-gm-prep.npcs.table.header.notes": "Notes",
+
   "lazy-gm-prep.getting-started.sections.heading": "Page Help",
   "lazy-gm-prep.getting-started.sections.subheading.columnExplanations": "Column Explanations",
   "lazy-gm-prep.getting-started.sections.review-characters.pcName": "The character’s name.",
   "lazy-gm-prep.getting-started.sections.review-characters.conceptRole": "A 2–5 word summary (e.g., “Cynical Elf Wizard,” “Brash Human Fighter”).",
   "lazy-gm-prep.getting-started.sections.review-characters.goalHook": "What does this character want? (e.g., “Find lost sister,” “Prove self to mentor,” “Get rich or die trying”).",
   "lazy-gm-prep.getting-started.sections.review-characters.recentNote": "Last session’s drama, a secret, a relationship, or a “to-do” for next session.",
+
   "lazy-gm-prep.strong-start.prompts.heading": "Prompts",
   "lazy-gm-prep.strong-start.prompts.world": "What’s happening in the world right now, outside the PCs’ control?",
   "lazy-gm-prep.strong-start.prompts.grab": "What would grab your players’ attention in the first 60 seconds?",
@@ -105,6 +114,7 @@
   "lazy-gm-prep.strong-start.prompts.tie": "How can this opening tie to a PC’s background, goal, or unresolved thread?",
   "lazy-gm-prep.strong-start.prompts.mood": "What mood do you want to set—chaos, mystery, danger, or wonder?",
   "lazy-gm-prep.strong-start.prompts.player": "If you were a player, what opening would make you lean forward?",
+
   "lazy-gm-prep.strong-start.table.heading": "Strong Start Encounters",
   "lazy-gm-prep.strong-start.table.rollLabel": "Click to roll",
   "lazy-gm-prep.strong-start.table.1": "A riot erupts in the marketplace, and the party is caught in the chaos.",
@@ -127,11 +137,13 @@
   "lazy-gm-prep.strong-start.table.18": "The party is accused of a crime they didn’t commit—guards close in.",
   "lazy-gm-prep.strong-start.table.19": "A desperate merchant offers a fortune for immediate help.",
   "lazy-gm-prep.strong-start.table.20": "The villain’s minions attack, targeting something (or someone) the party cares about.",
+
   "lazy-gm-prep.secrets-clues.prompts.heading": "Prompts",
   "lazy-gm-prep.secrets-clues.prompts.rumor": "What rumor could change the party’s understanding of the world or reveal some of the villain's plan?",
   "lazy-gm-prep.secrets-clues.prompts.secretPast": "What secret from a character’s past or connection with an NPC might resurface?",
   "lazy-gm-prep.secrets-clues.prompts.artifact": "What evidence or artifact could point the party toward a new location or objective?",
   "lazy-gm-prep.secrets-clues.prompts.mystery": "What is a mystery about the dungeon, town, or region that could be revealed?",
+
   "lazy-gm-prep.outline-scenes.prompts.1": "Aim for 1–2 scenes per hour of play.",
   "lazy-gm-prep.outline-scenes.prompts.2": "Mix scene types: include social, exploration, and combat.",
   "lazy-gm-prep.outline-scenes.prompts.3": "Don’t overcommit—three scenes are enough to feel ready.",
@@ -143,3 +155,4 @@
   "lazy-gm-prep.fantastic-locations.prompts.4": "Who or what is here now? (Monsters, NPCs, factions)",
   "lazy-gm-prep.fantastic-locations.prompts.5": "What do the characters see, hear, smell, or feel?",
   "lazy-gm-prep.fantastic-locations.prompts.6": "How does this location link to the PCs’ backgrounds or goals?"
+}
