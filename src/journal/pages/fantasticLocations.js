@@ -4,7 +4,7 @@ import { renderPromptsBlock } from '../helpers.js';
 export function createFantasticLocationsPage(def, prevContent) {
   const title = game.i18n.localize(def.titleKey);
 
-  // Respect "Copy previous" setting behavior
+  // Honor "Copy previous" behavior
   if (prevContent && String(prevContent).trim()) {
     return {
       name: title,
