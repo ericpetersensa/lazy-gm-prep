@@ -7,6 +7,7 @@ import { createDefaultSectionPage } from './pages/defaultSection.js';
 import { createStrongStartPage } from './pages/strongStart.js';
 import { createOutlineScenesPage } from './pages/outlineScene.js';
 import { createFantasticLocationsPage } from './pages/fantasticLocations.js'; // NEW
+
 import {
   ensureFolder,
   nextSequenceNumber,
@@ -20,7 +21,6 @@ export async function createPrepJournal() {
   const folderName = getSetting('folderName', 'GM Prep');
   const prefix = getSetting('journalPrefix', 'Session');
   const includeDate = !!getSetting('includeDateInName', true);
-
   const charRows = Number(getSetting('initialCharacterRows', 5)) || 5;
   const npcRows  = Number(getSetting('initialNpcRows', 5)) || 5;
 
