@@ -17,9 +17,7 @@ export function createFantasticLocationsPage(def, prevContent) {
     "lazy-gm-prep.fantastic-locations.prompts.1",
     "lazy-gm-prep.fantastic-locations.prompts.2",
     "lazy-gm-prep.fantastic-locations.prompts.3",
-    "lazy-gm-prep.fantastic-locations.prompts.4",
-    "lazy-gm-prep.fantastic-locations.prompts.5",
-    "lazy-gm-prep.fantastic-locations.prompts.6"
+    "lazy-gm-prep.fantastic-locations.prompts.4"
   ];
 
   let html = '';
