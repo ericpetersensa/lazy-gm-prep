@@ -34,7 +34,7 @@ export function createStrongStartPage(def, prevContent) {
   };
 }
 
-// --- Roll Table with Correct Structure ---
+// --- Roll Table with Correct Structure and Roller ---
 function d20TableHTML() {
   const heading = game.i18n.localize('lazy-gm-prep.strong-start.table.heading');
   const rollLabel = game.i18n.localize('lazy-gm-prep.strong-start.table.rollLabel');
@@ -47,9 +47,10 @@ function d20TableHTML() {
     </tr>`;
   }).join('\n');
 
+  // The roller span is essential for highlighting
   return `
     <h5>${escapeHtml(heading)}</h5>
-    <p>${escapeHtml(rollLabel)}: [[1d20]]</p>
+    <span class="lgmp-ss-roller">[[1d20]]</span>
     <table class="lgmp-strong-start lgmp-table">
       <thead>
         <tr>
