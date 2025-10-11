@@ -13,7 +13,7 @@ export function createStrongStartPage(def, prevContent) {
 
   let html = "";
   html += sectionDescription(def);
-  html += renderPromptsBlock(promptKeys, "lazy-gm-prep.strong-start.prompts.heading", false);
+  html += renderPromptsBlock(promptKeys, "lazy-gm-prep.prompts.heading", false);
   html += notesPlaceholder();
   html += d20TableHTML();
 
