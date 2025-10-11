@@ -147,11 +147,9 @@
   "lazy-gm-prep.outline-scenes.prompts.3": "Don’t overcommit—three scenes are enough to feel ready.",
   "lazy-gm-prep.outline-scenes.prompts.4": "Be ready to skip or swap scenes as play evolves.",
 
-  "lazy-gm-prep.fantastic-locations.prompts.1": "What is a memorable, inspiring name for this location?",
-  "lazy-gm-prep.fantastic-locations.prompts.2": "What are three fantastic features, dangers, or mysteries here?",
-  "lazy-gm-prep.fantastic-locations.prompts.3": "What secret, legend, or event (past or future) is tied to this place?",
-  "lazy-gm-prep.fantastic-locations.prompts.4": "Who or what is here now? (Monsters, NPCs, factions)",
-  "lazy-gm-prep.fantastic-locations.prompts.5": "What do the characters see, hear, smell, or feel?",
-  "lazy-gm-prep.fantastic-locations.prompts.6": "How does this location link to the PCs’ backgrounds or goals?",
-  "lazy-gm-prep.fantastic-locations.tip": "Don’t overthink it. One sentence per field is enough. If you need inspiration, roll on a random table or borrow from your favorite adventure."
+  "lazy-gm-prep.fantastic-locations.prompts.1": "What senses does this place evoke? (What do you hear, smell, or feel that’s unique?)",
+  "lazy-gm-prep.fantastic-locations.prompts.2": "What’s the biggest danger or opportunity here? (What could go wrong—or right?)",
+  "lazy-gm-prep.fantastic-locations.prompts.3": "Who wants to control, protect, or exploit this place—and why?",
+  "lazy-gm-prep.fantastic-locations.prompts.4": "What’s the weirdest or most memorable feature here, even if it’s just set dressing?",
+  "lazy-gm-prep.fantastic-locations.tip": "Tip:  Don’t overthink it. One sentence per field is enough. If you need inspiration, roll on a random table or borrow from your favorite adventure."
 }
