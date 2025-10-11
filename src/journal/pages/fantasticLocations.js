@@ -26,13 +26,13 @@ export function createFantasticLocationsPage(def, prevContent) {
   // Localized page description from lang/en.json via def.descKey
   html += sectionDescription(def);
 
-  // Optional tip (not localized unless you want a key for it)
-  html += tipHTML();
-
-  // Shared Prompts block
+  // Prompts block
   html += renderPromptsBlock(promptKeys, "lazy-gm-prep.prompts.heading", false);
 
-  // Three template blocks (like Outline Scenes)
+  // Localized Tip as a blockquote (placed after Prompts)
+  html += tipBlockquoteHTML();
+
+  // Three template blocks (styled cards like Outline Scenes)
   html += templatesHTML();
 
   return {
@@ -42,10 +42,16 @@ export function createFantasticLocationsPage(def, prevContent) {
   };
 }
 
-function tipHTML() {
-  const tip = "Don’t overthink it. One sentence per field is enough. If you need inspiration, roll on a random table or borrow from your favorite adventure.";
+/**
+ * Renders the i18n Tip (after Prompts) as a blockquote.
+ * If the key is missing/empty, nothing is rendered.
+ */
+function tipBlockquoteHTML() {
+  const tip = game.i18n.localize("lazy-gm-prep.fantastic-locations.tip") ?? "";
+  const clean = String(tip).trim();
+  if (!clean) return "";
   return `
-<p><em>${escapeHtml(tip)}</em></p>
+<blockquote><em>${escapeHtml(clean)}</em></blockquote>
 `;
 }
 
@@ -78,6 +84,6 @@ function locationTemplateHTML(n) {
 
 function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>\"']/g, c => (
-    { '&': '&', '<': '<', '>': '>', '"': '\"', "'": "'" }[c]
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
   ));
 }
