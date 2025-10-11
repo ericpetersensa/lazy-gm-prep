@@ -34,7 +34,7 @@ export function createStrongStartPage(def, prevContent) {
   };
 }
 
-// --- Roll Table with Formatting and Highlighting ---
+// --- Roll Table with Correct Structure ---
 function d20TableHTML() {
   const heading = game.i18n.localize('lazy-gm-prep.strong-start.table.heading');
   const rollLabel = game.i18n.localize('lazy-gm-prep.strong-start.table.rollLabel');
@@ -47,27 +47,19 @@ function d20TableHTML() {
     </tr>`;
   }).join('\n');
 
-  // Inline CSS for red headers and green highlight
-  // The highlight is applied dynamically by Foundry, but we provide the class here
   return `
-    <style>
-      table.lgmp-strong-start th {
-        color: #c00;
-        font-weight: bold;
-        background: #ffeaea;
-      }
-      table.lgmp-strong-start tr.is-highlighted {
-        background: #d6ffd6 !important;
-      }
-    </style>
     <h5>${escapeHtml(heading)}</h5>
     <p>${escapeHtml(rollLabel)}: [[1d20]]</p>
-    <table class="lgmp-strong-start">
-      <tr>
-        <th>d20</th>
-        <th>${escapeHtml(heading)}</th>
-      </tr>
-      ${rows}
+    <table class="lgmp-strong-start lgmp-table">
+      <thead>
+        <tr>
+          <th>d20</th>
+          <th>${escapeHtml(heading)}</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
     </table>
   `;
 }
