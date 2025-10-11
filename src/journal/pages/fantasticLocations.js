@@ -23,7 +23,7 @@ export function createFantasticLocationsPage(def, prevContent) {
   ];
 
   let html = '';
-  // ✅ Localized page description from lang/en.json via def.descKey
+  // Localized page description from lang/en.json via def.descKey
   html += sectionDescription(def);
 
   // Optional tip (not localized unless you want a key for it)
@@ -50,26 +50,29 @@ function tipHTML() {
 }
 
 function templatesHTML() {
-  const blocks = [1, 2, 3].map(n => locationTemplateHTML(n)).join('\n');
+  // Parent grid container for cards
   return `
-${blocks}
+<div class="lgmp-scenes">
+  ${[1, 2, 3].map(n => locationTemplateHTML(n)).join('\n')}
+</div>
 `;
 }
 
 function locationTemplateHTML(n) {
   return `
-###### Location ${n}
-
-Name: (Make it memorable)
-
-Three Features: (What stands out? Scale, age, weirdness, danger, mystery)
-• 
-• 
-• 
-
-Who/What’s Here: (Monsters, NPCs, factions, or just a vibe)
-
-PC Hook: (How could this matter to the party?)
+  <div class="lgmp-scene">
+    <h5>Location ${n}</h5>
+    <div class="lgmp-field"><strong>Name:</strong> <em>(Make it memorable)</em></div>
+    <div class="lgmp-field"><strong>Three Features:</strong>
+      <ul>
+        <li>(What stands out? Scale, age, weirdness, danger, mystery)</li>
+        <li></li>
+        <li></li>
+      </ul>
+    </div>
+    <div class="lgmp-field"><strong>Who/What’s Here:</strong> <em>(Monsters, NPCs, factions, or just a vibe)</em></div>
+    <div class="lgmp-field"><strong>PC Hook:</strong> <em>(How could this matter to the party?)</em></div>
+  </div>
 `;
 }
 
