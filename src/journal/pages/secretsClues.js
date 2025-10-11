@@ -20,13 +20,13 @@ export function createSecretsCluesPage(def, prevContent) {
     content = `${bodyCore}${renderChecklist(toRender)}`;
     if (!bodyCore) {
       content = sectionDescription(def)
-        + renderPromptsBlock(promptKeys, "lazy-gm-prep.secrets-clues.prompts.heading", false)
+        + renderPromptsBlock(promptKeys, "lazy-gm-prep.prompts.heading", false)
         + notesPlaceholder()
         + content;
     }
   } else {
     content = sectionDescription(def)
-      + renderPromptsBlock(promptKeys, "lazy-gm-prep.secrets-clues.prompts.heading", false)
+      + renderPromptsBlock(promptKeys, "lazy-gm-prep.prompts.heading", false)
       + notesPlaceholder()
       + renderChecklist(topUpToTen([], 'Clue'));
   }
