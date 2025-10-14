@@ -67,7 +67,7 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst, { 
       case 'fantastic-locations':
         pages.push(createFantasticLocationsPage(def, prevContent));
         break;
-      case 'relevant-monsters': // NEW SECTION
+      case 'choose-monsters': // <-- Use the key from PAGE_ORDER
         pages.push(createRelevantMonstersPage(def, prevContent));
         break;
       default:
@@ -109,7 +109,7 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst, { c
       case 'fantastic-locations':
         pageLike = createFantasticLocationsPage(def, prevContent);
         break;
-      case 'relevant-monsters': // NEW SECTION
+      case 'choose-monsters': // <-- Use the key from PAGE_ORDER
         pageLike = createRelevantMonstersPage(def, prevContent);
         break;
       default:
