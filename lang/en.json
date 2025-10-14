@@ -153,5 +153,13 @@
   "lazy-gm-prep.npcs.prompts.connection": "What is this NPC’s connection to the adventure or the characters?",
   "lazy-gm-prep.npcs.prompts.goal": "What secret, motivation, or goal drives this NPC?",
   "lazy-gm-prep.npcs.prompts.trait": "What is one unique trait, quirk, or mannerism that makes them memorable?",
-  "lazy-gm-prep.npcs.prompts.surprise": "What’s one way this NPC could surprise the party?"
+  "lazy-gm-prep.npcs.prompts.surprise": "What’s one way this NPC could surprise the party?",
+
+  "lazy-gm-prep.monsters.prompts.1": "What monsters would naturally inhabit this place? What threats or allies fit the current situation?",
+  "lazy-gm-prep.monsters.prompts.2": "Are there monsters that connect to the PCs’ backgrounds or campaign secrets?",
+  "lazy-gm-prep.monsters.prompts.3": "Is there a boss or unique monster that can be highlighted?",
+  "lazy-gm-prep.monsters.prompts.4": "Can you reskin or modify an existing monster to fit your needs?",
+  "lazy-gm-prep.monsters.quote": "Keep it lazy: List a handful of likely monsters, improvise the rest, and be ready to swap them out if the story changes.",
+  "lazy-gm-prep.monsters.url.label": "Monster Database",
+  "lazy-gm-prep.monsters.url": "https://slyflourish.com/5e_artisanal_database/monsters/index.html"
 }
