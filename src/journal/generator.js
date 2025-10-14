@@ -1,4 +1,5 @@
 // src/journal/generator.js
+
 import { createGettingStartedPage } from './pages/gettingStarted.js';
 import { createSecretsCluesPage } from './pages/secretsClues.js';
 import { createReviewCharactersPage } from './pages/reviewCharacters.js';
@@ -6,7 +7,8 @@ import { createImportantNpcsPage } from './pages/importantNpcs.js';
 import { createDefaultSectionPage } from './pages/defaultSection.js';
 import { createStrongStartPage } from './pages/strongStart.js';
 import { createOutlineScenesPage } from './pages/outlineScene.js';
-import { createFantasticLocationsPage } from './pages/fantasticLocations.js'; // NEW
+import { createFantasticLocationsPage } from './pages/fantasticLocations.js';
+import { createRelevantMonstersPage } from './pages/relevantMonsters.js';
 
 import {
   ensureFolder,
@@ -22,16 +24,13 @@ export async function createPrepJournal() {
   const prefix = getSetting('journalPrefix', 'Session');
   const includeDate = !!getSetting('includeDateInName', true);
   const charRows = Number(getSetting('initialCharacterRows', 5)) || 5;
-  const npcRows  = Number(getSetting('initialNpcRows', 5)) || 5;
-
+  const npcRows = Number(getSetting('initialNpcRows', 5)) || 5;
   const folderId = await ensureFolder(folderName);
   const seq = nextSequenceNumber(prefix);
   const isFirst = seq === 0;
-
   const entryName = includeDate
     ? `${prefix} ${seq}: ${new Date().toLocaleDateString()}`
     : `${prefix} ${seq}`;
-
   const prev = findPreviousSession(prefix);
 
   if (separate) {
@@ -46,11 +45,9 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst, { 
   if (isFirst) {
     pages.push(createGettingStartedPage());
   }
-
   for (const def of PAGE_ORDER) {
     const copyOn = !!getSetting(`copy.${def.key}`, true);
     const prevContent = copyOn ? getPreviousSectionHTML(prevJournal, def) : null;
-
     switch (def.key) {
       case 'secrets-clues':
         pages.push(createSecretsCluesPage(def, prevContent));
@@ -67,14 +64,16 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst, { 
       case 'outline-scenes':
         pages.push(createOutlineScenesPage(def, prevContent));
         break;
-      case 'fantastic-locations': // NEW
+      case 'fantastic-locations':
         pages.push(createFantasticLocationsPage(def, prevContent));
+        break;
+      case 'relevant-monsters': // NEW SECTION
+        pages.push(createRelevantMonstersPage(def, prevContent));
         break;
       default:
         pages.push(createDefaultSectionPage(def, prevContent));
     }
   }
-
   const entry = await JournalEntry.create({ name: entryName, folder: folderId, pages });
   ui.notifications?.info(game.i18n.format('lazy-gm-prep.notifications.created', { name: entry.name }));
   return entry;
@@ -87,11 +86,9 @@ async function createSeparatePages(entryName, folderId, prevJournal, isFirst, { 
 async function createCombinedPage(entryName, folderId, prevJournal, isFirst, { charRows, npcRows }) {
   const combinedPageName = game.i18n.localize("lazy-gm-prep.module.name");
   const sectionHtml = [];
-
   for (const def of PAGE_ORDER) {
     const copyOn = !!getSetting(`copy.${def.key}`, true);
     const prevContent = copyOn ? getPreviousSectionHTML(prevJournal, def) : null;
-
     let pageLike;
     switch (def.key) {
       case 'secrets-clues':
@@ -109,31 +106,29 @@ async function createCombinedPage(entryName, folderId, prevJournal, isFirst, { c
       case 'outline-scenes':
         pageLike = createOutlineScenesPage(def, prevContent);
         break;
-      case 'fantastic-locations': // NEW
+      case 'fantastic-locations':
         pageLike = createFantasticLocationsPage(def, prevContent);
+        break;
+      case 'relevant-monsters': // NEW SECTION
+        pageLike = createRelevantMonstersPage(def, prevContent);
         break;
       default:
         pageLike = createDefaultSectionPage(def, prevContent);
     }
-
     const title = game.i18n.localize(def.titleKey);
     const content = pageLike?.text?.content ?? "";
     sectionHtml.push(`<h2>${title}</h2>\n${content}`);
   }
-
   const combinedContent = sectionHtml.join("\n<hr>\n");
   const pages = [];
-
   if (isFirst) {
     pages.push(createGettingStartedPage());
   }
-
   pages.push({
     name: combinedPageName,
     type: 'text',
     text: { format: 1, content: combinedContent }
   });
-
   const entry = await JournalEntry.create({ name: entryName, folder: folderId, pages });
   ui.notifications?.info(game.i18n.format('lazy-gm-prep.notifications.created', { name: entry.name }));
   return entry;
