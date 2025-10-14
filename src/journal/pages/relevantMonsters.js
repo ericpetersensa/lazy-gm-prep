@@ -1,4 +1,5 @@
 // src/journal/pages/relevantMonsters.js
+import { renderPromptsBlock } from '../helpers.js';
 
 export function createRelevantMonstersPage(def, prevContent) {
   if (prevContent && prevContent.trim()) {
@@ -9,21 +10,16 @@ export function createRelevantMonstersPage(def, prevContent) {
     };
   }
 
-  // Collapsible Prompts Section
-  const prompts = [
-    game.i18n.localize("lazy-gm-prep.monsters.prompts.1"),
-    game.i18n.localize("lazy-gm-prep.monsters.prompts.2"),
-    game.i18n.localize("lazy-gm-prep.monsters.prompts.3"),
-    game.i18n.localize("lazy-gm-prep.monsters.prompts.4")
+  // Prompts keys for monsters section
+  const promptKeys = [
+    "lazy-gm-prep.monsters.prompts.1",
+    "lazy-gm-prep.monsters.prompts.2",
+    "lazy-gm-prep.monsters.prompts.3",
+    "lazy-gm-prep.monsters.prompts.4"
   ];
-  const promptsHtml = `
-    <details>
-      <summary><strong>${game.i18n.localize("lazy-gm-prep.prompts.heading")}</strong></summary>
-      <ul>
-        ${prompts.map(p => `<li>${p}</li>`).join("\n")}
-      </ul>
-    </details>
-  `;
+
+  // Collapsible Prompts Section (using shared heading)
+  const promptsHtml = renderPromptsBlock(promptKeys);
 
   // Quote Section
   const quoteHtml = `
@@ -33,14 +29,12 @@ export function createRelevantMonstersPage(def, prevContent) {
   `;
 
   // Clickable URL Section
+  const urlLabel = game.i18n.localize("lazy-gm-prep.monsters.url.label");
+  const url = game.i18n.localize("lazy-gm-prep.monsters.url");
   const urlHtml = `
     <div style="margin-top:1em;">
-      <a href="${game.i18n.localize("lazy-gm-prep.monize("lazy-gm-prep.monsters.url.label")}
-      </a>
-    </div>
-  `;
-
-  const content = promptsHtml + quoteHtml + urlHtml;
+      <a href="${url}" target="_blank" rel="noopener">${urlLabel}</a>
+Html + quoteHtml + urlHtml;
 
   return {
     name: game.i18n.localize(def.titleKey),
