@@ -65,7 +65,7 @@
   "lazy-gm-prep.steps.fantastic-locations.title": "5. Develop Fantastic Locations",
   "lazy-gm-prep.steps.fantastic-locations.description": "Give each place a bold, evocative name and jot down a few striking, memorable features. Focus on what makes each location unique, what’s happening there now, and how it might connect to your PCs.",
   "lazy-gm-prep.steps.important-npcs.title": "6. Outline Important NPCs",
-  "lazy-gm-prep.steps.important-npcs.description": "Note only the NPCs that drive this session. Capture just the essentials you need to run them at the table.",
+  "lazy-gm-prep.steps.important-npcs.description": "Focus on the NPCs who drive the story, serve as quest-givers, major allies, rivals, or villains. Keep your notes brief—just enough to remind you of their role and how they connect to the adventure.",
   "lazy-gm-prep.steps.choose-monsters.title": "7. Choose Relevant Monsters",
   "lazy-gm-prep.steps.choose-monsters.description": "Pick foes that fit the situation and location. Treat difficulty as a loose gauge; let story and context shape the encounter.",
   "lazy-gm-prep.steps.magic-item-rewards.title": "8. Select Magic Item Rewards",
@@ -148,5 +148,10 @@
   "lazy-gm-prep.fantastic-locations.prompts.2": "What’s the biggest danger or opportunity here? (What could go wrong—or right?)",
   "lazy-gm-prep.fantastic-locations.prompts.3": "Who wants to control, protect, or exploit this place—and why?",
   "lazy-gm-prep.fantastic-locations.prompts.4": "What’s the weirdest or most memorable feature here, even if it’s just set dressing?",
-  "lazy-gm-prep.fantastic-locations.tip": "Tip:  Don’t overthink it. One sentence per field is enough. If you need inspiration, roll on a random table or borrow from your favorite adventure."
+  "lazy-gm-prep.fantastic-locations.tip": "Tip:  Don’t overthink it. One sentence per field is enough. If you need inspiration, roll on a random table or borrow from your favorite adventure.",
+
+  "lazy-gm-prep.npcs.prompts.connection": "What is this NPC’s connection to the adventure or the characters?",
+  "lazy-gm-prep.npcs.prompts.goal": "What secret, motivation, or goal drives this NPC?",
+  "lazy-gm-prep.npcs.prompts.trait": "What is one unique trait, quirk, or mannerism that makes them memorable?",
+  "lazy-gm-prep.npcs.prompts.surprise": "What’s one way this NPC could surprise the party?"
 }
