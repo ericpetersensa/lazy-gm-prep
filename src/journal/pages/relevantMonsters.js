@@ -2,7 +2,6 @@
 import { renderPromptsBlock } from '../helpers.js';
 
 export function createRelevantMonstersPage(def, prevContent) {
-  // Reuse previous content if present
   if (prevContent && prevContent.trim()) {
     return {
       name: game.i18n.localize(def.titleKey),
@@ -26,18 +25,14 @@ export function createRelevantMonstersPage(def, prevContent) {
     </blockquote>
   `;
 
-  // Safe i18n with fallbacks to avoid missing/mashed output
-  const t = (key, fallback = "") => {
-    const v = game.i18n.localize(key);
-    return v === key ? fallback : v;
-  };
-  const url = t(
-    "lazy-gm-prep.monsters.url",
-    "https://slyflourish.com/5e_artisanal_database/monsters/index.html"
-  );
-  const urlLabel = t("lazy-gm-prep.monsters.url.label", "Monster Database");
+  const urlLabel = game.i18n.localize("lazy-gm-prep.monsters.url.label");
+  const url = game.i18n.localize("lazy-gm-prep.monsters.url");
   const urlHtml = `
-    <p>${url}${urlLabel}</a></p>
+    <p>
+      ${url}
+        ${urlLabel}
+      </a>
+    </p>
   `;
 
   const content = `${promptsHtml}\n${quoteHtml}\n${urlHtml}`;
@@ -48,4 +43,3 @@ export function createRelevantMonstersPage(def, prevContent) {
     text: { format: 1, content }
   };
 }
-``
