@@ -2,6 +2,7 @@
 import { renderPromptsBlock } from '../helpers.js';
 
 export function createRelevantMonstersPage(def, prevContent) {
+  // If we have previous content and copy is enabled, reuse it.
   if (prevContent && prevContent.trim()) {
     return {
       name: game.i18n.localize(def.titleKey),
@@ -18,12 +19,12 @@ export function createRelevantMonstersPage(def, prevContent) {
     "lazy-gm-prep.monsters.prompts.4"
   ];
 
-  // Collapsible Prompts Section (using shared heading)
+  // Collapsible Prompts Section (shared component)
   const promptsHtml = renderPromptsBlock(promptKeys);
 
   // Quote Section
   const quoteHtml = `
-    <blockquote style="margin-top:1em;font-style:italic;">
+    <blockquote class="lgmp-quote">
       ${game.i18n.localize("lazy-gm-prep.monsters.quote")}
     </blockquote>
   `;
@@ -32,9 +33,8 @@ export function createRelevantMonstersPage(def, prevContent) {
   const urlLabel = game.i18n.localize("lazy-gm-prep.monsters.url.label");
   const url = game.i18n.localize("lazy-gm-prep.monsters.url");
   const urlHtml = `
-    <div style="margin-top:1em;">
-      <a href="${url}" target="_blank" rel="noopener">${urlLabel}</a>
-Html + quoteHtml + urlHtml;
+    <p><a href="${url}" target="_blank" rel="noopener">${urlLabel}</a></p>
+ent = `${promptsHtml}\n${quoteHtml}\n${urlHtml}`;
 
   return {
     name: game.i18n.localize(def.titleKey),
