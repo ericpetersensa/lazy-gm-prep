@@ -1,4 +1,3 @@
-// src/journal/pages/relevantMonsters.js
 import { renderPromptsBlock } from '../helpers.js';
 
 export function createRelevantMonstersPage(def, prevContent) {
@@ -28,7 +27,9 @@ export function createRelevantMonstersPage(def, prevContent) {
   const urlLabel = game.i18n.localize("lazy-gm-prep.monsters.url.label");
   const url = game.i18n.localize("lazy-gm-prep.monsters.url");
   const urlHtml = `
-    <p><a href{urlLabel}</a></p>
+    <p>
+      ${url}${urlLabel}</a>
+    </p>
   `;
 
   const content = `${promptsHtml}\n${quoteHtml}\n${urlHtml}`;
