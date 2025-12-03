@@ -1,12 +1,7 @@
 
 // src/journal/pages/strongStart.js
 
-import {
-  sectionDescription,
-  notesPlaceholder,
-  renderPromptsBlock,
-  renderDetailsBlock
-} from '../helpers.js';
+import { sectionDescription, notesPlaceholder, renderPromptsBlock, renderDetailsBlock } from '../helpers.js';
 
 export function createStrongStartPage(def, prevContent) {
   const title = game.i18n.localize(def.titleKey);
