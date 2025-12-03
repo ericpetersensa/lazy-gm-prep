@@ -22,7 +22,7 @@ export function createOutlineScenesPage(def, prevContent) {
   ];
   html += renderPromptsBlock(promptKeys, "lazy-gm-prep.prompts.heading", false);
 
-  // Scenes section (open by default)
+  // Scenes section (open by default) — header localized
   const scenesHeading = game.i18n.localize("lazy-gm-prep.outline-scenes.heading") || "Scenes";
   html += `
     <details class="lgmp-scenes-block" open>
@@ -31,20 +31,9 @@ export function createOutlineScenesPage(def, prevContent) {
         ${buildScenesHTML(prevContent, 3)}
       </div>
     </details>
-    <script>
-      // Interactive toggle for checklist markers (☐ ↔ ☑) in view mode
-      document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll(".lgmp-scene .lgmp-checklist li").forEach(function(li) {
-          li.addEventListener("click", function() {
-            const t = li.textContent.trim();
-            if (t.startsWith("☐")) li.textContent = t.replace(/^☐/, "☑");
-            else if (t.startsWith("☑")) li.textContent = t.replace(/^☑/, "☐");
-          });
-        });
-      });
-    </script>
   `;
 
+  // NOTE: No inline <script>. Toggling is handled by domHooks.js in view mode.
   return { name: title, type: 'text', text: { format: 1, content: html } };
 }
 
@@ -53,7 +42,7 @@ export function createOutlineScenesPage(def, prevContent) {
  * No numbering—cards use a generic title from i18n.
  */
 function buildScenesHTML(prevContent, minCount = 3) {
-  const kept = extractNonDoneScenes(prevContent); // array of HTML strings
+  const kept = extractNonDoneScenes(prevContent);
   const cards = [...kept];
 
   const needed = Math.max(0, minCount - cards.length);
