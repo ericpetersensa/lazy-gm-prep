@@ -78,7 +78,7 @@ export function sectionDescription(def) {
 
 export function quickCheckHTML() {
   const prompt = game.i18n.localize('lazy-gm-prep.characters.tip.prompt');
-  return `<blockquote><strong>${escapeHtml(title)}</strong> ${escapeHtml(prompt)}</blockquote>\n`;
+  return `<blockquote>${escapeHtml(prompt)}</blockquote>\n`;
 }
 
 export function notesPlaceholder() {
