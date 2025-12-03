@@ -1,5 +1,7 @@
+
 // src/journal/helpers.js
 
+// ---------- Folder & Journal utilities ----------
 export async function ensureFolder(name) {
   if (!name) return null;
   const existing = game.folders?.find(f => f.type === "JournalEntry" && f.name === name);
@@ -39,8 +41,8 @@ export function getPreviousSectionHTML(prevJournal, def) {
     // Combined-page extraction
     const combinedName = game.i18n.localize("lazy-gm-prep.module.name");
     const combinedHost =
-      prevJournal.pages.find(p => (p.name ?? "") === combinedName && p.text?.content) ||
-      prevJournal.pages.find(p => p.type === "text" && p.text?.content);
+      prevJournal.pages.find(p => (p.name ?? "") === combinedName && p.text?.content)
+      ?? prevJournal.pages.find(p => p.type === "text" && p.text?.content);
     if (!combinedHost?.text?.content) return null;
     return extractCombinedSection(combinedHost.text.content, wantedTitle);
   } catch (err) {
@@ -76,9 +78,13 @@ export function sectionDescription(def) {
   return `<p class="lgmp-step-desc">${escapeHtml(desc)}</p>\n<hr>\n`;
 }
 
+/**
+ * Single-line Quick Tip blockquote for "Review the Characters".
+ * Uses your consolidated key: lazy-gm-prep.characters.tip.prompt
+ */
 export function quickCheckHTML() {
-  const prompt = game.i18n.localize('lazy-gm-prep.characters.tip.prompt');
-  return `<blockquote>${escapeHtml(prompt)}</blockquote>\n`;
+  const tip = game.i18n.localize('lazy-gm-prep.characters.tip.prompt');
+  return `<blockquote>${escapeHtml(tip)}</blockquote>\n`;
 }
 
 export function notesPlaceholder() {
@@ -123,7 +129,7 @@ ${bodyRows}
 </table>\n`;
 }
 
-/** Legacy (kept) */
+/** Legacy (kept) **/
 export function gmReviewPromptsHTML() {
   const lines = [
     game.i18n.localize("lazy-gm-prep.characters.prompts.spotlight"),
@@ -147,7 +153,6 @@ export function renderPromptsBlock(promptKeys, headingKey = "lazy-gm-prep.prompt
   const t = (k) => game.i18n.localize(k);
   const heading = t(headingKey);
   const items = promptKeys.map(t).map(escapeHtml);
-
   return `
 <details class="lgmp-prompts"${open ? " open" : ""}>
   <summary>${escapeHtml(heading)}</summary>
@@ -158,7 +163,24 @@ export function renderPromptsBlock(promptKeys, headingKey = "lazy-gm-prep.prompt
 `;
 }
 
-/** Compatibility wrapper for Secrets & Clues */
+/**
+ * NEW: Generic collapsible block for arbitrary inner HTML (tables, text, widgets).
+ * @param {string} headingKey - i18n key for the summary label.
+ * @param {string} innerHTML - HTML string to render inside the details.
+ * @param {boolean} [open=false] - whether the block should start open.
+ * @param {string} [className="lgmp-details"] - optional class for styling hooks.
+ */
+export function renderDetailsBlock(headingKey, innerHTML, open = false, className = "lgmp-details") {
+  const heading = game.i18n.localize(headingKey);
+  return `
+<details class="${escapeHtml(className)}"${open ? " open" : ""}>
+  <summary>${escapeHtml(heading)}</summary>
+  ${String(innerHTML ?? "")}
+</details>
+`;
+}
+
+/** Compatibility wrapper for Secrets & Clues **/
 export function secretsPromptsHTML() {
   const keys = [
     "lazy-gm-prep.secrets-clues.prompts.rumor",
@@ -177,4 +199,3 @@ function escapeHtml(s) {
     '"': "\"",
     "'": "&#39;"
   }[m]));
-}
