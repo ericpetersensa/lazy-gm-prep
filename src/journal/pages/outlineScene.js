@@ -9,7 +9,7 @@ import {
 export function createOutlineScenesPage(def, prevContent) {
   const title = game.i18n.localize(def.titleKey);
 
-  // Description section (now uses i18n key)
+  // Description from i18n
   const desc = game.i18n.localize("lazy-gm-prep.steps.outline-scenes.description");
   let html = `<div class="lgmp-section">${escapeHtml(desc)}</div>`;
 
@@ -23,23 +23,22 @@ export function createOutlineScenesPage(def, prevContent) {
   html += renderPromptsBlock(promptKeys, "lazy-gm-prep.prompts.heading", false);
 
   // Scenes section (open by default)
+  const scenesHeading = game.i18n.localize("lazy-gm-prep.outline-scenes.heading") || "Scenes";
   html += `
     <details class="lgmp-scenes-block" open>
-      <summary>${game.i18n.localize("lazy-gm-prep.outline-scenes.heading") || "Scenes"}</summary>
+      <summary>${escapeHtml(scenesHeading)}</summary>
       <div class="lgmp-scenes">
         ${buildScenesHTML(prevContent, 3)}
       </div>
     </details>
     <script>
+      // Interactive toggle for checklist markers (☐ ↔ ☑) in view mode
       document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll(".lgmp-scene .lgmp-checklist li").forEach(function(li) {
-          li.addEventListener("click", function(e) {
-            // Toggle between unchecked and checked
-            if (li.textContent.trim().startsWith("☐")) {
-              li.textContent = li.textContent.replace(/^☐/, "☑");
-            } else if (li.textContent.trim().startsWith("☑")) {
-              li.textContent = li.textContent.replace(/^☑/, "☐");
-            }
+          li.addEventListener("click", function() {
+            const t = li.textContent.trim();
+            if (t.startsWith("☐")) li.textContent = t.replace(/^☐/, "☑");
+            else if (t.startsWith("☑")) li.textContent = t.replace(/^☑/, "☐");
           });
         });
       });
@@ -49,65 +48,78 @@ export function createOutlineScenesPage(def, prevContent) {
   return { name: title, type: 'text', text: { format: 1, content: html } };
 }
 
-/** Build Scenes HTML by carrying over non-done from prevContent, then add blanks to reach minCount */
+/**
+ * Build Scenes HTML by carrying over non-done cards and adding blanks to reach minCount.
+ * No numbering—cards use a generic title from i18n.
+ */
 function buildScenesHTML(prevContent, minCount = 3) {
-  const kept = extractNonDoneScenes(prevContent);
-  const cards = kept.length ? kept.map((html, i) => renumberScene(html, i + 1)) : [];
-  const needed = Math.max(0, minCount - cards.length);
+  const kept = extractNonDoneScenes(prevContent); // array of HTML strings
+  const cards = [...kept];
 
+  const needed = Math.max(0, minCount - cards.length);
   for (let i = 0; i < needed; i++) {
-    cards.push(sceneCardHTML(cards.length + 1));
+    cards.push(sceneCardHTML());
   }
   return cards.join("\n");
 }
 
-/** Extract scenes from previous content, return only those NOT checked (done=false) */
+/**
+ * Extract scenes from previous content, return only those NOT checked (☐ Done).
+ * A scene is considered "Done" if it contains a checklist item starting with ☑.
+ */
 function extractNonDoneScenes(prevContent) {
   if (!prevContent || !String(prevContent).trim()) return [];
 
-  // Parse reliably using DOMParser
   const doc = new DOMParser().parseFromString(String(prevContent), "text/html");
   const sceneNodes = Array.from(doc.querySelectorAll(".lgmp-scene"));
 
-  // Keep scenes whose checklist marker is NOT checked
   const keep = sceneNodes.filter(node => {
     const li = node.querySelector("ul.lgmp-checklist li");
-    return li && !/^☑/.test(li.textContent.trim());
+    const text = (li?.textContent ?? "").trim();
+    return !(text.startsWith("☑")); // keep if NOT marked done
   });
 
-  // Return raw HTML for each kept scene node
   return keep.map(node => node.outerHTML);
 }
 
-/** Renumber an existing scene card's label to the provided number */
-function renumberScene(sceneHtml, num) {
-  return sceneHtml.replace(/(<span[^>]*class="lgmp-label"[^>]*>)(Scene\s*)(\d+)(<\/span>)/i, `$1$2${num}$4`);
-}
+/**
+ * Fresh blank scene card with checklist-style Done marker (unchecked by default).
+ * Uses the generic card title i18n key: lazy-gm-prep.strong-start.card.title
+ */
+function sceneCardHTML() {
+  const cardTitle = game.i18n.localize("lazy-gm-prep.strong-start.card.title") || "Strong Start";
 
-/** Fresh blank scene card with checklist-style Done marker (unchecked by default) */
-function sceneCardHTML(n) {
-  const labelScenes = game.i18n.localize("lazy-gm-prep.outline-scenes.label.scene") || "Scene";
   return `
     <div class="lgmp-scene">
       <ul class="lgmp-checklist">
         <li>☐ Done</li>
       </ul>
-      <span class="lgmp-label">${escapeHtml(labelScenes)} ${n}</span>
+
+      <h5 class="lgmp-card-title">${escapeHtml(cardTitle)}</h5>
+
       <div class="lgmp-field">
-        <strong>Title:</strong>
-        <div class="lgmp-card-fill">(e.g., “Ambush at the Old Bridge”)</div>
+        <strong>${escapeHtml(game.i18n.localize("lazy-gm-prep.strong-start.card.whatsHappening") || "What's Happening?")}</strong>
+        <div class="lgmp-card-fill">(Describe the event or change that kicks off the session)</div>
       </div>
+
       <div class="lgmp-field">
-        <strong>Purpose:</strong>
-        <div class="lgmp-card-fill">(What is this scene for? A challenge, a clue, a turning point?)</div>
+        <strong>${escapeHtml(game.i18n.localize("lazy-gm-prep.strong-start.card.point") || "What's the Point?")}</strong>
+        <div class="lgmp-card-fill">(What hook or goal does this introduce?)</div>
       </div>
+
       <div class="lgmp-field">
-        <strong>Key Elements:</strong>
-        <div class="lgmp-card-fill">(1–3 things: location, NPC, monster, secret, or twist)</div>
+        <strong>${escapeHtml(game.i18n.localize("lazy-gm-prep.strong-start.card.action") || "Where's the Action?")}</strong>
+        <div class="lgmp-card-fill">(Describe the immediate action or conflict)</div>
       </div>
+
       <div class="lgmp-field">
-        <strong>Loose Notes:</strong>
-        <div class="lgmp-card-fill">(How might it start? What’s the vibe? What could go wrong?)</div>
+        <strong>${escapeHtml(game.i18n.localize("lazy-gm-prep.strong-start.card.sensory") || "Sensory Details")}</strong>
+        <div class="lgmp-card-fill">(Optional: sights, sounds, smells, etc.)</div>
+      </div>
+
+      <div class="lgmp-field">
+        <strong>${escapeHtml(game.i18n.localize("lazy-gm-prep.strong-start.card.notes") || "Loose Notes")}</strong>
+        <div class="lgmp-card-fill">(Any other GM notes)</div>
         ${notesPlaceholder()}
       </div>
     </div>
