@@ -1,3 +1,4 @@
+
 /* lazy-gm-prep/styles/lazy-gm-prep.css
  * Base tables, Strong Start highlight, header button, sections, legacy actor styles,
  * checklist, Secrets overlay, open-settings pill, Outline Scenes cards, Prompts block
@@ -160,12 +161,28 @@
   .lgmp-keylist { margin: 0.25rem 0 0.25rem 1.25rem; }
 
   /* === Prompts (collapsible) === */
-  details.lgmp-prompts { margin: 0.25rem 0 0.5rem; }
+  details.lgmp-prompts {
+    margin: 0.25rem 0 0.5rem;
+  }
   /* IMPORTANT: Keep the default triangle marker visible. Do NOT remove list-style. */
   details.lgmp-prompts > summary {
     cursor: pointer;
     font-weight: 600;
     opacity: 0.95;
   }
-  ul.lgmp-prompts { margin: 0.25rem 0 0.25rem 1.25rem; }
+  ul.lgmp-prompts {
+    margin: 0.25rem 0 0.25rem 1.25rem;
+  }
+
+  /* === Optional: Strong Start collapsible and highlight === */
+  details.lgmp-strong-start-block {
+    margin-top: 0.75rem;
+  }
+  details.lgmp-strong-start-block > summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+  table.lgmp-strong-start tr.is-highlighted {
+    background: rgba(255, 235, 130, 0.35);
+  }
 }
