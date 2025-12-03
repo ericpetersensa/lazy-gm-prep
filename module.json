@@ -2,8 +2,8 @@
   "id": "lazy-gm-prep",
   "title": "Lazy GM Prep",
   "description": "Generate session prep journals based on Return of the Lazy Dungeon Master.",
-  "version": "0.2.76",
-  "compatibility": { "minimum": "13.0.0", "verified": "13.350" },
+  "version": "0.3.01",
+  "compatibility": { "minimum": "13.0.0", "verified": "13.351" },
   "authors": [
     { "name": "Eric Petersen", "email": "ericpetersensa@gmail.com" }
   ],
