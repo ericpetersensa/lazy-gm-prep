@@ -9,8 +9,8 @@ import {
 export function createOutlineScenesPage(def, prevContent) {
   const title = game.i18n.localize(def.titleKey);
 
-  // Description section
-  const desc = "Use this page as your flexible, living roadmap—ready to adapt, improvise, and delight in the surprises your players bring. Prep just enough to feel confident, not constrained, and without overcommitting. Be ready to throw them away when play goes elsewhere.";
+  // Description section (now uses i18n key)
+  const desc = game.i18n.localize("lazy-gm-prep.steps.outline-scenes.description");
   let html = `<div class="lgmp-section">${escapeHtml(desc)}</div>`;
 
   // Prompts section (collapsed by default)
@@ -30,6 +30,20 @@ export function createOutlineScenesPage(def, prevContent) {
         ${buildScenesHTML(prevContent, 3)}
       </div>
     </details>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".lgmp-scene .lgmp-checklist li").forEach(function(li) {
+          li.addEventListener("click", function(e) {
+            // Toggle between unchecked and checked
+            if (li.textContent.trim().startsWith("☐")) {
+              li.textContent = li.textContent.replace(/^☐/, "☑");
+            } else if (li.textContent.trim().startsWith("☑")) {
+              li.textContent = li.textContent.replace(/^☑/, "☐");
+            }
+          });
+        });
+      });
+    </script>
   `;
 
   return { name: title, type: 'text', text: { format: 1, content: html } };
