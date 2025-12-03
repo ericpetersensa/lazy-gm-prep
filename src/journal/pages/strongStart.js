@@ -1,70 +1,62 @@
 
 // src/journal/pages/strongStart.js
 
-import { sectionDescription, notesPlaceholder, renderPromptsBlock, renderDetailsBlock } from '../helpers.js';
+import { sectionDescription, notesPlaceholder, renderDetailsBlock } from '../helpers.js';
 
 export function createStrongStartPage(def, prevContent) {
   const title = game.i18n.localize(def.titleKey);
 
-  // If copying previous content, use it directly—no extra heading or template
+  // If copying previous content, use it directly—no template needed
   if (prevContent && String(prevContent).trim()) {
     return { name: title, type: 'text', text: { format: 1, content: prevContent } };
   }
 
-  // Otherwise, render the default template
-  const promptKeys = [
-    "lazy-gm-prep.strong-start.prompts.world",
-    "lazy-gm-prep.strong-start.prompts.grab",
-    "lazy-gm-prep.strong-start.prompts.twist",
-    "lazy-gm-prep.strong-start.prompts.tie"
-  ];
+  // Build the Strong Start card
+  const strongStartCard = `
+  <div class="lgmp-scene lgmp-strong-start-card">
+    <h5>${game.i18n.localize('lazy-gm-prep.strong-start.card.title') || 'Strong Start'}</h5>
+    <div class="lgmp-field"><strong>${game.i18n.localize('lazy-gm-prep.strong-start.card.whatsHappening') || "What's Happening?"}</strong><br>
+      <em>(Describe the event or change that kicks off the session)</em>
+      <div class="lgmp-card-fill"></div>
+    </div>
+    <div class="lgmp-field"><strong>${game.i18n.localize('lazy-gm-prep.strong-start.card.point') || "What's the Point?"}</strong><br>
+      <em>(What hook or goal does this introduce?)</em>
+      <div class="lgmp-card-fill"></div>
+    </div>
+    <div class="lgmp-field"><strong>${game.i18n.localize('lazy-gm-prep.strong-start.card.action') || "Where's the Action?"}</strong><br>
+      <em>(Describe the immediate action or conflict)</em>
+      <div class="lgmp-card-fill"></div>
+    </div>
+    <div class="lgmp-field"><strong>${game.i18n.localize('lazy-gm-prep.strong-start.card.sensory') || "Sensory Details"}</strong><br>
+      <em>(Optional: sights, sounds, smells, etc.)</em>
+      <div class="lgmp-card-fill"></div>
+    </div>
+    <div class="lgmp-field"><strong>${game.i18n.localize('lazy-gm-prep.strong-start.card.notes') || "Loose Notes"}</strong><br>
+      <em>(Any other GM notes)</em>
+      <div class="lgmp-card-fill"></div>
+    </div>
+  </div>
+  `;
 
+  // Compose the page: Description (not collapsible), then the card (open by default), then notes (collapsed)
   let html = "";
   html += sectionDescription(def);
-  html += renderPromptsBlock(promptKeys, "lazy-gm-prep.prompts.heading", false);
-  html += notesPlaceholder();
 
-  // Collapsible: Strong Start Encounters under a twisty
+  // SECTION: Strong Start Card — open by default
   html += renderDetailsBlock(
-    "lazy-gm-prep.strong-start.table.heading",
-    strongStartEncountersHTML(), // inner content (roller + table)
-    false,                       // collapsed by default; set to true if you want it open initially
-    "lgmp-strong-start-block"    // class hook for styling / JS
+    "lazy-gm-prep.strong-start.card.heading", // e.g., "Strong Start"
+    strongStartCard,
+    true,
+    "lgmp-strong-start-block"
+  );
+
+  // SECTION: Notes — collapsed by default
+  html += renderDetailsBlock(
+    "lazy-gm-prep.steps.other-notes.title", // reuse "Other Notes"
+    notesPlaceholder(),
+    false,
+    "lgmp-notes-block"
   );
 
   return { name: title, type: 'text', text: { format: 1, content: html } };
-}
-
-/**
- * Inner content for the Strong Start Encounters block:
- * - The inline roller is wrapped in .lgmp-ss-roller so the highlighter can find it.
- * - The table carries .lgmp-strong-start so the highlighter can target rows.
- */
-function strongStartEncountersHTML() {
-  const heading = game.i18n.localize('lazy-gm-prep.strong-start.table.heading');
-  const rollLabel = game.i18n.localize('lazy-gm-prep.strong-start.table.rollLabel');
-
-  const rows = Array.from({ length: 20 }, (_, i) => {
-    const n = i + 1;
-    const text = game.i18n.localize(`lazy-gm-prep.strong-start.table.${n}`);
-    return `<tr><td>${n}</td><td>${escapeHtml(text)}</td></tr>`;
-  }).join('\n');
-
-  // Use Foundry's inline-roll syntax so core creates the anchor with data-roll
-  // Keep the roller near the table, inside the details, for a self-contained section.
-  return `
-<div class="lgmp-ss-roller">${escapeHtml(rollLabel)} [[1d20]]</div>
-<table class="lgmp-strong-start">
-  <thead><tr><th>d20</th><th>${escapeHtml(heading)}</th></tr></thead>
-  <tbody>
-    ${rows}
-  </tbody>
-</table>
-`;
-}
-
-function escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>\"']/g, c => (
-    { '&': '&', '<': '<', '>': '>', '"': '\"' }[c]
-  ));
 }
