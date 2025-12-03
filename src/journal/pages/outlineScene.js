@@ -54,7 +54,7 @@ function buildScenesHTML(prevContent, minCount = 3) {
 
 /**
  * Extract scenes from previous content, return only those NOT checked (☐ Done).
- * A scene is considered "Done" if it contains a checklist item starting with ☑.
+ * A scene is considered "Done" if its checklist marker starts with ☑.
  */
 function extractNonDoneScenes(prevContent) {
   if (!prevContent || !String(prevContent).trim()) return [];
@@ -63,7 +63,7 @@ function extractNonDoneScenes(prevContent) {
   const sceneNodes = Array.from(doc.querySelectorAll(".lgmp-scene"));
 
   const keep = sceneNodes.filter(node => {
-    const li = node.querySelector("ul.lgmp-checklist li");
+    const li = node.querySelector('ul.lgmp-checklist li[data-marker="scene-done"]');
     const text = (li?.textContent ?? "").trim();
     return !(text.startsWith("☑")); // keep if NOT marked done
   });
@@ -81,7 +81,7 @@ function sceneCardHTML() {
   return `
     <div class="lgmp-scene">
       <ul class="lgmp-checklist">
-        <li>☐ Done</li>
+        <li data-marker="scene-done">☐ Done</li>
       </ul>
 
       <h5 class="lgmp-card-title">${escapeHtml(cardTitle)}</h5>
