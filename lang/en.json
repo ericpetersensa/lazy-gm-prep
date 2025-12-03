@@ -82,7 +82,7 @@
   "lazy-gm-prep.characters.table.header.recentNote": "Recent Note",
   "lazy-gm-prep.characters.table.header.player": "Player",
   "lazy-gm-prep.characters.table.header.bondDrama": "Bond/Drama",
-  "lazy-gm-prep.characters.quickcheck.title": "Quick Check:",
+  "lazy-gm-prep.characters.quickcheck.title": "Lazy Tip:",
   "lazy-gm-prep.characters.quickcheck.prompt": "Can you name every character at the table, and recall one thing about each?",
   "lazy-gm-prep.characters.prompts.spotlight": "Who hasn’t had a spotlight moment lately?",
   "lazy-gm-prep.characters.prompts.unresolved": "Does any character have an unresolved goal, secret, or personal hook to bring forward?",
@@ -148,7 +148,7 @@
   "lazy-gm-prep.fantastic-locations.prompts.2": "What’s the biggest danger or opportunity here? (What could go wrong—or right?)",
   "lazy-gm-prep.fantastic-locations.prompts.3": "Who wants to control, protect, or exploit this place—and why?",
   "lazy-gm-prep.fantastic-locations.prompts.4": "What’s the weirdest or most memorable feature here, even if it’s just set dressing?",
-  "lazy-gm-prep.fantastic-locations.tip": "Tip:  Don’t overthink it. One sentence per field is enough. If you need inspiration, roll on a random table or borrow from your favorite adventure.",
+  "lazy-gm-prep.fantastic-locations.tip": "Lazy Tip:  Don’t overthink it. One sentence per field is enough. If you need inspiration, roll on a random table or borrow from your favorite adventure.",
 
   "lazy-gm-prep.npcs.prompts.connection": "What is this NPC’s connection to the adventure or the characters?",
   "lazy-gm-prep.npcs.prompts.goal": "What secret, motivation, or goal drives this NPC?",
@@ -159,7 +159,7 @@
   "lazy-gm-prep.monsters.prompts.2": "Are there monsters that connect to the PCs’ backgrounds or campaign secrets?",
   "lazy-gm-prep.monsters.prompts.3": "Is there a boss or unique monster that can be highlighted?",
   "lazy-gm-prep.monsters.prompts.4": "Can you reskin or modify an existing monster to fit your needs?",
-  "lazy-gm-prep.monsters.quote": "Keep it lazy: List a handful of likely monsters, improvise the rest, and be ready to swap them out if the story changes.",
+  "lazy-gm-prep.monsters.quote": "Lazy Tip: List a handful of likely monsters, improvise the rest, and be ready to swap them out if the story changes.",
   "lazy-gm-prep.monsters.url.label": "Monster Database",
   "lazy-gm-prep.monsters.url": "https://slyflourish.com/5e_artisanal_database/monsters/index.html"
 }
