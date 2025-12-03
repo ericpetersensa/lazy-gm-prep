@@ -76,6 +76,7 @@
   "lazy-gm-prep.ui.add-notes-here": "Add your notes here.",
   "lazy-gm-prep.prompts.heading": "Prompts",
 
+  "lazy-gm-prep.characters.table.heading": "Characters",
   "lazy-gm-prep.characters.table.header.pcName": "PC Name",
   "lazy-gm-prep.characters.table.header.conceptRole": "Concept / Role",
   "lazy-gm-prep.characters.table.header.goalHook": "Goal / Hook",
