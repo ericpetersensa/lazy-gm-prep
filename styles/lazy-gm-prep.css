@@ -229,4 +229,36 @@
     border-bottom: 1px dashed #888;
     margin-top: 0.2em;
   }
+
+  /* === Optional Polish Patch === */
+  /* Tip block styling to harmonize with cards */
+  .lgmp-tip,
+  blockquote.lgmp-tip {
+    margin: 0.5rem 0 0.75rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 8px;
+    background: var(--color-bg-subtle, rgba(0,0,0,0.06));
+    border: 1px solid var(--color-border, rgba(255,255,255,0.12));
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .lgmp-tip strong { font-weight: 700; }
+
+  /* Generic field utilities for Notes or table editors */
+  .lgmp-field { margin: 0.35rem 0; }
+  .lgmp-label { font-weight: 600; }
+  .lgmp-input,
+  .lgmp-textarea {
+    width: 100%;
+    min-height: 6rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-border, rgba(255,255,255,0.12));
+    background: var(--color-bg, #1f1f1f);
+    color: var(--color-text, #fff);
+  }
+
+  /* Slightly tighten tables inside the Characters collapsible */
+  details.lgmp-characters-block .lgmp-table {
+    margin-top: 0.35rem;
+  }
 }
