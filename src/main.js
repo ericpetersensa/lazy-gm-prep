@@ -1,27 +1,29 @@
+
 // src/main.js
+
 import { registerSettings } from "./settings.js";
 import { MODULE_ID } from "./constants.js";
 import { createPrepJournal } from "./journal/generator.js";
 import { ensureClickCSS } from "./journal/domHooks.js";
 
 /* =======================================================================================
- Constants & State
+   Constants & State
 ======================================================================================= */
 const SECRETS_PAGE_NAME = "4. Define Secrets & Clues"; // exact title (case-insensitive)
 const CURRENT_PAGE_BY_ENTRY = new Map(); // entryId -> current pageId (for direct toggle)
 
 /* =======================================================================================
- Create GM Prep: Header button (AppV2 & v13+)
+   Create GM Prep: Header button (AppV2 & v13+)
 ======================================================================================= */
 function ensureInlineHeaderButton(rootEl) {
   if (!game.user.isGM) return;
   const header = rootEl.querySelector(".directory-header");
   if (!header) return;
   const container =
-    header.querySelector(".action-buttons") ||
-    header.querySelector(".header-actions") ||
-    header.querySelector(".header-controls") ||
-    header;
+      header.querySelector(".action-buttons")
+   || header.querySelector(".header-actions")
+   || header.querySelector(".header-controls")
+   || header;
   if (container.querySelector('[data-action="lazy-gm-prep-inline"]')) return;
   const btn = document.createElement("button");
   btn.type = "button";
@@ -39,7 +41,7 @@ Hooks.on("renderJournalDirectory", (_app, html) => {
 });
 
 /* =======================================================================================
- Shared HTML utilities (normalize, extract, build)
+   Shared HTML utilities (normalize, extract, build)
 ======================================================================================= */
 function normalizeMarkers(html) {
   let s = String(html ?? "");
@@ -63,7 +65,7 @@ function extractChecklist(html) {
   const LI_RE = /\<li[^\>]*\>([\s\S]*?)\<\/li\>/gi;
   let m;
   while ((m = LI_RE.exec(ulHtml))) {
-    const raw = m[1].replace(/\<\/?\[^>\]+\>/g, "").trim();
+    const raw = m[1].replace(/\<\/*[^\>]+\>/g, "").trim();
     if (!raw) continue;
     const checked = /^\s*☑/.test(raw);
     const text = raw.replace(/^\s*[\u2610\u2611]\s*/, "");
@@ -78,18 +80,18 @@ function buildChecklist(items) {
   return `<ul class="lgmp-checklist">\n${lis}\n</ul>`;
 }
 function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>\\"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  return String(s ?? "").replace(/[&<>"']/g, (m) => ({ "&": "&", "<": "<", ">": ">", '"': "\"", "'": "&#39;" }[m]));
 }
 
 /* =======================================================================================
- Overlay Panel (☰ Secrets) — view mode helper (optional UI)
+   Overlay Panel (☰ Secrets) — view mode helper (optional UI)
 ======================================================================================= */
 function injectSecretsPanel(app, sheetRoot) {
   // Only when not editing
   const isEditMode =
-    sheetRoot.querySelector(".editor") ||
-    sheetRoot.querySelector(".tox-tinymce") ||
-    sheetRoot.querySelector('[contenteditable="true"]');
+       sheetRoot.querySelector(".editor")
+    || sheetRoot.querySelector(".tox-tinymce")
+    || sheetRoot.querySelector('[contenteditable="true"]');
   if (isEditMode) return;
 
   // Track current page -> entry (used by direct toggle)
@@ -122,9 +124,11 @@ function injectSecretsPanel(app, sheetRoot) {
   const panel = document.createElement("div");
   panel.className = "lgmp-secrets-panel";
   panel.setAttribute("hidden", "hidden");
+
   const header = document.createElement("div");
   header.className = "lgmp-secrets-panel__header";
   header.innerHTML = `<strong>Secrets & Clues</strong><button type="button" class="lgmp-secrets-close" title="Close">×</button>`;
+
   const list = document.createElement("ul");
   list.className = "lgmp-secrets-panel__list";
   items.forEach((it, idx) => {
@@ -133,6 +137,7 @@ function injectSecretsPanel(app, sheetRoot) {
     li.innerHTML = `<button type="button" class="lgmp-secret-toggle">${it.checked ? "☑" : "☐"}</button><span class="lgmp-secret-text">${escapeHtml(it.text)}</span>`;
     list.appendChild(li);
   });
+
   panel.appendChild(header);
   panel.appendChild(list);
   appEl.appendChild(fab);
@@ -170,7 +175,7 @@ function injectSecretsPanel(app, sheetRoot) {
 }
 
 /* =======================================================================================
- Direct Click-to-Toggle in the rendered page (no overlay)
+   Direct Click-to-Toggle in the rendered page (no overlay)
 ======================================================================================= */
 function looksLikeSecrets(name) {
   return !!name && String(name).trim().toLowerCase() === SECRETS_PAGE_NAME.toLowerCase();
@@ -200,26 +205,28 @@ function bindDirectToggle(host) {
     // Resolve the correct page
     let page = null;
     const currentId = CURRENT_PAGE_BY_ENTRY.get(entry.id);
-    if (currentId) page = entry.pages?.get?.(currentId) || null;
-    if (!page) page = entry.pages?.contents?.find(p => looksLikeSecrets(p.name)) || null;
-    if (!page) page = entry.pages?.contents?.find(p => hasChecklistHTML(p.text?.content)) || null;
+    if (currentId) page = entry.pages?.get?.(currentId) ?? null;
+    if (!page) page = entry.pages?.contents?.find(p => looksLikeSecrets(p.name)) ?? null;
+    if (!page) page = entry.pages?.contents?.find(p => hasChecklistHTML(p.text?.content)) ?? null;
     if (!page) return ui.notifications?.warn(`[${MODULE_ID}] Cannot find "${SECRETS_PAGE_NAME}" on "${entry.name}".`);
+
     // Map clicked DOM item -> saved HTML item
     const ulDom = li.closest("ul.lgmp-checklist");
     const allUlsDom = Array.from(host.querySelectorAll("ul.lgmp-checklist"));
     const ulIndex = Math.max(0, allUlsDom.indexOf(ulDom));
     const liIndex = Array.from(ulDom.querySelectorAll(":scope > li")).indexOf(li);
+
     try {
       const saved = normalizeMarkers(page.text?.content ?? "");
       const doc = new DOMParser().parseFromString(saved, "text/html");
       const allUlsSaved = doc.querySelectorAll("ul.lgmp-checklist");
-      let ulSaved = allUlsSaved?.[ulIndex] || allUlsSaved?.[0] || null;
+      let ulSaved = allUlsSaved?.[ulIndex] ?? allUlsSaved?.[0] ?? null;
       if (!ulSaved) return ui.notifications?.warn(`[${MODULE_ID}] Saved HTML has no <ul class="lgmp-checklist">.`);
-      let liSaved = ulSaved.querySelectorAll(":scope > li")?.[liIndex] || null;
+      let liSaved = ulSaved.querySelectorAll(":scope > li")?.[liIndex] ?? null;
       if (!liSaved) {
         const clickedText = (li.textContent || "").replace(/^\s*[\u2610\u2611]\s*/, "").trim();
         liSaved = Array.from(ulSaved.querySelectorAll(":scope > li"))
-          .find(x => ((x.textContent || "").replace(/^\s*[\u2610\u2611]\s*/, "").trim() === clickedText)) || null;
+          .find(x => ((x.textContent || "").replace(/^\s*[\u2610\u2611]\s*/, "").trim() === clickedText)) ?? null;
       }
       if (!liSaved) return ui.notifications?.warn(`[${MODULE_ID}] Could not locate matching list item in saved HTML.`);
       const raw = (liSaved.textContent || "").trim();
@@ -234,12 +241,11 @@ function bindDirectToggle(host) {
 }
 
 /* =======================================================================================
- Strong Start inline-roll highlighter
+   Strong Start inline-roll highlighter (twisty-aware)
 ======================================================================================= */
 function bindStrongStartHighlight(host) {
   if (!host) return;
-
-  // Scope to each Strong Start table on the sheet
+  // Scope to Strong Start tables on the sheet (even inside <details>)
   const tables = host.querySelectorAll("table.lgmp-strong-start");
   if (!tables.length) return;
 
@@ -247,16 +253,16 @@ function bindStrongStartHighlight(host) {
   function extractRollTotal(rollerEl) {
     if (!rollerEl) return null;
     try {
-      const json = rollerEl.dataset?.roll || rollerEl.getAttribute?.("data-roll");
+      const json = rollerEl.dataset?.roll ?? rollerEl.getAttribute?.("data-roll");
       if (json) {
         const obj = typeof json === "string" ? JSON.parse(json) : json;
         const total = Number(obj?.total);
         if (Number.isFinite(total)) return total;
       }
     } catch (_) { /* ignore */ }
-    const txt = rollerEl.textContent || "";
-    const m = txt.match(/(-?\d+)/);
-    return m ? Number(m[1]) : null;
+    const txt = rollerEl.textContent ?? "";
+    const m = txt.match(/\(-?\d+\)/);
+    return m ? Number(m[0].replace(/[^\d\-]/g, "")) : null;
   }
 
   function highlightRow(table, n) {
@@ -267,7 +273,7 @@ function bindStrongStartHighlight(host) {
     for (const tr of rows) {
       const firstTd = tr.querySelector("td");
       if (!firstTd) continue;
-      const val = Number((firstTd.textContent || "").trim());
+      const val = Number((firstTd.textContent ?? "").trim());
       if (val === d) {
         tr.classList.add("is-highlighted");
         break;
@@ -277,30 +283,41 @@ function bindStrongStartHighlight(host) {
 
   const ATTEMPTS = 4;
   let tries = 0;
-
-  (function tryHighlight() {
+  (function tryHighlight(){
     let didWork = false;
-
     tables.forEach(table => {
-      // Find the nearest inline roller for this section
-      // Simple approach: look for a preceding .lgmp-ss-roller in the same host
-      const rollerSpan = host.querySelector(".lgmp-ss-roller");
-      if (!rollerSpan) return;
-
-      const rollerAnchor = rollerSpan.querySelector(".inline-roll, a.inline-roll, a.inline-result");
-      if (!rollerAnchor) return;
-
-      const total = extractRollTotal(rollerAnchor);
+      const details = table.closest("details.lgmp-strong-start-block") ?? table.closest("details");
+      const scope = details ?? host;
+      const rollerSpan = scope.querySelector(".lgmp-ss-roller");
+      const rollerAnchor = rollerSpan?.querySelector(".inline-roll, a.inline-roll, a.inline-result");
+      const total = rollerAnchor ? extractRollTotal(rollerAnchor) : null;
       if (Number.isFinite(total)) {
+        // Ensure the details are open so the highlight is visible
+        if (details && !details.open) details.open = true;
         highlightRow(table, total);
         didWork = true;
       }
     });
+    if (!didWork && tries++ < ATTEMPTS) setTimeout(tryHighlight, 60);
+  }());
 
-    if (!didWork && tries++ < ATTEMPTS) {
-      setTimeout(tryHighlight, 60);
-    }
-  })();
+  // Open the collapsible when a GM clicks the inline roll and highlight the result.
+  tables.forEach(table => {
+    const details = table.closest("details.lgmp-strong-start-block") ?? table.closest("details");
+    const scope = details ?? host;
+    const rollerAnchor = scope.querySelector(".lgmp-ss-roller .inline-roll, .lgmp-ss-roller a.inline-roll, .lgmp-ss-roller a.inline-result");
+    if (!rollerAnchor) return;
+    rollerAnchor.addEventListener("click", () => {
+      try {
+        if (details && !details.open) details.open = true;
+        // Give Foundry a moment to resolve the roll and set data-roll
+        setTimeout(() => {
+          const total = extractRollTotal(rollerAnchor);
+          if (Number.isFinite(total)) highlightRow(table, total);
+        }, 50);
+      } catch (_) { /* ignore */ }
+    });
+  });
 }
 
 /* === Updated: bind "Open Module Settings" links in pages/sections ============ */
@@ -362,18 +379,21 @@ Hooks.once("init", () => {
     restricted: true
   });
 });
+
 Hooks.once("ready", () => {
   console.log(`${MODULE_ID} ready`);
   ensureClickCSS();
   ui.journal?.render(true);
 });
+
 Hooks.on("renderApplicationV2", (_app, el) => {
   if (el?.classList?.contains?.("journal-sheet")) {
     bindDirectToggle(el);
     bindOpenSettings(el);
-    bindStrongStartHighlight(el); // <-- NEW
+    bindStrongStartHighlight(el); // <–– TWISTY-aware highlighter
   }
 });
+
 Hooks.on("chatMessage", (_chatLog, text) => {
   if (!game.user.isGM) return;
   if (text.trim().toLowerCase() === "/prep") {
