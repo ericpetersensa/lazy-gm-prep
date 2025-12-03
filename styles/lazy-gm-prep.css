@@ -151,6 +151,8 @@
     border: 1px solid var(--color-border, rgba(255,255,255,0.12));
     border-radius: 8px;
     background: var(--color-bg-subtle, rgba(0,0,0,0.06));
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
   .lgmp-scene > h5 {
     margin: 0 0 0.35rem 0;
@@ -189,13 +191,42 @@
   /* === Consistent collapsible styling for all sections === */
   details.lgmp-prompts-block,
   details.lgmp-characters-block,
-  details.lgmp-notes-block {
+  details.lgmp-notes-block,
+  details.lgmp-strong-start-block {
     margin-top: 0.5rem;
   }
   details.lgmp-prompts-block > summary,
   details.lgmp-characters-block > summary,
-  details.lgmp-notes-block > summary {
+  details.lgmp-notes-block > summary,
+  details.lgmp-strong-start-block > summary {
     cursor: pointer;
     font-weight: 600;
+  }
+
+  /* === Card styling for Strong Start and Scenes === */
+  .lgmp-strong-start-card,
+  .lgmp-scene {
+    background: var(--color-bg-subtle, #232323);
+    border-radius: 8px;
+    padding: 1em 1.2em;
+    margin: 0.5em 0 1em 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid var(--color-border, #444);
+  }
+  .lgmp-strong-start-card h5,
+  .lgmp-scene h5 {
+    margin: 0 0 0.5em 0;
+    font-size: 1.1em;
+    font-weight: 700;
+  }
+  .lgmp-strong-start-card .lgmp-field,
+  .lgmp-scene .lgmp-field {
+    margin-bottom: 0.7em;
+  }
+  .lgmp-strong-start-card .lgmp-card-fill,
+  .lgmp-scene .lgmp-card-fill {
+    min-height: 1.5em;
+    border-bottom: 1px dashed #888;
+    margin-top: 0.2em;
   }
 }
