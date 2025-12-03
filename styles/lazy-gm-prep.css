@@ -174,7 +174,7 @@
     margin: 0.25rem 0 0.25rem 1.25rem;
   }
 
-  /* === Optional: Strong Start collapsible and highlight === */
+  /* === Strong Start collapsible and highlight === */
   details.lgmp-strong-start-block {
     margin-top: 0.75rem;
   }
@@ -184,5 +184,18 @@
   }
   table.lgmp-strong-start tr.is-highlighted {
     background: rgba(255, 235, 130, 0.35);
+  }
+
+  /* === Consistent collapsible styling for all sections === */
+  details.lgmp-prompts-block,
+  details.lgmp-characters-block,
+  details.lgmp-notes-block {
+    margin-top: 0.5rem;
+  }
+  details.lgmp-prompts-block > summary,
+  details.lgmp-characters-block > summary,
+  details.lgmp-notes-block > summary {
+    cursor: pointer;
+    font-weight: 600;
   }
 }
