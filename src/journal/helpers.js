@@ -77,8 +77,7 @@ export function sectionDescription(def) {
 }
 
 export function quickCheckHTML() {
-  const title = game.i18n.localize('lazy-gm-prep.characters.quickcheck.title');
-  const prompt = game.i18n.localize('lazy-gm-prep.characters.quickcheck.prompt');
+  const prompt = game.i18n.localize('lazy-gm-prep.characters.tip.prompt');
   return `<blockquote><strong>${escapeHtml(title)}</strong> ${escapeHtml(prompt)}</blockquote>\n`;
 }
 
