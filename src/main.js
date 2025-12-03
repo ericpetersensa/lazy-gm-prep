@@ -1,6 +1,5 @@
 
 // src/main.js
-
 import { registerSettings } from "./settings.js";
 import { MODULE_ID } from "./constants.js";
 import { createPrepJournal } from "./journal/generator.js";
