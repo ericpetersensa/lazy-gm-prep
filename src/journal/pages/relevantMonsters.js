@@ -23,7 +23,7 @@ export function createRelevantMonstersPage(def, prevContent) {
   // Quote
   const quoteHtml = `
     <blockquote class="lgmp-quote">
-      ${game.i18n.localize("lazy-gm-prep.monsters.quote")}
+      ${game.i18n.localize("lazy-gm-prep.monsters.tip")}
     </blockquote>
   `;
 
