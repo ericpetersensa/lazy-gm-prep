@@ -4,16 +4,14 @@
 import { MODULE_ID } from '../constants.js';
 
 /**
- * Lightweight CSS to keep checklist items feeling interactive.
- * NOTE: No click handlers here—main.js owns toggling for both Clues and Scenes.
+ * Visual affordances only; actual checklist toggling is owned by main.js.
  */
 export function ensureClickCSS() {
   if (document.getElementById(`${MODULE_ID}-toggle-style`)) return;
 
-  const style = document.createElement("style");
+  const style = document.createElement('style');
   style.id = `${MODULE_ID}-toggle-style`;
   style.textContent = `
-    /* Checklist visual affordance only; behavior comes from main.js */
     ul.lgmp-checklist li {
       cursor: pointer;
       user-select: none;
@@ -26,15 +24,15 @@ export function ensureClickCSS() {
 }
 
 /**
- * Initialize minimal DOM hooks.
- * - No custom toggle logic.
- * - Styling only; main.js attaches behavior listeners.
+ * Minimal DOM hooks—no checklist logic here.
  */
 export function initDomHooks() {
   ensureClickCSS();
 }
 
-// Initialize once
-Hooks.on("ready", () => {
-  initDomHooks();
-});
+// Guard in case Hooks is undefined during build or wrong load order.
+if (typeof Hooks !== 'undefined' && Hooks?.on) {
+  Hooks.on('ready', () => {
+    initDomHooks();
+  });
+}
