@@ -1,21 +1,49 @@
 
 // src/journal/pages/outlineScene.js
-import { escapeHtml, renderPromptsBlock, buildScenesHTML } from '../helpers.js';
+import { renderPromptsBlock } from '../helpers.js';
+
+/** Minimal HTML escaper (keeps localized strings safe in HTML). */
+function escapeHtml(str) {
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  return String(str ?? '').replace(/[&<>"']/g, (c) => map[c]);
+}
 
 /**
- * Outline Potential Scenes page (v13 JournalEntryPage object).
- * @param {object} def - Section definition (includes titleKey, key, etc.)
- * @param {string|null} prevContent - HTML carried forward from prior session, if any
- * @returns {import("types").JournalEntryPage} A page object with text content (HTML)
+ * Build N scene cards. If you later want to seed with previous content,
+ * you can parse `prevContent` and hydrate notes per card.
+ */
+function buildScenesHTML(prevContent, count = 3) {
+  let html = '';
+  for (let i = 1; i <= count; i++) {
+    html += `
+      <section class="lgmp-scene card">
+        <header class="card-header">
+          <h3 class="card-title">Scene ${i}</h3>
+        </header>
+        <div class="card-body">
+          <div class="lgmp-notes">
+            <p class="lgmp-notes-hint">Add your notes here.</p>
+          </div>
+          <ul class="lgmp-checklist">
+            <!-- Plain checklist item; domHooks.js will attach behavior -->
+            <li data-marker="scene-done">☐ Done</li>
+          </ul>
+        </div>
+      </section>
+    `;
+  }
+  return html;
+}
+
+/**
+ * Outline Potential Scenes page as a v13 JournalEntryPage object.
  */
 export function createOutlineScenesPage(def, prevContent) {
-  // Localized title (used both in header and page name)
+  // Localized section title and description
   const title = game.i18n.localize(def.titleKey);
-
-  // Localized description
   const desc = game.i18n.localize("lazy-gm-prep.steps.outline-scenes.description");
 
-  // Build HTML content
+  // Build top header + description
   let html = `
     <h2 class="lgmp-section-title">${escapeHtml(title)}</h2>
     <p class="lgmp-section-desc">${escapeHtml(desc)}</p>
@@ -37,7 +65,7 @@ export function createOutlineScenesPage(def, prevContent) {
     ${buildScenesHTML(prevContent, 3)}
   `;
 
-  // v13: return a proper JournalEntryPage object (NOT a raw HTML string)
+  // Return a proper JournalEntryPage object (v13)
   return {
     name: title,
     type: "text",
@@ -45,7 +73,6 @@ export function createOutlineScenesPage(def, prevContent) {
       content: html,
       format: CONST.TEXT_FORMAT_HTML
     },
-    // Optional ordering hint so it sits roughly mid-stack
     sort: 500
   };
 }
