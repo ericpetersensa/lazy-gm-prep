@@ -32,10 +32,10 @@ export function enableChecklistToggle() {
     const target = e.target;
     if (!(target instanceof HTMLElement)) return;
 
-    // Only act on items inside a .lgmp-checklist
+    // Only act on checklist items
     if (!target.matches("ul.lgmp-checklist li")) return;
 
-    // Locate the surrounding journal page element to get the page id (v13 markup includes data-page-id)
+    // Locate the page container to get the JournalEntryPage id (v13 markup includes data-page-id)
     const pageHost = target.closest('[data-page-id]');
     const pageId = pageHost?.getAttribute('data-page-id');
     if (!pageId) return;
@@ -68,13 +68,13 @@ export function enableChecklistToggle() {
 
     const currentHtml = String(pageDoc.text?.content ?? "");
 
-    // Create a temporary DOM to mutate the marker reliably
+    // Mutate a temporary DOM
     const doc = new DOMParser().parseFromString(currentHtml, "text/html");
 
-    // Try to locate the corresponding LI in persisted HTML
+    // Find matching LI to toggle in the persisted HTML
     let liToToggle = null;
 
-    // If clicked LI has a data-marker, align by card + attribute
+    // Prefer attribute-based match inside the same card when present
     const marker = target.getAttribute('data-marker');
     if (marker) {
       const clickedCard = target.closest('.lgmp-scene');
@@ -87,14 +87,14 @@ export function enableChecklistToggle() {
       liToToggle = savedCard?.querySelector(`ul.lgmp-checklist li[data-marker="${marker}"]`) ?? null;
     }
 
-    // Fallback for generic checklists (Secrets & Clues): toggle by list index
+    // Fallback: toggle by list index
     if (!liToToggle) {
       const clickedUl = target.closest('ul.lgmp-checklist');
       const renderedLis = Array.from(clickedUl.querySelectorAll('li'));
       const liIndex = renderedLis.indexOf(target);
 
       const ulsSaved = Array.from(doc.querySelectorAll('ul.lgmp-checklist'));
-      // Best-effort: pick the first UL whose text includes the same label
+      // Best-effort: choose UL whose text includes the same label
       let savedUl = null;
       for (const ul of ulsSaved) {
         if (ul.textContent?.includes(target.textContent?.trim() ?? "")) {
@@ -112,13 +112,13 @@ export function enableChecklistToggle() {
     if (t.startsWith("☐")) liToToggle.textContent = t.replace(/^☐/, "☑");
     else if (t.startsWith("☑")) liToToggle.textContent = t.replace(/^☑/, "☐");
 
-    // Persist the updated HTML back to the page and preserve HTML format explicitly
+    // Persist the updated HTML back to the page, preserving HTML format
     const newHtml = doc.body.innerHTML;
     await pageDoc.update({ text: { content: newHtml, format: CONST.TEXT_FORMAT_HTML } });
   });
 }
 
-/** Initialize DOM hooks once */
+/** Initialize hooks once */
 export function initDomHooks() {
   ensureClickCSS();
   enableChecklistToggle();
